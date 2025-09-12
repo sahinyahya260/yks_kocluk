@@ -18,7 +18,95 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Kullanıcı doğrulama fonksiyonu
+# Bölüm bazlı tema renkleri ve arka planları
+BÖLÜM_TEMALARI = {
+    "Tıp": {
+        "renk": "#dc3545",
+        "arka_plan": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        "icon": "🩺",
+        "background_image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+    },
+    "Hukuk": {
+        "renk": "#6f42c1",
+        "arka_plan": "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
+        "icon": "⚖️",
+        "background_image": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+    },
+    "Mühendislik": {
+        "renk": "#fd7e14",
+        "arka_plan": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+        "icon": "⚙️",
+        "background_image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+    },
+    "İşletme": {
+        "renk": "#20c997",
+        "arka_plan": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+        "icon": "💼",
+        "background_image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+    },
+    "Öğretmenlik": {
+        "renk": "#198754",
+        "arka_plan": "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+        "icon": "👩‍🏫",
+        "background_image": "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+    },
+    "Diğer": {
+        "renk": "#6c757d",
+        "arka_plan": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        "icon": "🎓",
+        "background_image": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+    }
+}
+
+# Derece öğrencisi stratejileri
+DERECE_STRATEJİLERİ = {
+    "9. Sınıf": {
+        "öncelik": ["TYT Matematik Temeli", "TYT Türkçe", "Fen Temel", "Sosyal Temel"],
+        "haftalık_dağılım": {
+            "TYT Matematik": 6, "TYT Türkçe": 4, "TYT Fen": 3, "TYT Sosyal": 2, 
+            "AYT": 0, "Deneme": 1, "Tekrar": 4
+        },
+        "günlük_strateji": "Temel kavram odaklı çalışma, bol tekrar",
+        "hedef": "TYT konularında %80 hakimiyet"
+    },
+    "10. Sınıf": {
+        "öncelik": ["TYT Matematik İleri", "AYT Giriş", "TYT Pekiştirme"],
+        "haftalık_dağılım": {
+            "TYT Matematik": 5, "TYT Türkçe": 3, "TYT Fen": 3, "TYT Sosyal": 2,
+            "AYT": 3, "Deneme": 2, "Tekrar": 2
+        },
+        "günlük_strateji": "TYT pekiştirme + AYT temel başlangıç",
+        "hedef": "TYT %85, AYT temel konularda %60 hakimiyet"
+    },
+    "11. Sınıf": {
+        "öncelik": ["AYT Ana Dersler", "TYT Hız", "Deneme Yoğunluğu"],
+        "haftalık_dağılım": {
+            "TYT Matematik": 3, "TYT Türkçe": 2, "TYT Fen": 2, "TYT Sosyal": 1,
+            "AYT": 8, "Deneme": 3, "Tekrar": 1
+        },
+        "günlük_strateji": "AYT odaklı yoğun çalışma, TYT hız çalışması",
+        "hedef": "TYT %90, AYT %75 hakimiyet"
+    },
+    "12. Sınıf": {
+        "öncelik": ["AYT İleri Seviye", "Deneme Maratonu", "Zayıf Alan Kapatma"],
+        "haftalık_dağılım": {
+            "TYT Matematik": 2, "TYT Türkçe": 2, "TYT Fen": 1, "TYT Sosyal": 1,
+            "AYT": 8, "Deneme": 5, "Tekrar": 1
+        },
+        "günlük_strateji": "Zorlu sorular, hız ve doğruluk, psikolojik hazırlık",
+        "hedef": "TYT %95, AYT %85+ hakimiyet"
+    },
+    "Mezun": {
+        "öncelik": ["Eksik Alan Kapatma", "Üst Seviye Problemler", "Mental Hazırlık"],
+        "haftalık_dağılım": {
+            "TYT Matematik": 2, "TYT Türkçe": 1, "TYT Fen": 1, "TYT Sosyal": 1,
+            "AYT": 10, "Deneme": 4, "Tekrar": 1
+        },
+        "günlük_strateji": "Uzman seviyesi sorular, tam hakimiyet",
+        "hedef": "TYT %98, AYT %90+ hakimiyet"
+    }
+}
+
 def kullanıcı_doğrula(kullanıcı_adı, şifre):
     """CSV dosyasından kullanıcı bilgilerini kontrol eder"""
     try:
@@ -121,95 +209,6 @@ def login_sayfası():
             - Deneme sonuçları değerlendirmesi
             - Bölüm özel stratejiler
             """)
-
-# Bölüm bazlı tema renkleri ve arka planları
-BÖLÜM_TEMALARI = {
-    "Tıp": {
-        "renk": "#dc3545",
-        "arka_plan": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        "icon": "🩺",
-        "background_image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-    },
-    "Hukuk": {
-        "renk": "#6f42c1",
-        "arka_plan": "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
-        "icon": "⚖️",
-        "background_image": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-    },
-    "Mühendislik": {
-        "renk": "#fd7e14",
-        "arka_plan": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-        "icon": "⚙️",
-        "background_image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-    },
-    "İşletme": {
-        "renk": "#20c997",
-        "arka_plan": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-        "icon": "💼",
-        "background_image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-    },
-    "Öğretmenlik": {
-        "renk": "#198754",
-        "arka_plan": "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-        "icon": "👩‍🏫",
-        "background_image": "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-    },
-    "Diğer": {
-        "renk": "#6c757d",
-        "arka_plan": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        "icon": "🎓",
-        "background_image": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-    }
-}
-
-# Derece öğrencisi stratejileri
-DERECE_STRATEJİLERİ = {
-    "9. Sınıf": {
-        "öncelik": ["TYT Matematik Temeli", "TYT Türkçe", "Fen Temel", "Sosyal Temel"],
-        "haftalık_dağılım": {
-            "TYT Matematik": 6, "TYT Türkçe": 4, "TYT Fen": 3, "TYT Sosyal": 2, 
-            "AYT": 0, "Deneme": 1, "Tekrar": 4
-        },
-        "günlük_strateji": "Temel kavram odaklı çalışma, bol tekrar",
-        "hedef": "TYT konularında %80 hakimiyet"
-    },
-    "10. Sınıf": {
-        "öncelik": ["TYT Matematik İleri", "AYT Giriş", "TYT Pekiştirme"],
-        "haftalık_dağılım": {
-            "TYT Matematik": 5, "TYT Türkçe": 3, "TYT Fen": 3, "TYT Sosyal": 2,
-            "AYT": 3, "Deneme": 2, "Tekrar": 2
-        },
-        "günlük_strateji": "TYT pekiştirme + AYT temel başlangıç",
-        "hedef": "TYT %85, AYT temel konularda %60 hakimiyet"
-    },
-    "11. Sınıf": {
-        "öncelik": ["AYT Ana Dersler", "TYT Hız", "Deneme Yoğunluğu"],
-        "haftalık_dağılım": {
-            "TYT Matematik": 3, "TYT Türkçe": 2, "TYT Fen": 2, "TYT Sosyal": 1,
-            "AYT": 8, "Deneme": 3, "Tekrar": 1
-        },
-        "günlük_strateji": "AYT odaklı yoğun çalışma, TYT hız çalışması",
-        "hedef": "TYT %90, AYT %75 hakimiyet"
-    },
-    "12. Sınıf": {
-        "öncelik": ["AYT İleri Seviye", "Deneme Maratonu", "Zayıf Alan Kapatma"],
-        "haftalık_dağılım": {
-            "TYT Matematik": 2, "TYT Türkçe": 2, "TYT Fen": 1, "TYT Sosyal": 1,
-            "AYT": 8, "Deneme": 5, "Tekrar": 1
-        },
-        "günlük_strateji": "Zorlu sorular, hız ve doğruluk, psikolojik hazırlık",
-        "hedef": "TYT %95, AYT %85+ hakimiyet"
-    },
-    "Mezun": {
-        "öncelik": ["Eksik Alan Kapatma", "Üst Seviye Problemler", "Mental Hazırlık"],
-        "haftalık_dağılım": {
-            "TYT Matematik": 2, "TYT Türkçe": 1, "TYT Fen": 1, "TYT Sosyal": 1,
-            "AYT": 10, "Deneme": 4, "Tekrar": 1
-        },
-        "günlük_strateji": "Uzman seviyesi sorular, tam hakimiyet",
-        "hedef": "TYT %98, AYT %90+ hakimiyet"
-    }
-}
 
 def tema_css_oluştur(bölüm_kategori):
     tema = BÖLÜM_TEMALARI[bölüm_kategori]
@@ -318,11 +317,11 @@ class DereceProgramı:
             "Türkçe": {
                 "Temel": ["Sözcükte Anlam", "Cümlede Anlam"],
                 "Orta": ["Paragraf", "Anlatım Biçimleri"],
-                "İleri": ["Edebiyat Bilgileri", "Şiir İncelemese"],
+                "İleri": ["Edebiyat Bilgileri", "Şiir İncelemesi"],
                 "Uzman": ["Metin İnceleme", "Dil Bilgisi İleri"]
             },
             "Fen": {
-                               "Temel": ["Hareket", "Kuvvet ve Hareket", "Madde"],
+                "Temel": ["Hareket", "Kuvvet ve Hareket", "Madde"],
                 "Orta": ["Enerji", "Isı ve Sıcaklık", "Elektrik"],
                 "İleri": ["Dalgalar", "Atom ve Periyodik Sistem", "Hücre"],
                 "Uzman": ["Modern Fizik", "Organik Bileşikler", "Kalıtım"]
@@ -604,7 +603,7 @@ def derece_konu_takibi():
                         anahtar = f"AYT-{ders}-{konu}"
                         mevcut_seviye = st.session_state.konu_durumu.get(anahtar, "Hiç Bilmiyor")
                         
-                                                yeni_seviye = st.selectbox(
+                        yeni_seviye = st.selectbox(
                             f"{konu}",
                             list(mastery_seviyeleri.keys()),
                             index=list(mastery_seviyeleri.keys()).index(mevcut_seviye),
@@ -934,11 +933,6 @@ def derece_öneriler():
 def main():
     initialize_session_state()
     
-    # Önce giriş kontrolü
-    if not st.session_state.giriş_yapıldı:
-        login_sayfası()
-        return
-    
     # Tema CSS'ini uygula
     if st.session_state.program_oluşturuldu:
         bölüm_kategori = st.session_state.öğrenci_bilgisi['bölüm_kategori']
@@ -983,18 +977,11 @@ def main():
                 son_net = st.session_state.deneme_sonuçları[-1]['tyt_net']
                 st.metric("📈 Son TYT Net", f"{son_net:.1f}")
             
-            # Çıkış butonu
-            st.markdown("---")
-            if st.button("🚪 Çıkış Yap"):
-                st.session_state.giriş_yapıldı = False
-                st.session_state.kullanıcı_adı = ''
-                st.rerun()
-            
             # Sıfırlama
+            st.markdown("---")
             if st.button("🔄 Sistemi Sıfırla"):
-                for key in list(st.session_state.keys()):
-                    if key not in ['giriş_yapıldı', 'kullanıcı_adı']:
-                        del st.session_state[key]
+                for key in st.session_state.keys():
+                    del st.session_state[key]
                 st.rerun()
         
         # Ana içerik
@@ -1066,7 +1053,42 @@ def main():
                 st.dataframe(df, use_container_width=True)
             else:
                 st.info("Henüz deneme verisi bulunmuyor. İlk denemenizi girin!")
+import pandas as pd
+import streamlit as st
+
+# Kullanıcıları CSV'den yükle
+def load_users():
+    try:
+        users = pd.read_csv("users.csv")
+        return users
+    except FileNotFoundError:
+        st.error("users.csv dosyası bulunamadı!")
+        return pd.DataFrame(columns=["username", "password"])
+
+# Giriş ekranı
+def login_screen():
+    st.title("🔑 Kullanıcı Girişi")
+    username = st.text_input("Kullanıcı Adı")
+    password = st.text_input("Şifre", type="password")
+    login_btn = st.button("Giriş Yap")
+
+    if login_btn:
+        users = load_users()
+        if ((users["username"] == username) & (users["password"] == password)).any():
+            st.session_state.logged_in = True
+            st.success("✅ Giriş başarılı! Devam edebilirsiniz.")
+        else:
+            st.error("❌ Kullanıcı adı veya şifre hatalı.")
+
+# Ana uygulama yöneticisi
+def app():
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+
+    if st.session_state.logged_in:
+        main()   # senin mevcut panelin burada çalışacak
+    else:
+        login_screen()
 
 if __name__ == "__main__":
-    main()
-                            f
+    app()
