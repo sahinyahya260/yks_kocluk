@@ -8,8 +8,33 @@ from typing import Dict, List
 import numpy as np
 import calendar
 import hashlib
+import json
 import os
 
+# Veri kaydetme fonksiyonu
+def save_user_data(username, data):
+    """Kullanıcı verilerini JSON dosyasına kaydeder."""
+    filename = f"{username}_data.json"
+    try:
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        return True
+    except Exception as e:
+        st.error(f"Veri kaydetme hatası: {e}")
+        return False
+
+# Veri yükleme fonksiyonu
+def load_user_data(username):
+    """Kullanıcı verilerini JSON dosyasından yükler."""
+    filename = f"{username}_data.json"
+    if os.path.exists(filename):
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            st.error(f"Veri yükleme hatası: {e}")
+            return None
+    return None
 # Sayfa konfigürasyonu
 st.set_page_config(
     page_title="YKS Derece Öğrencisi Hazırlık Sistemi",
@@ -183,18 +208,28 @@ def login_sayfası():
             giriş_butonu = st.form_submit_button("🚀 Giriş Yap", use_container_width=True)
             
             if giriş_butonu:
-                if kullanıcı_adı and şifre:
-                    if kullanıcı_doğrula(kullanıcı_adı, şifre):
-                        st.session_state.giriş_yapıldı = True
-                        st.session_state.kullanıcı_adı = kullanıcı_adı
-                        st.success("Giriş başarılı! Programa yönlendiriliyorsunuz...")
-                        st.rerun()
-                    else:
-                        st.error("❌ Kullanıcı adı veya şifre hatalı!")
-                        st.info("💡 users.csv dosyasında kayıtlı kullanıcı bilgilerini kontrol edin.")
+        if kullanıcı_adı and şifre:
+            if kullanıcı_doğrula(kullanıcı_adı, şifre):
+                st.session_state.giriş_yapıldı = True
+                st.session_state.kullanıcı_adı = kullanıcı_adı
+                
+                # Kullanıcı verilerini yükle
+                user_data = load_user_data(kullanıcı_adı)
+                if user_data:
+                    # Yüklenen verilerle oturum durumunu güncelle
+                    st.session_state.update(user_data)
+                    # Deneme sonuçları ve konu durumu gibi listeleri ve sözlükleri sıfırlamadığınızdan emin olun
                 else:
-                    st.warning("⚠️ Lütfen kullanıcı adı ve şifre giriniz!")
-        
+                    # İlk kez giriş yapıyorsa varsayılanları başlat
+                    initialize_session_state()
+
+                st.success("Giriş başarılı! Programa yönlendiriliyorsunuz...")
+                st.rerun()
+            else:
+                st.error("❌ Kullanıcı adı veya şifre hatalı!")
+                st.info("💡 users.csv dosyasında kayıtlı kullanıcı bilgilerini kontrol edin.")
+        else:
+            st.warning("⚠️ Lütfen kullanıcı adı ve şifre giriniz!")
         # Bilgi kutusu
         with st.expander("ℹ️ Sistem Hakkında"):
             st.markdown("""
@@ -430,8 +465,21 @@ def öğrenci_bilgi_formu():
             tema_css = tema_css_oluştur(bölüm_kategori)
             st.markdown(tema_css, unsafe_allow_html=True)
             
-            st.success(f"🎉 Hoş geldin {isim}! {bölüm_kategori} temalı derece öğrencisi programın hazırlandı!")
-            st.rerun()
+           # Oturum durumundaki tüm verileri tek bir sözlükte topla
+    data_to_save = {
+        'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
+        'program_oluşturuldu': st.session_state.program_oluşturuldu,
+        'deneme_sonuçları': st.session_state.deneme_sonuçları,
+        'konu_durumu': st.session_state.konu_durumu,
+        'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
+        'motivasyon_puanı': st.session_state.motivasyon_puanı,
+        'hedef_sıralama': st.session_state.hedef_sıralama
+    }
+    
+    # Verileri kaydet
+    if save_user_data(st.session_state.kullanıcı_adı, data_to_save):
+        st.success(f"🎉 Hoş geldin {isim}! {bölüm_kategori} temalı derece öğrencisi programın hazırlandı ve kaydedildi!")
+    st.rerun()
 
 def derece_günlük_program():
     bilgi = st.session_state.öğrenci_bilgisi
