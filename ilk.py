@@ -353,7 +353,7 @@ def öğrenci_bilgi_formu():
         st.session_state.program_oluşturuldu = True
     
     # YENİ EKLENEN KOD
-    verileri_otomatik_kaydet()
+        verileri_otomatik_kaydet()
     
     st.success(f"🎉 Hoş geldin {isim}!..."); st.markdown("""
     <div class="hero-section">
