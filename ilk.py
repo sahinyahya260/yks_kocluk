@@ -34,6 +34,21 @@ def main_panel():
     st.sidebar.success(f"👋 Hoş geldin, {st.session_state.username}")
     main()
 
+# ================= EKSİK OLAN BAŞLANGIÇ ================= #
+def initialize_session_state():
+    if "program_oluşturuldu" not in st.session_state:
+        st.session_state.program_oluşturuldu = False
+    if "öğrenci_bilgisi" not in st.session_state:
+        st.session_state.öğrenci_bilgisi = {}
+    if "konu_durumu" not in st.session_state:
+        st.session_state.konu_durumu = {}
+    if "deneme_sonuçları" not in st.session_state:
+        st.session_state.deneme_sonuçları = []
+    if "günlük_çalışma_kayıtları" not in st.session_state:
+        st.session_state.günlük_çalışma_kayıtları = []
+    if "motivasyon_puanı" not in st.session_state:
+        st.session_state.motivasyon_puanı = 100
+
 # ================= SENİN PANEL KODUN ================= #
 
 def main():
