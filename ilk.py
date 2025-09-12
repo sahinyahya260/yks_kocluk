@@ -155,7 +155,7 @@ def verileri_otomatik_kaydet():
             'günlük_çalışma_kayıtları': st.session_state.get('günlük_çalışma_kayıtları', {})
         }
         def kullanıcı_verilerini_kaydet(kullanıcı_adı, veriler):
-    """Kullanıcı verilerini JSON dosyasına kaydeder"""
+            """Kullanıcı verilerini JSON dosyasına kaydeder"""
     try:
         with open(f'user_data/{kullanıcı_adı}.json', 'w', encoding='utf-8') as f:
             json.dump(veriler, f, ensure_ascii=False, indent=4)
