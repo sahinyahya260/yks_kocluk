@@ -35,6 +35,7 @@ def load_user_data(username):
             st.error(f"Veri yükleme hatası: {e}")
             return None
     return None
+
 # Sayfa konfigürasyonu
 st.set_page_config(
     page_title="YKS Derece Öğrencisi Hazırlık Sistemi",
@@ -210,22 +211,23 @@ def login_sayfası():
             if giriş_butonu:
                 if kullanıcı_adı and şifre:
                     if kullanıcı_doğrula(kullanıcı_adı, şifre):
-            # Kullanıcı verilerini yükle
+                        st.session_state.giriş_yapıldı = True
+                        st.session_state.kullanıcı_adı = kullanıcı_adı
+                        
+                        # Kullanıcı verilerini yükle
                         user_data = load_user_data(kullanıcı_adı)
-            if user_data:
-                st.session_state.update(user_data)
-            else:
-                initialize_session_state()
+                        if user_data:
+                            st.session_state.update(user_data)
+                        else:
+                            initialize_session_state()
 
-            st.success("Giriş başarılı! Programa yönlendiriliyorsunuz...")
-            st.rerun()
-        
-            st.error("❌ Kullanıcı adı veya şifre hatalı!")
-            st.info("💡 users.csv dosyasında kayıtlı kullanıcı bilgilerini kontrol edin.")
-                    
-        st.warning("⚠️ Lütfen kullanıcı adı ve şifre giriniz!")
-
-
+                        st.success("Giriş başarılı! Programa yönlendiriliyorsunuz...")
+                        st.rerun()
+                    else:
+                        st.error("❌ Kullanıcı adı veya şifre hatalı!")
+                        st.info("💡 users.csv dosyasında kayıtlı kullanıcı bilgilerini kontrol edin.")
+                else:
+                    st.warning("⚠️ Lütfen kullanıcı adı ve şifre giriniz!")
 
         # Bilgi kutusu
         with st.expander("ℹ️ Sistem Hakkında"):
@@ -474,25 +476,26 @@ def öğrenci_bilgi_formu():
         }
         st.session_state.program_oluşturuldu = True
 
-        # Tema CSS uygula (senin fonksiyon mevcut olmalı)
+        # Tema CSS uygula
         try:
             tema_css = tema_css_oluştur(bölüm_kategori)
             st.markdown(tema_css, unsafe_allow_html=True)
         except Exception:
-            # Eğer tema fonksiyonu yoksa yoluna devam et
             pass
 
-        # Otomatik kaydet (bu fonksiyonun dosyada tanımlı olması gerekiyor)
-        try:
-            verileri_otomatik_kaydet()
-        except Exception:
-            # Kaydetme başarısız olursa uygulama yine de devam etsin
-            pass
-
-        st.success(f"🎉 Hoş geldin {isim}! {bölüm_kategori} temalı derece öğrencisi programın hazırlandı ve kaydedildi!")
+        # Verileri kaydet
+        data_to_save = {
+            'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
+            'program_oluşturuldu': st.session_state.program_oluşturuldu,
+            'deneme_sonuçları': st.session_state.deneme_sonuçları,
+            'konu_durumu': st.session_state.konu_durumu,
+            'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
+            'motivasyon_puanı': st.session_state.motivasyon_puanı,
+            'hedef_sıralama': st.session_state.hedef_sıralama,
+        }
+        if save_user_data(st.session_state.kullanıcı_adı, data_to_save):
+            st.success(f"🎉 Hoş geldin {isim}! {bölüm_kategori} temalı derece öğrencisi programın hazırlandı ve kaydedildi!")
         st.rerun()
-
-
 
 def derece_günlük_program():
     bilgi = st.session_state.öğrenci_bilgisi
@@ -563,13 +566,25 @@ def derece_günlük_program():
         if st.button("Günlük Performansı Kaydet"):
             tarih_str = str(date.today())
             if tarih_str not in st.session_state.günlük_çalışma_kayıtları:
-                st.session_state.günlük_çalışma_kayıtları[tarih_str] = {}
                 st.session_state.günlük_çalışma_kayıtları[tarih_str] = {
                 'tamamlanan_görevler': tamamlanan_görevler,
                 'tamamlanma_oranı': len(tamamlanan_görevler) / max(1, len([a for td in program.values() for a in td.values() if 'Çalışma' in a])) * 100,
                 'gün': seçilen_gün
             }
-            st.success("Günlük performans kaydedildi! 🎉")
+            # Verileri kaydet
+            data_to_save = {
+                'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
+                'program_oluşturuldu': st.session_state.program_oluşturuldu,
+                'deneme_sonuçları': st.session_state.deneme_sonuçları,
+                'konu_durumu': st.session_state.konu_durumu,
+                'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
+                'motivasyon_puanı': st.session_state.motivasyon_puanı,
+                'hedef_sıralama': st.session_state.hedef_sıralama,
+            }
+            if save_user_data(st.session_state.kullanıcı_adı, data_to_save):
+                st.success("Günlük performans kaydedildi! 🎉")
+            else:
+                st.error("Veri kaydetme başarısız.")
 
 def derece_saatlik_program_oluştur(gün, program_türü, bilgi, strateji):
     # Derece öğrencisi için detaylı saatlik program
@@ -713,6 +728,22 @@ def derece_konu_takibi():
                     <h2 style="color: {tema['renk']};">{zayif_konular}</h2>
                 </div>
             ''', unsafe_allow_html=True)
+    
+    # Her seçimden sonra verileri kaydet
+    data_to_save = {
+        'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
+        'program_oluşturuldu': st.session_state.program_oluşturuldu,
+        'deneme_sonuçları': st.session_state.deneme_sonuçları,
+        'konu_durumu': st.session_state.konu_durumu,
+        'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
+        'motivasyon_puanı': st.session_state.motivasyon_puanı,
+        'hedef_sıralama': st.session_state.hedef_sıralama,
+    }
+    if save_user_data(st.session_state.kullanıcı_adı, data_to_save):
+        st.success("Konu masterysi başarıyla kaydedildi! 🎉")
+    else:
+        st.error("Veri kaydetme başarısız.")
+
 
 def derece_deneme_analizi():
     st.markdown('<div class="section-header">📈 Derece Öğrencisi Deneme Analizi</div>', unsafe_allow_html=True)
@@ -805,7 +836,21 @@ def derece_deneme_analizi():
                 }
                 
                 st.session_state.deneme_sonuçları.append(sonuç)
-                st.success("Derece öğrencisi analizi tamamlandı! 📊")
+                
+                # Verileri kaydet
+                data_to_save = {
+                    'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
+                    'program_oluşturuldu': st.session_state.program_oluşturuldu,
+                    'deneme_sonuçları': st.session_state.deneme_sonuçları,
+                    'konu_durumu': st.session_state.konu_durumu,
+                    'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
+                    'motivasyon_puanı': st.session_state.motivasyon_puanı,
+                    'hedef_sıralama': st.session_state.hedef_sıralama,
+                }
+                if save_user_data(st.session_state.kullanıcı_adı, data_to_save):
+                    st.success("Derece öğrencisi analizi tamamlandı! 📊")
+                else:
+                    st.error("Veri kaydetme başarısız.")
     
     # Derece öğrencisi grafikleri
     if st.session_state.deneme_sonuçları:
@@ -992,17 +1037,18 @@ def derece_öneriler():
             st.markdown(f"• {alışkanlık}")
 
 def main():
-    initialize_session_state()
-    
-    # Tema CSS'ini uygula
-    if st.session_state.program_oluşturuldu:
-        bölüm_kategori = st.session_state.öğrenci_bilgisi['bölüm_kategori']
-        tema_css = tema_css_oluştur(bölüm_kategori)
-        st.markdown(tema_css, unsafe_allow_html=True)
-    
-    if not st.session_state.program_oluşturuldu:
-        öğrenci_bilgi_formu()
+    if "giriş_yapıldı" not in st.session_state:
+        st.session_state.giriş_yapıldı = False
+        
+    if not st.session_state.giriş_yapıldı:
+        login_sayfası()
     else:
+        # Tema CSS'ini uygula
+        if st.session_state.program_oluşturuldu:
+            bölüm_kategori = st.session_state.öğrenci_bilgisi['bölüm_kategori']
+            tema_css = tema_css_oluştur(bölüm_kategori)
+            st.markdown(tema_css, unsafe_allow_html=True)
+        
         bilgi = st.session_state.öğrenci_bilgisi
         tema = BÖLÜM_TEMALARI[bilgi['bölüm_kategori']]
         
@@ -1114,42 +1160,6 @@ def main():
                 st.dataframe(df, use_container_width=True)
             else:
                 st.info("Henüz deneme verisi bulunmuyor. İlk denemenizi girin!")
-import pandas as pd
-import streamlit as st
-
-# Kullanıcıları CSV'den yükle
-def load_users():
-    try:
-        users = pd.read_csv("users.csv")
-        return users
-    except FileNotFoundError:
-        st.error("users.csv dosyası bulunamadı!")
-        return pd.DataFrame(columns=["username", "password"])
-
-# Giriş ekranı
-def login_screen():
-    st.title("🔑 Kullanıcı Girişi")
-    username = st.text_input("Kullanıcı Adı")
-    password = st.text_input("Şifre", type="password")
-    login_btn = st.button("Giriş Yap")
-
-    if login_btn:
-        users = load_users()
-        if ((users["username"] == username) & (users["password"] == password)).any():
-            st.session_state.logged_in = True
-            st.success("✅ Giriş başarılı! Devam edebilirsiniz.")
-        else:
-            st.error("❌ Kullanıcı adı veya şifre hatalı.")
-
-# Ana uygulama yöneticisi
-def app():
-    if "logged_in" not in st.session_state:
-        st.session_state.logged_in = False
-
-    if st.session_state.logged_in:
-        main()   # senin mevcut panelin burada çalışacak
-    else:
-        login_screen()
-
+            
 if __name__ == "__main__":
-    app()
+    main()
