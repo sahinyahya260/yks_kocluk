@@ -208,28 +208,26 @@ def login_sayfası():
             giriş_butonu = st.form_submit_button("🚀 Giriş Yap", use_container_width=True)
             
             if giriş_butonu:
-                if kullanıcı_adı and şifre:
-                    if kullanıcı_doğrula(kullanıcı_adı, şifre):
-                        st.session_state.giriş_yapıldı = True
-                st.session_state.kullanıcı_adı = kullanıcı_adı
-                
-                # Kullanıcı verilerini yükle
-                user_data = load_user_data(kullanıcı_adı)
-                if user_data:
-                    # Yüklenen verilerle oturum durumunu güncelle
-                    st.session_state.update(user_data)
-                    # Deneme sonuçları ve konu durumu gibi listeleri ve sözlükleri sıfırlamadığınızdan emin olun
-                else:
-                    # İlk kez giriş yapıyorsa varsayılanları başlat
-                    initialize_session_state()
+        if kullanıcı_adı and şifre:
+        if kullanıcı_doğrula(kullanıcı_adı, şifre):
+            st.session_state.giriş_yapıldı = True
+            st.session_state.kullanıcı_adı = kullanıcı_adı
 
-                st.success("Giriş başarılı! Programa yönlendiriliyorsunuz...")
-                st.rerun()
+            # Kullanıcı verilerini yükle
+            user_data = load_user_data(kullanıcı_adı)
+            if user_data:
+                st.session_state.update(user_data)
             else:
-                st.error("❌ Kullanıcı adı veya şifre hatalı!")
-                st.info("💡 users.csv dosyasında kayıtlı kullanıcı bilgilerini kontrol edin.")
-            else:
-            st.warning("⚠️ Lütfen kullanıcı adı ve şifre giriniz!")
+                initialize_session_state()
+
+            st.success("Giriş başarılı! Programa yönlendiriliyorsunuz...")
+            st.experimental_rerun()
+        else:
+            st.error("❌ Kullanıcı adı veya şifre hatalı!")
+            st.info("💡 users.csv dosyasında kayıtlı kullanıcı bilgilerini kontrol edin.")
+    else:
+        st.warning("⚠️ Lütfen kullanıcı adı ve şifre giriniz!")
+
         # Bilgi kutusu
         with st.expander("ℹ️ Sistem Hakkında"):
             st.markdown("""
