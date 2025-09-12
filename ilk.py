@@ -9,7 +9,12 @@ import numpy as np
 import calendar
 import hashlib
 import os
+import json
+import os
 
+# user_data klasörünü oluştur
+if not os.path.exists('user_data'):
+    os.makedirs('user_data')
 # Sayfa konfigürasyonu
 st.set_page_config(
     page_title="YKS Derece Öğrencisi Hazırlık Sistemi",
@@ -108,12 +113,10 @@ DERECE_STRATEJİLERİ = {
 }
 
 def kullanıcı_doğrula(kullanıcı_adı, şifre):
-    """CSV dosyasından kullanıcı bilgilerini kontrol eder"""
+    """CSV veya users.csv üzerinden kullanıcı doğrulama"""
     try:
-        # users.csv dosyasını okumaya çalış
         if os.path.exists('users.csv'):
             users_df = pd.read_csv('users.csv', header=None, names=['kullanıcı_adı', 'şifre'])
-            # Kullanıcı adı ve şifre kontrolü
             for index, row in users_df.iterrows():
                 if row['kullanıcı_adı'].strip() == kullanıcı_adı.strip() and row['şifre'].strip() == şifre.strip():
                     return True
@@ -123,92 +126,67 @@ def kullanıcı_doğrula(kullanıcı_adı, şifre):
             örnek_df = pd.DataFrame(örnek_data, columns=['kullanıcı_adı', 'şifre'])
             örnek_df.to_csv('users.csv', index=False, header=False)
             st.info("users.csv dosyası oluşturuldu. Örnek kullanıcılar: ahmet/1234, admin/admin123")
-            
-            # Yeni oluşturulan dosyadan kontrol et
-            if kullanıcı_adı == 'ahmet' and şifre == '1234':
+            if (kullanıcı_adı, şifre) in [('ahmet','1234'), ('admin','admin123')]:
                 return True
-            if kullanıcı_adı == 'admin' and şifre == 'admin123':
-                return True
-                
         return False
     except Exception as e:
         st.error(f"Kullanıcı doğrulama hatası: {e}")
         return False
 
+
+def kullanıcı_verilerini_yükle(kullanıcı_adı):
+    """Kullanıcı verilerini JSON dosyasından yükler"""
+    try:
+        if os.path.exists(f'user_data/{kullanıcı_adı}.json'):
+            with open(f'user_data/{kullanıcı_adı}.json', 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        st.error(f"Yükleme hatası: {e}")
+    return None
+
+def verileri_otomatik_kaydet():
+    """Oturum verilerini otomatik olarak kaydeder"""
+    if st.session_state.get('giriş_yapıldı') and st.session_state.get('kullanıcı_adı'):
+        veriler = {
+            'öğrenci_bilgisi': st.session_state.get('öğrenci_bilgisi', {}),
+            'program_oluşturuldu': st.session_state.get('program_oluşturuldu', False),
+            'deneme_sonuçları': st.session_state.get('deneme_sonuçları', []),
+            'konu_durumu': st.session_state.get('konu_durumu', {}),
+            'günlük_çalışma_kayıtları': st.session_state.get('günlük_çalışma_kayıtları', {})
+        }
+        def kullanıcı_verilerini_kaydet(kullanıcı_adı, veriler):
+    """Kullanıcı verilerini JSON dosyasına kaydeder"""
+    try:
+        with open(f'user_data/{kullanıcı_adı}.json', 'w', encoding='utf-8') as f:
+            json.dump(veriler, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        st.error(f"Kayıt hatası: {e}")
+
+
 def login_sayfası():
     """Giriş sayfası"""
-    st.markdown("""
-    <style>
-    .login-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 3rem;
-        border-radius: 15px;
-        margin: 2rem auto;
-        max-width: 500px;
-        text-align: center;
-        color: white;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    .login-header {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
-    .login-form {
-        background: rgba(255,255,255,0.1);
-        padding: 2rem;
-        border-radius: 10px;
-        margin-top: 1rem;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # ... mevcut CSS ve HTML kodları aynen kalacak ...
     
-    col1, col2, col3 = st.columns([1, 2, 1])
-    
-    with col2:
-        st.markdown("""
-        <div class="login-container">
-            <div class="login-header">🏆 YKS Derece Sistemi</div>
-            <p>Giriş yaparak derece öğrencisi programına erişin</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        with st.form("login_form"):
-            st.markdown("### 🔐 Giriş Bilgileri")
-            
-            kullanıcı_adı = st.text_input("👤 Kullanıcı Adı", placeholder="Kullanıcı adınızı girin")
-            şifre = st.text_input("🔒 Şifre", type="password", placeholder="Şifrenizi girin")
-            
-            giriş_butonu = st.form_submit_button("🚀 Giriş Yap", use_container_width=True)
-            
-            if giriş_butonu:
-                if kullanıcı_adı and şifre:
-                    if kullanıcı_doğrula(kullanıcı_adı, şifre):
-                        st.session_state.giriş_yapıldı = True
-                        st.session_state.kullanıcı_adı = kullanıcı_adı
-                        st.success("Giriş başarılı! Programa yönlendiriliyorsunuz...")
-                        st.rerun()
-                    else:
-                        st.error("❌ Kullanıcı adı veya şifre hatalı!")
-                        st.info("💡 users.csv dosyasında kayıtlı kullanıcı bilgilerini kontrol edin.")
-                else:
-                    st.warning("⚠️ Lütfen kullanıcı adı ve şifre giriniz!")
-        
-        # Bilgi kutusu
-        with st.expander("ℹ️ Sistem Hakkında"):
-            st.markdown("""
-            **Kullanım:**
-            - users.csv dosyasında kayıtlı kullanıcı adı ve şifre ile giriş yapın
-            - Dosya formatı: kullanıcı_adı,şifre (her satırda bir kullanıcı)
-            - Örnek: ahmet,1234
-            
-            **Özellikler:**
-            - Kişiselleştirilmiş derece öğrencisi programı
-            - Detaylı konu takibi ve analizi
-            - Deneme sonuçları değerlendirmesi
-            - Bölüm özel stratejiler
-            """)
+    # Giriş formu kısmını BUL ve şöyle değiştir:
+    if giriş_butonu:
+        if kullanıcı_adı and şifre:
+            if kullanıcı_doğrula(kullanıcı_adı, şifre):
+                st.session_state.giriş_yapıldı = True
+                st.session_state.kullanıcı_adı = kullanıcı_adı
+                
+                # YENİ EKLENEN KOD - Verileri yükle
+                kullanıcı_verileri = kullanıcı_verilerini_yükle(kullanıcı_adı)
+                if kullanıcı_verileri:
+                    st.session_state.öğrenci_bilgisi = kullanıcı_verileri.get('öğrenci_bilgisi', {})
+                    st.session_state.program_oluşturuldu = kullanıcı_verileri.get('program_oluşturuldu', False)
+                    st.session_state.deneme_sonuçları = kullanıcı_verileri.get('deneme_sonuçları', [])
+                    st.session_state.konu_durumu = kullanıcı_verileri.get('konu_durumu', {})
+                    st.session_state.günlük_çalışma_kayıtları = kullanıcı_verileri.get('günlük_çalışma_kayıtları', {})
+                
+                st.success("Giriş başarılı! Verileriniz yüklendi...")
+                st.rerun()
+            else:
+                st.error("❌ Kullanıcı adı veya şifre hatalı!")
 
 def tema_css_oluştur(bölüm_kategori):
     tema = BÖLÜM_TEMALARI[bölüm_kategori]
@@ -370,7 +348,14 @@ def initialize_session_state():
             st.session_state[key] = default_value
 
 def öğrenci_bilgi_formu():
-    st.markdown("""
+    if submitted and isim and hedef_bölüm:
+    # ... mevcut kodlar ...
+    st.session_state.program_oluşturuldu = True
+    
+    # YENİ EKLENEN KOD
+    verileri_otomatik_kaydet()
+    
+    st.success(f"🎉 Hoş geldin {isim}!...")st.markdown("""
     <div class="hero-section">
         <div class="main-header">🏆 YKS Derece Öğrencisi Sistemi</div>
         <p style="font-size: 1.2rem;">Türkiye'nin En Başarılı Öğrencilerinin Stratejileri ile Hazırlan!</p>
@@ -555,25 +540,29 @@ def derece_saatlik_program_oluştur(gün, program_türü, bilgi, strateji):
     return temel_program
 
 def derece_konu_takibi():
-    st.markdown('<div class="section-header">🎯 Derece Öğrencisi Konu Masterysi</div>', unsafe_allow_html=True)
+    if yeni_seviye != mevcut_seviye:
+        st.session_state.konu_durumu[anahtar] = yeni_seviye
+        # YENİ EKLENEN KOD
+        verileri_otomatik_kaydet()
+        st.markdown('<div class="section-header">🎯 Derece Öğrencisi Konu Masterysi</div>', unsafe_allow_html=True)
     
-    bilgi = st.session_state.öğrenci_bilgisi
-    tema = BÖLÜM_TEMALARI[bilgi['bölüm_kategori']]
-    program = DereceProgramı()
+        bilgi = st.session_state.öğrenci_bilgisi
+        tema = BÖLÜM_TEMALARI[bilgi['bölüm_kategori']]
+        program = DereceProgramı()
     
-    # Mastery seviyeleri
-    mastery_seviyeleri = {
+        # Mastery seviyeleri
+        mastery_seviyeleri = {
         "Hiç Bilmiyor": 0,
         "Temel Bilgi": 25,
         "Orta Seviye": 50,
         "İyi Seviye": 75,
         "Uzman (Derece) Seviye": 100
-    }
+        }
     
-    # Konu seçimi ve durum güncelleme
-    col1, col2 = st.columns(2)
+        # Konu seçimi ve durum güncelleme
+        col1, col2 = st.columns(2)
     
-    with col1:
+        with col1:
         st.markdown("### 📚 TYT Konu Masterysi")
         for ders, seviyeler in program.tyt_konular.items():
             with st.expander(f"{ders}"):
@@ -654,6 +643,14 @@ def derece_konu_takibi():
             ''', unsafe_allow_html=True)
 
 def derece_deneme_analizi():
+    if st.form_submit_button("📊 Derece Analizi Yap"):
+    # ... mevcut kodlar ...
+    st.session_state.deneme_sonuçları.append(sonuç)
+    
+    # YENİ EKLENEN KOD
+    verileri_otomatik_kaydet()
+    
+    st.success("Derece öğrencisi analizi tamamlandı! 📊")
     st.markdown('<div class="section-header">📈 Derece Öğrencisi Deneme Analizi</div>', unsafe_allow_html=True)
     
     bilgi = st.session_state.öğrenci_bilgisi
@@ -978,11 +975,14 @@ def main():
                 st.metric("📈 Son TYT Net", f"{son_net:.1f}")
             
             # Sıfırlama
-            st.markdown("---")
-            if st.button("🔄 Sistemi Sıfırla"):
-                for key in st.session_state.keys():
-                    del st.session_state[key]
-                st.rerun()
+            # Sıfırlama butonunu BUL ve şöyle değiştir:
+            if st.sidebar.button("🔄 Çıkış Yap"):
+    # YENİ EKLENEN KOD - Çıkış yapmadan önce kaydet
+            verileri_otomatik_kaydet()
+    
+            or key in list(st.session_state.keys()):
+            del st.session_state[key]
+            st.rerun()
         
         # Ana içerik
         if menu == "🏠 Ana Dashboard":
@@ -1082,7 +1082,7 @@ def login_screen():
 
 # Ana uygulama yöneticisi
 def app():
-    if "logged_in" not in st.session_state:
+    if "logged_in" not in st.session_state: 
         st.session_state.logged_in = False
 
     if st.session_state.logged_in:
