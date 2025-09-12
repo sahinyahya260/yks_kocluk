@@ -9,21 +9,6 @@ import numpy as np
 import calendar
 import hashlib
 import os
-# --- Rerun uyumluluk helper'ı ---
-def safe_rerun():
-    """
-    Streamlit sürüm farklılıklarına karşı güvenli yeniden çalıştırma.
-    - Öncelikle st.experimental_rerun() denenir.
-    - Yoksa st.rerun() denenir.
-    - Bunlar da yoksa st.stop() ile çalışmayı durdurur (kullanıcı yenilerse veya sonraki etkileşimde session_state okunur).
-    """
-    try:
-        st.experimental_rerun()
-    except Exception:
-        try:
-            st.rerun()
-        except Exception:
-            st.stop()
 
 # Sayfa konfigürasyonu
 st.set_page_config(
@@ -1144,11 +1129,9 @@ def login():
         if username in users and users[username] == password:
             st.session_state["logged_in"] = True
             st.session_state["username"] = username
-            safe_rerun()
+            st.experimental_rerun()
         else:
             st.sidebar.error("❌ Hatalı kullanıcı adı veya şifre")
-
-
 
 # ---------------- ANA UYGULAMA ----------------
 def app():
@@ -1165,10 +1148,8 @@ def app():
             student_panel(username)
 
         if st.sidebar.button("🚪 Çıkış Yap"):
-    # session'ı temizle
-            for k in list(st.session_state.keys()):
-                del st.session_state[k]
-                safe_rerun()
+            st.session_state.clear()
+            st.experimental_rerun()
 
 if __name__ == "__main__":
     app()
