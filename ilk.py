@@ -350,7 +350,7 @@ def initialize_session_state():
 def öğrenci_bilgi_formu():
     if submitted and isim and hedef_bölüm:
     # ... mevcut kodlar ...
-    st.session_state.program_oluşturuldu = True
+        st.session_state.program_oluşturuldu = True
     
     # YENİ EKLENEN KOD
     verileri_otomatik_kaydet()
