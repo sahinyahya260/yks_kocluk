@@ -563,7 +563,7 @@ def derece_konu_takibi():
         col1, col2 = st.columns(2)
     
         with col1:
-        st.markdown("### 📚 TYT Konu Masterysi")
+            st.markdown("### 📚 TYT Konu Masterysi")
         for ders, seviyeler in program.tyt_konular.items():
             with st.expander(f"{ders}"):
                 for seviye, konular in seviyeler.items():
