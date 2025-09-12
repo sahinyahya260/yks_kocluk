@@ -648,7 +648,7 @@ def derece_deneme_analizi():
         st.session_state.deneme_sonuçları.append(sonuç)
     
     # YENİ EKLENEN KOD
-    verileri_otomatik_kaydet()
+        verileri_otomatik_kaydet()
     
     st.success("Derece öğrencisi analizi tamamlandı! 📊")
     st.markdown('<div class="section-header">📈 Derece Öğrencisi Deneme Analizi</div>', unsafe_allow_html=True)
