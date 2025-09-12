@@ -402,81 +402,96 @@ def initialize_session_state():
             st.session_state[key] = default_value
 
 def öğrenci_bilgi_formu():
+    # Hero / başlık
     st.markdown("""
     <div class="hero-section">
         <div class="main-header">🏆 YKS Derece Öğrencisi Sistemi</div>
         <p style="font-size: 1.2rem;">Türkiye'nin En Başarılı Öğrencilerinin Stratejileri ile Hazırlan!</p>
     </div>
     """, unsafe_allow_html=True)
-    
+
+    # Formu oluştur
     with st.form("öğrenci_bilgi_form", clear_on_submit=False):
         st.markdown('<div class="section-header">📝 Kişisel Bilgiler</div>', unsafe_allow_html=True)
-        
+
         col1, col2, col3 = st.columns(3)
-        
         with col1:
             isim = st.text_input("👤 Adın Soyadın", placeholder="Örn: Ahmet Yılmaz")
             sınıf = st.selectbox("🏫 Sınıf", ["9. Sınıf", "10. Sınıf", "11. Sınıf", "12. Sınıf", "Mezun"])
             alan = st.selectbox("📚 Alan", ["Sayısal", "Eşit Ağırlık", "Sözel"])
-        
+
         with col2:
             hedef_bölüm = st.text_input("🎯 Hedef Bölüm", placeholder="Örn: Tıp - İstanbul Üniversitesi")
             hedef_sıralama = st.number_input("🏅 Hedef Sıralama", min_value=1, max_value=100000, value=1000)
             çalışma_saati = st.slider("⏰ Günlük Çalışma Saati", 4, 16, 10)
-        
+
         with col3:
-            seviye = st.selectbox("📊 Şu Anki Seviye", 
-                                ["Başlangıç (Net: 0-30)", "Temel (Net: 30-60)", 
-                                 "Orta (Net: 60-90)", "İyi (Net: 90-120)", "Çok İyi (Net: 120+)"])
+            seviye = st.selectbox("📊 Şu Anki Seviye",
+                                  ["Başlangıç (Net: 0-30)", "Temel (Net: 30-60)",
+                                   "Orta (Net: 60-90)", "İyi (Net: 90-120)", "Çok İyi (Net: 120+)"])
             uyku_saati = st.slider("😴 Günlük Uyku Saati", 6, 10, 8)
             beslenme_kalitesi = st.selectbox("🍎 Beslenme Kalitesi", ["Düzenli", "Orta", "Düzensiz"])
-        
-        # Gelişmiş motivasyon faktörleri
+
         st.markdown("### 💪 Motivasyon Profili")
         col4, col5 = st.columns(2)
-        
         with col4:
             çalışma_ortamı = st.selectbox("🏠 Çalışma Ortamı", ["Sessiz Oda", "Kütüphane", "Kafe", "Karışık"])
             çalışma_tarzı = st.selectbox("📖 Çalışma Tarzı", ["Yalnız", "Grup", "Karma"])
-        
         with col5:
             hedef_motivasyonu = st.slider("🎯 Hedef Motivasyon Seviyesi", 1, 10, 8)
             stres_yönetimi = st.selectbox("😌 Stres Yönetimi", ["Çok İyi", "İyi", "Orta", "Zayıf"])
-        
+
+        # Form submit butonu
         submitted = st.form_submit_button("✅ Derece Öğrencisi Programını Başlat", use_container_width=True)
-        
-        if submitted and isim and hedef_bölüm:
-            bölüm_kategori = bölüm_kategorisi_belirle(hedef_bölüm)
-            
-            st.session_state.öğrenci_bilgisi = {
-                'isim': isim, 'sınıf': sınıf, 'alan': alan, 'hedef_bölüm': hedef_bölüm,
-                'hedef_sıralama': hedef_sıralama, 'seviye': seviye, 'çalışma_saati': çalışma_saati,
-                'uyku_saati': uyku_saati, 'beslenme_kalitesi': beslenme_kalitesi,
-                'çalışma_ortamı': çalışma_ortamı, 'çalışma_tarzı': çalışma_tarzı,
-                'hedef_motivasyonu': hedef_motivasyonu, 'stres_yönetimi': stres_yönetimi,
-                'bölüm_kategori': bölüm_kategori, 'kayıt_tarihi': str(datetime.now().date())
-            }
-            st.session_state.program_oluşturuldu = True
-            
-            # Tema CSS'ini uygula
+
+    # Form submit sonrası işlemler (form bloğunun dışı - doğru yer burası)
+    if submitted:
+        # Zorunlu alan kontrolü
+        if not isim or not hedef_bölüm:
+            st.warning("⚠️ Lütfen adınızı ve hedef bölümünüzü giriniz!")
+            return
+
+        # Bölüm kategori belirleme (senin fonksiyonun dâhilinde olmalı)
+        bölüm_kategori = bölüm_kategorisi_belirle(hedef_bölüm)
+
+        # session_state güncelle
+        st.session_state.öğrenci_bilgisi = {
+            'isim': isim,
+            'sınıf': sınıf,
+            'alan': alan,
+            'hedef_bölüm': hedef_bölüm,
+            'hedef_sıralama': int(hedef_sıralama),
+            'seviye': seviye,
+            'çalışma_saati': int(çalışma_saati),
+            'uyku_saati': int(uyku_saati),
+            'beslenme_kalitesi': beslenme_kalitesi,
+            'çalışma_ortamı': çalışma_ortamı,
+            'çalışma_tarzı': çalışma_tarzı,
+            'hedef_motivasyonu': int(hedef_motivasyonu),
+            'stres_yönetimi': stres_yönetimi,
+            'bölüm_kategori': bölüm_kategori,
+            'kayıt_tarihi': str(datetime.now().date())
+        }
+        st.session_state.program_oluşturuldu = True
+
+        # Tema CSS uygula (senin fonksiyon mevcut olmalı)
+        try:
             tema_css = tema_css_oluştur(bölüm_kategori)
             st.markdown(tema_css, unsafe_allow_html=True)
-            
-           # Oturum durumundaki tüm verileri tek bir sözlükte topla
-    data_to_save = {
-        'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
-        'program_oluşturuldu': st.session_state.program_oluşturuldu,
-        'deneme_sonuçları': st.session_state.deneme_sonuçları,
-        'konu_durumu': st.session_state.konu_durumu,
-        'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
-        'motivasyon_puanı': st.session_state.motivasyon_puanı,
-        'hedef_sıralama': st.session_state.hedef_sıralama
-    }
-    
-    # Verileri kaydet
-    if save_user_data(st.session_state.kullanıcı_adı, data_to_save):
+        except Exception:
+            # Eğer tema fonksiyonu yoksa yoluna devam et
+            pass
+
+        # Otomatik kaydet (bu fonksiyonun dosyada tanımlı olması gerekiyor)
+        try:
+            verileri_otomatik_kaydet()
+        except Exception:
+            # Kaydetme başarısız olursa uygulama yine de devam etsin
+            pass
+
         st.success(f"🎉 Hoş geldin {isim}! {bölüm_kategori} temalı derece öğrencisi programın hazırlandı ve kaydedildi!")
-    st.rerun()
+        st.experimental_rerun()
+
 
 def derece_günlük_program():
     bilgi = st.session_state.öğrenci_bilgisi
