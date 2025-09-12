@@ -355,7 +355,7 @@ def öğrenci_bilgi_formu():
     # YENİ EKLENEN KOD
     verileri_otomatik_kaydet()
     
-    st.success(f"🎉 Hoş geldin {isim}!...")st.markdown("""
+    st.success(f"🎉 Hoş geldin {isim}!..."); st.markdown("""
     <div class="hero-section">
         <div class="main-header">🏆 YKS Derece Öğrencisi Sistemi</div>
         <p style="font-size: 1.2rem;">Türkiye'nin En Başarılı Öğrencilerinin Stratejileri ile Hazırlan!</p>
