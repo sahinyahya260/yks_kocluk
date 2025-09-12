@@ -1145,7 +1145,7 @@ def login():
             st.session_state["logged_in"] = True
             st.session_state["username"] = username
             safe_rerun()
-    else:
+        else:
             st.sidebar.error("❌ Hatalı kullanıcı adı veya şifre")
 
 
