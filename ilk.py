@@ -1142,9 +1142,9 @@ def login():
 
     if login_btn:
         if username in users and users[username] == password:
-        st.session_state["logged_in"] = True
-        st.session_state["username"] = username
-        safe_rerun()
+            st.session_state["logged_in"] = True
+            st.session_state["username"] = username
+            safe_rerun()
     else:
         st.sidebar.error("❌ Hatalı kullanıcı adı veya şifre")
 
