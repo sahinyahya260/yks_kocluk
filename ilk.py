@@ -208,9 +208,9 @@ def login_sayfası():
             giriş_butonu = st.form_submit_button("🚀 Giriş Yap", use_container_width=True)
             
             if giriş_butonu:
-        if kullanıcı_adı and şifre:
-        if kullanıcı_doğrula(kullanıcı_adı, şifre):
-            st.session_state.giriş_yapıldı = True
+                if kullanıcı_adı and şifre:
+                    if kullanıcı_doğrula(kullanıcı_adı, şifre):
+                        st.session_state.giriş_yapıldı = True
             st.session_state.kullanıcı_adı = kullanıcı_adı
 
             # Kullanıcı verilerini yükle
@@ -222,11 +222,12 @@ def login_sayfası():
 
             st.success("Giriş başarılı! Programa yönlendiriliyorsunuz...")
             st.experimental_rerun()
-        else:
+            else:
             st.error("❌ Kullanıcı adı veya şifre hatalı!")
             st.info("💡 users.csv dosyasında kayıtlı kullanıcı bilgilerini kontrol edin.")
-    else:
+            else:
         st.warning("⚠️ Lütfen kullanıcı adı ve şifre giriniz!")
+
 
         # Bilgi kutusu
         with st.expander("ℹ️ Sistem Hakkında"):
