@@ -1043,13 +1043,16 @@ def main():
     if not st.session_state.giriş_yapıldı:
         login_sayfası()
     else:
+        # Bu kontrol, kullanıcının ilk formunu doldurup doldurmadığını anlar
+        if not st.session_state.program_oluşturuldu:
+            öğrenci_bilgi_formu()
+            return # Formu gösterdikten sonra ana programı çalıştırmayı durdur
+
         # Tema CSS'ini uygula
-        if st.session_state.program_oluşturuldu:
-            bölüm_kategori = st.session_state.öğrenci_bilgisi['bölüm_kategori']
-            tema_css = tema_css_oluştur(bölüm_kategori)
-            st.markdown(tema_css, unsafe_allow_html=True)
-        
         bilgi = st.session_state.öğrenci_bilgisi
+        tema_css = tema_css_oluştur(bilgi['bölüm_kategori'])
+        st.markdown(tema_css, unsafe_allow_html=True)
+        
         tema = BÖLÜM_TEMALARI[bilgi['bölüm_kategori']]
         
         # Sidebar
