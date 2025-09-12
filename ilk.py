@@ -645,7 +645,7 @@ def derece_konu_takibi():
 def derece_deneme_analizi():
     if st.form_submit_button("📊 Derece Analizi Yap"):
     # ... mevcut kodlar ...
-    st.session_state.deneme_sonuçları.append(sonuç)
+        st.session_state.deneme_sonuçları.append(sonuç)
     
     # YENİ EKLENEN KOD
     verileri_otomatik_kaydet()
