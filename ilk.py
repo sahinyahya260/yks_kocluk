@@ -218,7 +218,7 @@ def login_sayfası():
                 initialize_session_state()
 
             st.success("Giriş başarılı! Programa yönlendiriliyorsunuz...")
-            st.experimental_rerun()
+            st.rerun()
         
             st.error("❌ Kullanıcı adı veya şifre hatalı!")
             st.info("💡 users.csv dosyasında kayıtlı kullanıcı bilgilerini kontrol edin.")
@@ -490,7 +490,8 @@ def öğrenci_bilgi_formu():
             pass
 
         st.success(f"🎉 Hoş geldin {isim}! {bölüm_kategori} temalı derece öğrencisi programın hazırlandı ve kaydedildi!")
-        st.experimental_rerun()
+        st.rerun()
+
 
 
 def derece_günlük_program():
