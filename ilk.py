@@ -1053,42 +1053,103 @@ def main():
                 st.dataframe(df, use_container_width=True)
             else:
                 st.info("Henüz deneme verisi bulunmuyor. İlk denemenizi girin!")
-import pandas as pd
 import streamlit as st
+import pandas as pd
+import json
+import os
 
-# Kullanıcıları CSV'den yükle
+# ---------------- USERS ----------------
 def load_users():
-    try:
-        users = pd.read_csv("users.csv")
-        return users
-    except FileNotFoundError:
-        st.error("users.csv dosyası bulunamadı!")
-        return pd.DataFrame(columns=["username", "password"])
+    df = pd.read_csv("users.csv", header=None, names=["username", "password"])
+    return dict(zip(df.username, df.password))
 
-# Giriş ekranı
-def login_screen():
-    st.title("🔑 Kullanıcı Girişi")
-    username = st.text_input("Kullanıcı Adı")
-    password = st.text_input("Şifre", type="password")
-    login_btn = st.button("Giriş Yap")
+# ---------------- PROGRESS ----------------
+def load_progress(username=None):
+    if os.path.exists("progress.json"):
+        with open("progress.json", "r") as f:
+            data = json.load(f)
+    else:
+        data = {}
+
+    if username:
+        return data.get(username, {})
+    return data
+
+def save_progress(username, progress):
+    if os.path.exists("progress.json"):
+        with open("progress.json", "r") as f:
+            data = json.load(f)
+    else:
+        data = {}
+
+    data[username] = progress
+
+    with open("progress.json", "w") as f:
+        json.dump(data, f, indent=4)
+
+# ---------------- ADMIN PANEL ----------------
+def admin_panel():
+    st.title("👨‍🏫 Admin Paneli - Öğrenci Takip Sistemi")
+    data = load_progress()
+    if not data:
+        st.warning("Henüz öğrenci verisi bulunmuyor.")
+    else:
+        df = pd.DataFrame(data).T  # öğrenciler satırlarda
+        st.dataframe(df, use_container_width=True)
+
+# ---------------- ÖĞRENCİ PANELİ ----------------
+def student_panel(username):
+    st.title(f"🎓 {username} - YKS Paneli")
+
+    # öğrencinin kaydını yükle
+    progress = load_progress(username)
+    if not progress:
+        progress = {"deneme": 0, "net": 0, "motivasyon": 50}
+
+    # düzenlenebilir alanlar
+    progress["deneme"] = st.number_input("📘 Çözdüğü Deneme Sayısı", value=progress["deneme"], step=1)
+    progress["net"] = st.number_input("📝 Son TYT Net", value=progress["net"], step=1)
+    progress["motivasyon"] = st.slider("💪 Motivasyon", 0, 100, value=progress["motivasyon"])
+
+    # kaydet
+    if st.button("💾 Kaydet"):
+        save_progress(username, progress)
+        st.success("İlerleme kaydedildi ✅")
+
+# ---------------- GİRİŞ PANELİ ----------------
+def login():
+    st.sidebar.title("🔑 Kullanıcı Girişi")
+    users = load_users()
+
+    username = st.sidebar.text_input("Kullanıcı Adı")
+    password = st.sidebar.text_input("Şifre", type="password")
+    login_btn = st.sidebar.button("Giriş Yap")
 
     if login_btn:
-        users = load_users()
-        if ((users["username"] == username) & (users["password"] == password)).any():
-            st.session_state.logged_in = True
-            st.success("✅ Giriş başarılı! Devam edebilirsiniz.")
+        if username in users and users[username] == password:
+            st.session_state["logged_in"] = True
+            st.session_state["username"] = username
+            st.experimental_rerun()
         else:
-            st.error("❌ Kullanıcı adı veya şifre hatalı.")
+            st.sidebar.error("❌ Hatalı kullanıcı adı veya şifre")
 
-# Ana uygulama yöneticisi
+# ---------------- ANA UYGULAMA ----------------
 def app():
     if "logged_in" not in st.session_state:
-        st.session_state.logged_in = False
+        st.session_state["logged_in"] = False
 
-    if st.session_state.logged_in:
-        main()   # senin mevcut panelin burada çalışacak
+    if not st.session_state["logged_in"]:
+        login()
     else:
-        login_screen()
+        username = st.session_state["username"]
+        if username == "admin":
+            admin_panel()
+        else:
+            student_panel(username)
+
+        if st.sidebar.button("🚪 Çıkış Yap"):
+            st.session_state.clear()
+            st.experimental_rerun()
 
 if __name__ == "__main__":
     app()
