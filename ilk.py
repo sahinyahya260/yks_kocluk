@@ -1166,9 +1166,9 @@ def app():
 
         if st.sidebar.button("🚪 Çıkış Yap"):
     # session'ı temizle
-    for k in list(st.session_state.keys()):
-        del st.session_state[k]
-    safe_rerun()
+            for k in list(st.session_state.keys()):
+                del st.session_state[k]
+                safe_rerun()
 
 if __name__ == "__main__":
     app()
