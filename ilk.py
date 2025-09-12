@@ -1140,14 +1140,14 @@ def login():
     password = st.sidebar.text_input("Şifre", type="password")
     login_btn = st.sidebar.button("Giriş Yap")
 
-    if login_btn:
+   if login_btn:
     if username in users and users[username] == password:
         st.session_state["logged_in"] = True
         st.session_state["username"] = username
         safe_rerun()
+    else:
+        st.sidebar.error("❌ Hatalı kullanıcı adı veya şifre")
 
-        else:
-            st.sidebar.error("❌ Hatalı kullanıcı adı veya şifre")
 
 # ---------------- ANA UYGULAMA ----------------
 def app():
