@@ -1099,7 +1099,7 @@ def main():
                     del st.session_state[key]
                 st.rerun()
         
-        if menu == "🏠 Ana Dashboard":
+        if menu == "🏠 Ana Sayfa":
             st.markdown(f'''
             <div class="hero-section">
                 <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
