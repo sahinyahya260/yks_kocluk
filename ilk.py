@@ -1076,7 +1076,7 @@ def main():
             ''', unsafe_allow_html=True)
             
             menu = st.selectbox("📋 Derece Menüsü", [
-                "🏠 Ana Dashboard",
+                "🏠 Ana Sayfa",
                 "📅 Günlük Program", 
                 "🎯 Konu Masterysi",
                 "📈 Deneme Analizi",
