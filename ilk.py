@@ -675,112 +675,118 @@ def derece_saatlik_program_oluştur(gün, program_türü, bilgi, hedef_konu):
     return temel_program
 
 def derece_konu_takibi():
-    st.markdown('<div class="section-header">🎯 Derece Öğrencisi Konu Masterysi</div>', unsafe_allow_html=True)
     
-    bilgi = st.session_state.öğrenci_bilgisi
-    tema = BÖLÜM_TEMALARI[bilgi['bölüm_kategori']]
-    program = DereceProgramı()
+    st.markdown('<div class="section-header">🎯 Konu Masterysi</div>', unsafe_allow_html=True)
+    st.markdown('<p style="font-size: 1.1rem;">Eksik olduğun konuları tamamla ve ilerlemeni takip et.</p>', unsafe_allow_html=True)
     
-    mastery_seviyeleri = {
-        "Hiç Bilmiyor": 0,
-        "Temel Bilgi": 25,
-        "Orta Seviye": 50,
-        "İyi Seviye": 75,
-        "Uzman (Derece) Seviye": 100
+    # YKS konularını hiyerarşik olarak tanımla
+    yks_konulari = {
+        "TYT Türkçe": {
+            "Anlam Bilgisi": {
+                "Sözcükte Anlam": [
+                    "Gerçek Anlam",
+                    "Mecaz Anlam",
+                    "Terim Anlam",
+                    "Çok Anlamlılık",
+                    "Deyimler ve Atasözleri",
+                    "Sözcükler Arası Anlam İlişkileri"
+                ],
+                "Cümlede Anlam": [
+                    "Cümle Yorumlama",
+                    "Kesin Yargıya Ulaşma",
+                    "Anlatım Biçimleri",
+                    "Duygu ve Düşünceleri İfade Etme",
+                    "Amaç-Sonuç, Neden-Sonuç, Koşul-Sonuç"
+                ],
+                "Paragraf": [
+                    "Paragrafta Anlatım Teknikleri",
+                    "Paragrafta Düşünceyi Geliştirme Yolları",
+                    "Paragrafta Yapı",
+                    "Paragraf tamamlama",
+                    "Paragraf bölme",
+                    "Düşüncenin akışını bozan cümle",
+                    "Paragraf oluşturma",
+                    "Paragrafın temel konusu ve asıl verilmek istenen mesaj",
+                    "Ana düşünceyi destekleyen yan fikirler"
+                ]
+            },
+            "Dil Bilgisi": {
+                "Ses Bilgisi": [
+                    "Büyük Ünlü Uyumu",
+                    "Ünsüz Benzeşmesi",
+                    "Ünsüz Yumuşaması"
+                ],
+                "Sözcük Bilgisi": [
+                    "İsim",
+                    "Sıfat",
+                    "Zamir",
+                    "Edat"
+                ]
+            }
+        },
+        "TYT Matematik": {
+            "Temel Kavramlar": {
+                "Sayılar": ["Rasyonel Sayılar", "Gerçek Sayılar", "Bölünebilme"]
+            },
+            "Problemler": {
+                "Temel Problemler": ["Sayı Problemleri", "Kesir Problemleri"]
+            }
+        }
     }
     
-    col1, col2 = st.columns(2)
+    # 1. Adım: Ders seçimi
+    dersler = list(yks_konulari.keys())
+    secilen_ders = st.selectbox("Ders Seç", dersler, key="ders_mastery")
     
-    with col1:
-        st.markdown("### 📚 TYT Konu Masterysi")
-        for ders, konular in program.tyt_konular.items():
-            with st.expander(f"{ders}"):
-                for konu in konular:
-                    anahtar = f"TYT-{ders}-{konu}"
-                    mevcut_seviye = st.session_state.konu_durumu.get(anahtar, "Hiç Bilmiyor")
-                    
-                    yeni_seviye = st.selectbox(
-                        f"{konu}",
-                        list(mastery_seviyeleri.keys()),
-                        index=list(mastery_seviyeleri.keys()).index(mevcut_seviye),
-                        key=anahtar
-                    )
-                    
-                    if yeni_seviye != mevcut_seviye:
-                        st.session_state.konu_durumu[anahtar] = yeni_seviye
+    # 2. Adım: Konu alanı seçimi
+    if secilen_ders:
+        konu_alanlari = list(yks_konulari[secilen_ders].keys())
+        secilen_konu_alani = st.selectbox("Konu Alanı Seç", konu_alanlari, key="konu_alani_mastery")
     
-    with col2:
-        st.markdown("### 🚀 AYT Konu Masterysi")
-        for ders, konular in program.ayt_konular.items():
-            with st.expander(f"{ders}"):
-                for konu in konular:
-                    anahtar = f"AYT-{ders}-{konu}"
-                    mevcut_seviye = st.session_state.konu_durumu.get(anahtar, "Hiç Bilmiyor")
-                    
-                    yeni_seviye = st.selectbox(
-                        f"{konu}",
-                        list(mastery_seviyeleri.keys()),
-                        index=list(mastery_seviyeleri.keys()).index(mevcut_seviye),
-                        key=anahtar
-                    )
-                    
-                    if yeni_seviye != mevcut_seviye:
-                        st.session_state.konu_durumu[anahtar] = yeni_seviye
+    # 3. Adım: Alt konu seçimi
+    if secilen_konu_alani:
+        alt_konular = yks_konulari[secilen_ders][secilen_konu_alani]
+        secilen_alt_konu = st.selectbox("Alt Konu Seç", alt_konular, key="alt_konu_mastery")
     
-    if st.session_state.konu_durumu:
-        st.markdown("---")
-        st.markdown("### 📊 Genel Mastery İstatistikleri")
+    if st.button("Seçimi Onayla"):
+        # Seçilen konuyu ve alt konuyu birleştiren bir anahtar oluştur
+        konu_key = f"{secilen_ders}>{secilen_konu_alani}>{secilen_alt_konu}"
         
-        toplam_mastery = []
-        for anahtar, seviye in st.session_state.konu_durumu.items():
-            toplam_mastery.append(mastery_seviyeleri[seviye])
+        # Eğer bu konu masterysi daha önce girilmemişse, varsayılan değerle başlat
+        if konu_key not in st.session_state.konu_durumu:
+            st.session_state.konu_durumu[konu_key] = "Hiç Bilmiyor"
         
-        ortalama_mastery = np.mean(toplam_mastery) if toplam_mastery else 0
-        
-        col3, col4, col5 = st.columns(3)
-        
-        with col3:
-            st.markdown(f'''
-                <div class="metric-card">
-                    <h3>📈 Ortalama Mastery</h3>
-                    <h2 style="color: {tema['renk']};">{ortalama_mastery:.1f}%</h2>
-                </div>
-            ''', unsafe_allow_html=True)
-        
-        with col4:
-            uzman_konular = sum(1 for seviye in st.session_state.konu_durumu.values() 
-                               if seviye == "Uzman (Derece) Seviye")
-            st.markdown(f'''
-                <div class="metric-card">
-                    <h3>🏆 Uzman Konular</h3>
-                    <h2 style="color: {tema['renk']};">{uzman_konular}</h2>
-                </div>
-            ''', unsafe_allow_html=True)
-        
-        with col5:
-            zayif_konular = sum(1 for seviye in st.session_state.konu_durumu.values() 
-                               if mastery_seviyeleri.get(seviye, 0) < 50)
-            st.markdown(f'''
-                <div class="metric-card">
-                    <h3>⚠️ Zayıf Konular</h3>
-                    <h2 style="color: {tema['renk']};">{zayif_konular}</h2>
-                </div>
-            ''', unsafe_allow_html=True)
+        st.success(f"Konu takibi için **{secilen_alt_konu}** seçildi. Şimdi mastery seviyesini belirleyebilirsiniz.")
     
-    data_to_save = {
-        'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
-        'program_oluşturuldu': st.session_state.program_oluşturuldu,
-        'deneme_sonuçları': st.session_state.deneme_sonuçları,
-        'konu_durumu': st.session_state.konu_durumu,
-        'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
-        'motivasyon_puanı': st.session_state.motivasyon_puanı,
-        'hedef_sıralama': st.session_state.hedef_sıralama,
-    }
-    if st.button("Mastery Durumunu Kaydet"):
-        if save_user_data(st.session_state.kullanıcı_adı, data_to_save):
-            st.success("Konu masterysi başarıyla kaydedildi! 🎉")
-        else:
-            st.error("Veri kaydetme başarısız.")
+    st.markdown("---")
+    
+    # Mastery seviyesi güncelleme arayüzü
+    st.markdown('<div class="section-header">🧠 Mastery Seviyeni Belirle</div>', unsafe_allow_html=True)
+    
+    if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
+        # Konuları hiyerarşik bir şekilde göster
+        konu_mastery_secimi = st.selectbox(
+            "Seviyesini Belirlemek İstediğin Konuyu Seç", 
+            list(st.session_state.konu_durumu.keys()), 
+            key="mastery_level_selector"
+        )
+        
+        if konu_mastery_secimi:
+            mastery_seviyeleri = ["Hiç Bilmiyor", "Temel Bilgi", "Orta Seviye", "İyi Seviye", "Uzman (Derece) Seviye"]
+            mevcut_seviye = st.session_state.konu_durumu.get(konu_mastery_secimi, "Hiç Bilmiyor")
+            
+            yeni_seviye = st.select_slider(
+                f"**{konu_mastery_secimi}** için seviye seç:",
+                options=mastery_seviyeleri,
+                value=mevcut_seviye,
+                key=f"slider_{konu_mastery_secimi}"
+            )
+            
+            if yeni_seviye != mevcut_seviye:
+                st.session_state.konu_durumu[konu_mastery_secimi] = yeni_seviye
+                st.success(f"**{konu_mastery_secimi}** seviyesi **{yeni_seviye}** olarak güncellendi!")
+    else:
+        st.info("Lütfen önce yukarıdan bir konu seçip 'Seçimi Onayla' butonuna tıklayın.")
 
 def derece_deneme_analizi():
     st.markdown('<div class="section-header">📈 Derece Öğrencisi Deneme Analizi</div>', unsafe_allow_html=True)
