@@ -506,21 +506,17 @@ def öğrenci_bilgi_formu():
 def derece_günlük_program():
     
 
-    import datetime
-from dataclasses import dataclass
-from typing import Dict, List, Tuple
-import json
-
-@dataclass
-class OgrenciProfili:
-    isim: str
-    hedef_puan: int
-    mevcut_seviye: Dict[str, int]  # Her ders için 1-100 arası
-    zayif_konular: Dict[str, List[str]]
-    guclu_konular: Dict[str, List[str]]
-    gunluk_calisma_saati: int
-    sinav_tarihi: datetime.date
-    son_deneme_puanlari: Dict[str, List[int]]
+    
+     @dataclass
+     class OgrenciProfili:
+        isim: str
+        hedef_puan: int
+        mevcut_seviye: Dict[str, int]  # Her ders için 1-100 arası
+        zayif_konular: Dict[str, List[str]]
+        guclu_konular: Dict[str, List[str]]
+        gunluk_calisma_saati: int
+        sinav_tarihi: datetime.date
+        son_deneme_puanlari: Dict[str, List[int]]
 
 @dataclass
 class HaftalikStrateji:
