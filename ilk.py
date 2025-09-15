@@ -1252,7 +1252,6 @@ def main():
                 
                 for anahtar, seviye in st.session_state.konu_durumu.items():
                     parcalar = anahtar.split('-')
-                    ders_turu = parcalar[0]
                     ders = parcalar[1]
                     konu = parcalar[2]
                     
@@ -1277,16 +1276,18 @@ def main():
                     
                     # Yüzdelik dağılımı DataFrame'e dönüştür
                     yuzdeler_df = pd.DataFrame(seviye_sayilari.items(), columns=['Seviye', 'Sayi'])
-                    yuzdeler_df['Yüzde'] = yuzdeler_df['Sayi'] / toplam_konu * 100
+                    yuzdeler_df['Yüzde'] = yuzdeler_df['Sayi'] / toplam_konu
                     
-                    # Görseldeki gibi çubuk grafik oluştur (Plotly kullanıldı)
-                    fig = px.bar(yuzdeler_df, 
-                                 x='Seviye', 
-                                 y='Yüzde',
-                                 color='Yüzde',
-                                 color_continuous_scale=px.colors.sequential.Viridis,
-                                 text_auto='.2s')
-                    fig.update_layout(xaxis_title="", yaxis_title="Yüzde (%)")
+                    # Dairesel (donut) grafik oluştur
+                    fig = px.pie(yuzdeler_df,
+                                 values='Sayi',
+                                 names='Seviye',
+                                 title=f"{ders} Konu Dağılımı",
+                                 hole=0.4, # Donut grafik için iç boşluk
+                                 labels={'Seviye': 'Seviye', 'Sayi': 'Konu Sayısı'},
+                                 color_discrete_sequence=px.colors.qualitative.Pastel)
+                    
+                    fig.update_traces(textinfo='percent+label', pull=[0.05] * len(yuzdeler_df))
                     st.plotly_chart(fig, use_container_width=True)
                     
                     # Detaylar için açılır menü
