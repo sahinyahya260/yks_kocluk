@@ -1197,7 +1197,7 @@ def main():
                 "🏠 Ana Sayfa",
                 "⏰ Pomodoro Zamanlayıcısı",
                 "📅 Günlük Program", 
-                "🎯 Konu Masterysi",
+                "🎯 YKS Konuların Burda",
                 "📈 Deneme Analizi",
                 "💡 Derece Önerileri",
                 "📊 Performans İstatistikleri"
@@ -1422,7 +1422,7 @@ def main():
         elif menu == "📅 Günlük Program":
             derece_günlük_program()
             
-        elif menu == "🎯 Konu Masterysi":
+        elif menu == "🎯 YKS Konuların Burda":
             derece_konu_takibi()
             
         elif menu == "📈 Deneme Analizi":
