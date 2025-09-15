@@ -1219,6 +1219,35 @@ def main():
                 st.rerun()
         
         if menu == "🏠 Ana Sayfa":
+            
+            st.markdown('<div class="section-header">📈 Genel Durum</div>', unsafe_allow_html=True)
+
+            # Örnek ilerleme verileri
+            # NOT: Bu verileri, kullanıcıdan alınan gerçek verilere göre dinamik olarak güncellemeyi unutmayın.
+            konu_ilerleme = {
+                "TYT Matematik": 70,
+                "TYT Türkçe": 40
+            }
+            hedef_ilerleme = {
+                "Hukuk": 3
+            }
+
+            st.markdown('### Konu Tamamlama Durumu', unsafe_allow_html=True)
+            for konu, yuzde in konu_ilerleme.items():
+                st.write(f"**{konu}:**")
+                st.progress(yuzde / 100)
+                st.write(f"**%{yuzde} tamamlandı**")
+            
+            st.markdown('### Hedef Durumu', unsafe_allow_html=True)
+            for hedef, yuzde in hedef_ilerleme.items():
+                st.metric(label=f"{hedef} Hedefi", value=f"%{yuzde}", delta="Hedefe Yaklaşıldı")
+            
+            # Eski Ana Sayfa içeriği bu satırın altından devam edebilir
+            st.markdown('<div class="section-header">🚀 Hızlı İstatistikler</div>', unsafe_allow_html=True)
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            ... # Geri kalan kodunuz buraya gelecek
             st.markdown(f'''
             <div class="hero-section">
                 <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
