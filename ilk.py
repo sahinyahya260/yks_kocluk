@@ -1227,6 +1227,122 @@ def main():
             </div>
             ''', unsafe_allow_html=True)
             
+            mastery_seviyeleri = {
+                "Hiç Bilmiyor": 0,
+                "Temel Bilgi": 25,
+                "Orta Seviye": 50,
+                "İyi Seviye": 75,
+                "Uzman (Derece) Seviye": 100
+            }
+
+            oneriler = {
+                "Hiç Bilmiyor": "Bu konuya öncelik ver ve temel kaynaklardan çalışmaya başla. Konunun ana hatlarını anlamaya odaklan.",
+                "Temel Bilgi": "Konunun temel kavramlarını pekiştirmek için bol bol basit ve orta düzey soru çöz. Konu anlatımı tekrarı faydalı olabilir.",
+                "Orta Seviye": "Farklı kaynaklardan ve zorluk seviyelerinde soru çözerek pratik yap. Yanlış yaptığın soruların çözümünü iyice analiz et.",
+                "İyi Seviye": "Bu konuyu uzmanlık seviyesine çıkarmak için çıkmış sorular ve denemelerdeki zorlayıcı sorulara odaklan. Zamanla yarışarak soru çözme egzersizleri yap.",
+                "Uzman (Derece) Seviye": "Tebrikler! Bu konuyu pekiştirmek için sadece denemelerde karşısına çıkan sorulara bakman yeterli. Bildiğin konuyu tekrar etme tuzağına düşme."
+            }
+            
+            if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
+                
+                # Ders ve seviye bazlı yüzde hesaplaması için veri toplama
+                ders_seviye_sayilari = {}
+                konu_detaylari = {}
+                
+                for anahtar, seviye in st.session_state.konu_durumu.items():
+                    parcalar = anahtar.split('-')
+                    ders = parcalar[1]
+                    konu = parcalar[2]
+                    
+                    if ders not in ders_seviye_sayilari:
+                        ders_seviye_sayilari[ders] = {s: 0 for s in mastery_seviyeleri.keys()}
+                    
+                    if ders not in konu_detaylari:
+                        konu_detaylari[ders] = []
+                    
+                    ders_seviye_sayilari[ders][seviye] += 1
+                    konu_detaylari[ders].append({"konu": konu, "seviye": seviye})
+
+                st.markdown('<div class="section-header">📈 Konu Tamamlama Analizi</div>', unsafe_allow_html=True)
+
+                for ders, seviye_sayilari in ders_seviye_sayilari.items():
+                    toplam_konu = sum(seviye_sayilari.values())
+                    
+                    if toplam_konu == 0:
+                        continue
+                        
+                    st.markdown(f"### {ders} Genel Durumu")
+                    
+                    # Dersin genel durumunu çubuk grafik olarak göster
+                    yuzdeler = {seviye: (sayi / toplam_konu) * 100 for seviye, sayi in seviye_sayilari.items()}
+                    
+                    st.bar_chart(yuzdeler, color="#3498db")
+                    
+                    # Detaylı konu ilerlemelerini göster
+                    with st.expander(f"**{ders} Konu Detayları ve Öneriler**"):
+                        for konu_veri in konu_detaylari[ders]:
+                            konu = konu_veri['konu']
+                            seviye = konu_veri['seviye']
+                            yuzde = mastery_seviyeleri[seviye]
+                            
+                            st.markdown(f"**{konu}** - *{seviye}* (%{yuzde})")
+                            st.progress(yuzde / 100)
+                            
+                            st.markdown(f"""
+                                <div style="background-color: #ecf0f1; border-left: 5px solid #3498db; padding: 10px; margin-top: 10px; border-radius: 5px;">
+                                    <strong>İpucu:</strong> {oneriler[seviye]}
+                                </div>
+                            """, unsafe_allow_html=True)
+            else:
+                st.info("Henüz 'Konu Masterysi' bölümüne veri girmediniz. Lütfen konularınızı tamamlayın.")
+
+            # --- Mevcut Hızlı İstatistikler ---
+            st.markdown('<div class="section-header">🚀 Hızlı İstatistikler</div>', unsafe_allow_html=True)
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                konu_sayısı = len(st.session_state.konu_durumu) if 'konu_durumu' in st.session_state else 0
+                st.markdown(f'''
+                <div class="metric-card">
+                    <h3>📚 Toplam Konu</h3>
+                    <h2 style="color: {tema['renk']};">{konu_sayısı}</h2>
+                </div>
+                ''', unsafe_allow_html=True)
+            
+            with col2:
+                deneme_sayısı = len(st.session_state.deneme_sonuçları) if 'deneme_sonuçları' in st.session_state else 0
+                st.markdown(f'''
+                <div class="metric-card">
+                    <h3>📝 Toplam Deneme</h3>
+                    <h2 style="color: {tema['renk']};">{deneme_sayısı}</h2>
+                </div>
+                ''', unsafe_allow_html=True)
+            
+            with col3:
+                çalışma_günü = len(st.session_state.günlük_çalışma_kayıtları) if 'günlük_çalışma_kayıtları' in st.session_state else 0
+                st.markdown(f'''
+                <div class="metric-card">
+                    <h3>📅 Çalışma Günü</h3>
+                    <h2 style="color: {tema['renk']};">{çalışma_günü}</h2>
+                </div>
+                ''', unsafe_allow_html=True)
+            
+            with col4:
+                motivasyon = st.session_state.motivasyon_puanı if 'motivasyon_puanı' in st.session_state else 0
+                st.markdown(f'''
+                <div class="metric-card">
+                    <h3>💪 Motivasyon</h3>
+                    <h2 style="color: {tema['renk']};">{motivasyon}%</h2>
+                </div>
+                ''', unsafe_allow_html=True)
+            st.markdown(f'''
+            <div class="hero-section">
+                <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
+                <p style="font-size: 1.3rem;">"{bilgi['hedef_bölüm']}" hedefine giden yolda!</p>
+            </div>
+            ''', unsafe_allow_html=True)
+            
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
