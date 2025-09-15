@@ -1219,7 +1219,6 @@ def main():
                 st.rerun()
         
         if menu == "🏠 Ana Sayfa":
-            
             st.markdown(f'''
             <div class="hero-section">
                 <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
@@ -1237,11 +1236,11 @@ def main():
             }
 
             oneriler = {
-                "Hiç Bilmiyor": "Bu konuya öncelik ver ve temel kaynaklardan çalışmaya başla. Konunun ana hatlarını anlamaya odaklan.",
-                "Temel Bilgi": "Konunun temel kavramlarını pekiştirmek için bol bol basit ve orta düzey soru çöz. Konu anlatımı tekrarı faydalı olabilir.",
-                "Orta Seviye": "Farklı kaynaklardan ve zorluk seviyelerinde soru çözerek pratik yap. Yanlış yaptığın soruların çözümünü iyice analiz et.",
-                "İyi Seviye": "Bu konuyu uzmanlık seviyesine çıkarmak için çıkmış sorular ve denemelerdeki zorlayıcı sorulara odaklan. Zamanla yarışarak soru çözme egzersizleri yap.",
-                "Uzman (Derece) Seviye": "Tebrikler! Bu konuyu pekiştirmek için sadece denemelerde karşısına çıkan sorulara bakman yeterli. Bildiğin konuyu tekrar etme tuzağına düşme."
+                "Hiç Bilmiyor": "Bu konuyu öğrenmeye başlamalısın! Temelini sağlamlaştırmak için 50-75 arası basit soru çözerek konuya giriş yap.",
+                "Temel Bilgi": "Konuyu orta seviyeye taşımak için konu anlatımı videoları izle ve en az 100-150 arası orta düzey soru çöz. Yanlışlarını mutlaka not al.",
+                "Orta Seviye": "İyi seviyeye çıkmak için farklı kaynaklardan zor sorular çözerek kendini dene. Bu konudan deneme sınavı sorularına ağırlık ver ve 200'den fazla soruyla pekiştir.",
+                "İyi Seviye": "Artık bir uzmansın! Bu konuyu tam anlamıyla oturtmak için çıkmış sorular ve efsane zorlayıcı sorularla pratik yap. Sadece denemelerde karşına çıkan sorulara odaklan.",
+                "Uzman (Derece) Seviye": "Tebrikler! Bu konu tamamen cebinde. Sadece tekrar amaçlı deneme çözerken karşına çıkan soruları kontrol etmen yeterli. Yeni konulara yönelerek zamanını daha verimli kullan."
             }
             
             if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
@@ -1278,17 +1277,17 @@ def main():
                     yuzdeler_df = pd.DataFrame(seviye_sayilari.items(), columns=['Seviye', 'Sayi'])
                     yuzdeler_df['Yüzde'] = yuzdeler_df['Sayi'] / toplam_konu
                     
-                    # Dairesel (donut) grafik oluştur
-                    fig = px.pie(yuzdeler_df,
+                    # Genel ders durumu için dairesel (donut) grafik
+                    fig_genel = px.pie(yuzdeler_df,
                                  values='Sayi',
                                  names='Seviye',
                                  title=f"{ders} Konu Dağılımı",
-                                 hole=0.4, # Donut grafik için iç boşluk
+                                 hole=0.4,
                                  labels={'Seviye': 'Seviye', 'Sayi': 'Konu Sayısı'},
                                  color_discrete_sequence=px.colors.qualitative.Pastel)
                     
-                    fig.update_traces(textinfo='percent+label', pull=[0.05] * len(yuzdeler_df))
-                    st.plotly_chart(fig, use_container_width=True)
+                    fig_genel.update_traces(textinfo='percent+label', pull=[0.05] * len(yuzdeler_df))
+                    st.plotly_chart(fig_genel, use_container_width=True)
                     
                     # Detaylar için açılır menü
                     with st.expander(f"**{ders} Konu Detayları ve Öneriler**"):
@@ -1297,14 +1296,37 @@ def main():
                             seviye = konu_veri['seviye']
                             yuzde = mastery_seviyeleri[seviye]
                             
-                            st.markdown(f"**{konu}** - *{seviye}* (%{yuzde})")
-                            st.progress(yuzde / 100)
+                            col_detay1, col_detay2 = st.columns([1, 4])
                             
-                            st.markdown(f"""
-                                <div style="background-color: #ecf0f1; border-left: 5px solid #3498db; padding: 10px; margin-top: 10px; border-radius: 5px;">
-                                    <strong>İpucu:</strong> {oneriler[seviye]}
-                                </div>
-                            """, unsafe_allow_html=True)
+                            with col_detay1:
+                                # Konu için küçük dairesel ilerleme göstergesi
+                                fig_konu = go.Figure(go.Pie(
+                                    values=[yuzde, 100 - yuzde],
+                                    labels=['Tamamlandı', 'Kalan'],
+                                    hole=0.8,
+                                    marker_colors=['#3498db', '#ecf0f1'],
+                                    hoverinfo='none',
+                                    textinfo='text',
+                                    text=[f'{yuzde}%', ''],
+                                    textfont_size=20,
+                                    textfont_color='#2c3e50',
+                                    showlegend=False
+                                ))
+                                fig_konu.update_layout(
+                                    width=150,
+                                    height=150,
+                                    margin=dict(t=0, b=0, l=0, r=0),
+                                    annotations=[dict(text=f'{yuzde}%', x=0.5, y=0.5, font_size=20, showarrow=False)]
+                                )
+                                st.plotly_chart(fig_konu, use_container_width=True)
+
+                            with col_detay2:
+                                st.markdown(f"**{konu}** - *{seviye}*")
+                                st.markdown(f"""
+                                    <div style="background-color: #ecf0f1; border-left: 5px solid #3498db; padding: 10px; margin-top: 10px; border-radius: 5px;">
+                                        <strong>İpucu:</strong> {oneriler[seviye]}
+                                    </div>
+                                """, unsafe_allow_html=True)
             else:
                 st.info("Henüz 'Konu Masterysi' bölümüne veri girmediniz. Lütfen konularınızı tamamlayın.")
 
