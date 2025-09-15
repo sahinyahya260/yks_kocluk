@@ -1059,7 +1059,6 @@ def main():
         
         if menu == "🏠 Ana Sayfa":
            
-           
             st.markdown(f'''
             <div class="hero-section">
                 <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
@@ -1135,9 +1134,12 @@ def main():
                 konu_detaylari = {}
                 
                 for anahtar, seviye in st.session_state.konu_durumu.items():
-                    parcalar = anahtar.split('-')
-                    ders = parcalar[1]
-                    konu = parcalar[2]
+                    parcalar = anahtar.split('>') # YENİ ANAHTAR AYRIŞTIRMASI
+                    if len(parcalar) >= 4:
+                        ders = parcalar[0].strip()
+                        konu_adı = " > ".join(parcalar[1:]).strip() # Daha açıklayıcı konu adı oluştur
+                    else:
+                        continue # Hatalı veya eski formatlı anahtarları atla
                     
                     if ders not in ders_seviye_sayilari:
                         ders_seviye_sayilari[ders] = {s: 0 for s in mastery_seviyeleri.keys()}
@@ -1146,7 +1148,7 @@ def main():
                         konu_detaylari[ders] = []
                     
                     ders_seviye_sayilari[ders][seviye] += 1
-                    konu_detaylari[ders].append({"konu": konu, "seviye": seviye})
+                    konu_detaylari[ders].append({"konu": konu_adı, "seviye": seviye})
 
                 for ders, seviye_sayilari in ders_seviye_sayilari.items():
                     toplam_konu = sum(seviye_sayilari.values())
@@ -1212,6 +1214,7 @@ def main():
                                 """, unsafe_allow_html=True)
             else:
                 st.info("Henüz 'Konu Masterysi' bölümüne veri girmediniz. Lütfen konularınızı tamamlayın.")
+           
             
         elif menu == "⏰ Pomodoro Zamanlayıcısı":
             pomodoro_zamanlayıcısı_sayfası()
