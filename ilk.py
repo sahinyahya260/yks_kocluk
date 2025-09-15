@@ -676,6 +676,7 @@ def derece_saatlik_program_oluştur(gün, program_türü, bilgi, hedef_konu):
 
 def derece_konu_takibi():
     
+    
     st.markdown('<div class="section-header">🎯 Konu Masterysi</div>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 1.1rem;">Eksik olduğun konuları en detaylı şekilde takip et.</p>', unsafe_allow_html=True)
     
@@ -771,16 +772,16 @@ def derece_konu_takibi():
                 ]
             },
             "Problemler": {
-                "Sayı Problemleri": [],
-                "Kesir Problemleri": [],
-                "Yaş Problemleri": [],
-                "Yüzde Problemleri": [],
-                "Kar-Zarar Problemleri": [],
-                "Karışım Problemleri": [],
-                "Hareket Problemleri": [],
-                "İşçi Problemleri": [],
-                "Tablo-Grafik Problemleri": [],
-                "Rutin Olmayan Problemler": []
+                "Sayı Problemleri": ["Sayı Problemleri Genel"],
+                "Kesir Problemleri": ["Kesir Problemleri Genel"],
+                "Yaş Problemleri": ["Yaş Problemleri Genel"],
+                "Yüzde Problemleri": ["Yüzde Problemleri Genel"],
+                "Kar-Zarar Problemleri": ["Kar-Zarar Problemleri Genel"],
+                "Karışım Problemleri": ["Karışım Problemleri Genel"],
+                "Hareket Problemleri": ["Hareket Problemleri Genel"],
+                "İşçi Problemleri": ["İşçi Problemleri Genel"],
+                "Tablo-Grafik Problemleri": ["Tablo-Grafik Problemleri Genel"],
+                "Rutin Olmayan Problemler": ["Rutin Olmayan Problemler Genel"]
             },
             "Kümeler ve Olasılık": {
                 "Fonksiyonlar ve Kümeler": [
@@ -802,9 +803,9 @@ def derece_konu_takibi():
         },
         "TYT Geometri": {
             "Temel Geometri": {
-                "Temel Kavramlar": [],
-                "Doğruda Açılar": [],
-                "Üçgende Açılar": []
+                "Temel Kavramlar": ["Geometriye Giriş"],
+                "Doğruda Açılar": ["Doğruda Açılar Genel"],
+                "Üçgende Açılar": ["Üçgende Açılar Genel"]
             },
             "Özel Üçgenler": {
                 "Özel Üçgenler": [
@@ -821,7 +822,7 @@ def derece_konu_takibi():
                 ]
             },
             "Çokgenler": {
-                "Genel Çokgenler": [],
+                "Genel Çokgenler": ["Genel Çokgenler Konuları"],
                 "Özel Dörtgenler": [
                     "Dörtgenler (Genel)",
                     "Deltoid",
@@ -957,7 +958,7 @@ def derece_konu_takibi():
         },
         "TYT Biyoloji": {
             "Yaşam Bilimi": {
-                "Canlıların Ortak Özellikleri": [],
+                "Canlıların Ortak Özellikleri": ["Canlıların Ortak Özellikleri Genel"],
                 "Temel Bileşikler": [
                     "İnorganik Bileşikler",
                     "Organik Bileşikler"
@@ -1164,25 +1165,25 @@ def derece_konu_takibi():
         },
         "AYT Matematik": {
             "Temel ve İleri Fonksiyonlar": {
-                "Fonksiyonlar": [],
-                "Parabol": [],
-                "İkinci Dereceden Fonksiyonlar ve Grafikleri": [],
-                "Trigonometrik Fonksiyonlar (Trigonometri)": [],
-                "Üstel Fonksiyonlar – Logaritmik Fonksiyonlar": []
+                "Fonksiyonlar": ["Fonksiyonlar Genel"],
+                "Parabol": ["Parabol Genel"],
+                "İkinci Dereceden Fonksiyonlar ve Grafikleri": ["İkinci Dereceden Fonksiyonlar Genel"],
+                "Trigonometrik Fonksiyonlar (Trigonometri)": ["Trigonometri Genel"],
+                "Üstel Fonksiyonlar – Logaritmik Fonksiyonlar": ["Üstel ve Logaritmik Fonksiyonlar Genel"]
             },
             "Cebir": {
-                "Polinomlar": [],
-                "İkinci Dereceden Denklemler": []
+                "Polinomlar": ["Polinomlar Genel"],
+                "İkinci Dereceden Denklemler": ["İkinci Dereceden Denklemler Genel"]
             },
             "Kalkülüs (Analiz)": {
-                "Limit – Süreklilik": [],
-                "Türev": [],
-                "Belirsiz İntegral": [],
-                "Belirli İntegral": []
+                "Limit – Süreklilik": ["Limit ve Süreklilik Genel"],
+                "Türev": ["Türev Genel"],
+                "Belirsiz İntegral": ["Belirsiz İntegral Genel"],
+                "Belirli İntegral": ["Belirli İntegral Genel"]
             },
             "Diğer İleri Konular": {
-                "Permütasyon – Kombinasyon – Olasılık": [],
-                "Diziler": []
+                "Permütasyon – Kombinasyon – Olasılık": ["Permütasyon, Kombinasyon ve Olasılık Genel"],
+                "Diziler": ["Diziler Genel"]
             }
         },
         "AYT Geometri": {
@@ -1190,7 +1191,7 @@ def derece_konu_takibi():
                 "Açılar ve Üçgenler": [
                     "Doğruda ve Üçgende Açılar",
                     "Dik Üçgen",
-                    "Özel Üçgenler",
+                    "Özel Üçgenler (30-60-90, 45-45-90 vb.)",
                     "İkizkenar ve Eşkenar Üçgen",
                     "Açı Kenar Bağıntıları"
                 ],
@@ -1202,7 +1203,7 @@ def derece_konu_takibi():
                 ]
             },
             "Çokgenler ve Dörtgenler": {
-                "Çokgenler": [],
+                "Çokgenler": ["Çokgenler Genel"],
                 "Dörtgenler": [
                     "Dörtgenler",
                     "Yamuk",
@@ -1214,7 +1215,7 @@ def derece_konu_takibi():
                 ]
             },
             "Çember ve Analitik Geometri": {
-                "Çember ve Daire": [],
+                "Çember ve Daire": ["Çember ve Daire Genel"],
                 "Analitik Geometri": [
                     "Doğrunun Analitik İncelenmesi"
                 ]
@@ -1279,8 +1280,8 @@ def derece_konu_takibi():
                 "Tanzimat Edebiyatı": [
                     "Birinci ve İkinci Dönem Tanzimat"
                 ],
-                "Servet-i Fünun ve Fecr-i Ati": [],
-                "Milli Edebiyat": [],
+                "Servet-i Fünun ve Fecr-i Ati": ["Servet-i Fünun ve Fecr-i Ati Genel"],
+                "Milli Edebiyat": ["Milli Edebiyat Genel"],
                 "Cumhuriyet Dönemi Edebiyatı": [
                     "Cumhuriyet Dönemi Şiir",
                     "Cumhuriyet Dönemi Hikaye ve Roman"
@@ -1378,12 +1379,12 @@ def derece_konu_takibi():
                 "Kimya Bilimi": ["Kimyanın Temel Kavramları"],
                 "Atom ve Periyodik Sistem": ["Atomun Yapısı ve Periyodik Tablo"],
                 "Kimyasal Etkileşimler": ["Türler Arası Etkileşimler"],
-                "Maddenin Halleri": []
+                "Maddenin Halleri": ["Maddenin Halleri Genel"]
             },
             "Çözeltiler ve Termodinamik": {
-                "Karışımlar": ["Homojen ve Heterojen Karışımlar"],
-                "Asitler, Bazlar ve Tuzlar": [],
-                "Kimya Her Yerde": [],
+                "Karışımlar": ["Homojen ve Heterojen Karışımlar", "Derişim Birimleri"],
+                "Asitler, Bazlar ve Tuzlar": ["Asitler, Bazlar ve Tuzlar Genel"],
+                "Kimya Her Yerde": ["Kimya Her Yerde Genel"],
                 "Sıvı Çözeltiler ve Çözünürlük": ["Derişim Birimleri", "Koligatif Özellikler"]
             },
             "İleri Kimya": {
@@ -1460,9 +1461,6 @@ def derece_konu_takibi():
             st.success(f"**{konu_key}** seviyesi **{yeni_seviye}** olarak güncellendi!")
     else:
         st.info("Lütfen bir alt konu seçerek seviye belirleme alanını görünür yapın.")
-    
-    
-    
 def derece_performans_analizi(tyt_net, ayt_net, bilgi):
     hedef_net = hedef_net_hesapla(bilgi['hedef_sıralama'], bilgi['alan'])
     
