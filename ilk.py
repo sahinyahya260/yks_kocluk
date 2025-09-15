@@ -497,180 +497,251 @@ def öğrenci_bilgi_formu():
         st.rerun()
 
 def derece_günlük_program():
+    
     bilgi = st.session_state.öğrenci_bilgisi
     tema = BÖLÜM_TEMALARI[bilgi['bölüm_kategori']]
     
-    st.markdown(f'<div class="section-header">{tema["icon"]} Derece Öğrencisi Günlük Program</div>', 
-                unsafe_allow_html=True)
+    st.markdown(f'''
+    <div class="section-header">{tema["icon"]} Derece Öğrencisi Günlük Program</div>
+    <p style="font-size: 1.1rem;">Hedeflerine ulaşmak için planlı çalışmanın gücünden yararlan!</p>
+    ''', unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
-    with col1:
-        seçilen_gün = st.selectbox("📅 Gün Seçin", 
-                                  ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"])
-    with col2:
-        program_türü = st.selectbox("📋 Program Türü", ["Standart", "Yoğun", "Hafif", "Deneme Günü"])
-
-    # En çok ihtiyaç duyulan konuları bul
-    derece_programı = DereceProgramı()
-    tüm_konular = {**derece_programı.tyt_konular, **derece_programı.ayt_konular}
-    önerilen_konular = []
+    # Özel CSS stilleri
+    st.markdown(f'''
+    <style>
+    .daily-container {{
+        background: {tema['arka_plan']};
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 1rem 0;
+        color: white;
+    }}
+    .day-selector {{
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 0.5rem;
+    }}
+    .day-button {{
+        flex: 1;
+        text-align: center;
+        padding: 0.8rem;
+        margin: 0 0.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(255,255,255,0.1);
+    }}
+    .day-button:hover {{
+        background: rgba(255,255,255,0.2);
+    }}
+    .day-button.active {{
+        background: {tema['renk']};
+        font-weight: bold;
+    }}
+    .time-slot {{
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-left: 4px solid {tema['renk']};
+    }}
+    .completed {{
+        opacity: 0.7;
+        text-decoration: line-through;
+    }}
+    .program-stats {{
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 1rem;
+    }}
+    .stat-item {{
+        text-align: center;
+        flex: 1;
+    }}
+    </style>
+    ''', unsafe_allow_html=True)
     
-    for ders, konular in tüm_konular.items():
-        for konu in konular:
-            anahtar = f"TYT-{ders}-{konu}" if ders in derece_programı.tyt_konular else f"AYT-{ders}-{konu}"
-            seviye = st.session_state.konu_durumu.get(anahtar, "Hiç Bilmiyor")
-            if seviye in ["Hiç Bilmiyor", "Temel Bilgi", "Orta Seviye"]:
-                önerilen_konular.append(f"{anahtar.split('-')[0]} - {anahtar.split('-')[1]}: {anahtar.split('-')[2]}")
+    # Haftanın günleri
+    günler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
     
-    # Bugünün ana hedefini seç
-    st.markdown("---")
-    bugünkü_hedef = st.selectbox("🎯 Bugünkü Ana Hedef Konu", ["Seçiniz..."] + önerilen_konular)
+    # Gün seçimi
+    st.markdown('<div class="day-selector">', unsafe_allow_html=True)
+    for i, gün in enumerate(günler):
+        if st.button(gün, key=f"gün_{i}", use_container_width=True):
+            st.session_state.seçilen_gün = gün
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    program = derece_saatlik_program_oluştur(seçilen_gün, program_türü, bilgi, bugünkü_hedef)
+    # Varsayılan günü ayarla
+    if 'seçilen_gün' not in st.session_state:
+        st.session_state.seçilen_gün = günler[datetime.now().weekday()]
     
-    col_sabah, col_ogle, col_aksam = st.columns(3)
+    # Program türü seçimi
+    program_türü = st.selectbox("📋 Program Türü", ["Standart", "Yoğun", "Hafif", "Deneme Günü"], 
+                               key="program_türü")
     
-    with col_sabah:
-        st.markdown("### 🌅 Sabah Programı (06:00-12:00)")
-        for saat, aktivite in program['sabah'].items():
-            renk = tema['renk'] if 'Çalışma' in aktivite else '#6c757d'
-            st.markdown(f'''
-                <div class="program-item" style="border-left-color: {renk};">
-                    <strong>{saat}</strong><br>
-                    {aktivite}
+    # Bugünün tarihi
+    bugün = datetime.now().strftime("%d %B %Y")
+    st.markdown(f"**📅 Tarih:** {bugün} - **{st.session_state.seçilen_gün}**")
+    
+    # Programı oluştur
+    program = derece_saatlik_program_oluştur(st.session_state.seçilen_gün, program_türü, bilgi, "")
+    
+    # Programı göster
+    st.markdown("### 🕒 Günlük Program")
+    
+    # Tamamlanan görevleri takip etmek için session state
+    if 'tamamlanan_görevler' not in st.session_state:
+        st.session_state.tamamlanan_görevler = []
+    
+    # Zaman dilimlerini göster
+    for zaman_dilimi, aktiviteler in program.items():
+        st.markdown(f"#### {'🌅' if zaman_dilimi == 'sabah' else '☀️' if zaman_dilimi == 'öğle' else '🌙'} {zaman_dilimi.capitalize()} Programı")
+        
+        for saat, aktivite in aktiviteler.items():
+            görev_id = f"{st.session_state.seçilen_gün}_{saat}"
+            tamamlandı = görev_id in st.session_state.tamamlanan_görevler
+            
+            col1, col2 = st.columns([1, 5])
+            with col1:
+                if st.checkbox("", value=tamamlandı, key=görev_id):
+                    if görev_id not in st.session_state.tamamlanan_görevler:
+                        st.session_state.tamamlanan_görevler.append(görev_id)
+                else:
+                    if görev_id in st.session_state.tamamlanan_görevler:
+                        st.session_state.tamamlanan_görevler.remove(görev_id)
+            
+            with col2:
+                aktivite_stili = "completed" if tamamlandı else ""
+                st.markdown(f'''
+                <div class="time-slot {aktivite_stili}">
+                    <strong>{saat}</strong> - {aktivite}
                 </div>
-            ''', unsafe_allow_html=True)
+                ''', unsafe_allow_html=True)
     
-    with col_ogle:
-        st.markdown("### ☀️ Öğle Programı (12:00-18:00)")
-        for saat, aktivite in program['öğle'].items():
-            renk = tema['renk'] if 'Çalışma' in aktivite else '#6c757d'
-            st.markdown(f'''
-                <div class="program-item" style="border-left-color: {renk};">
-                    <strong>{saat}</strong><br>
-                    {aktivite}
-                </div>
-            ''', unsafe_allow_html=True)
+    # İstatistikler
+    toplam_görev = sum(len(zaman_dilimi) for zaman_dilimi in program.values())
+    tamamlanan_görev = len([g for g in st.session_state.tamamlanan_görevler if g.startswith(st.session_state.seçilen_gün)])
+    tamamlanma_oranı = (tamamlanan_görev / toplam_görev * 100) if toplam_görev > 0 else 0
     
-    with col_aksam:
-        st.markdown("### 🌙 Akşam Programı (18:00-24:00)")
-        for saat, aktivite in program['akşam'].items():
-            renk = tema['renk'] if 'Çalışma' in aktivite else '#6c757d'
-            st.markdown(f'''
-                <div class="program-item" style="border-left-color: {renk};">
-                    <strong>{saat}</strong><br>
-                    {aktivite}
-                </div>
-            ''', unsafe_allow_html=True)
+    st.markdown('<div class="program-stats">', unsafe_allow_html=True)
+    st.markdown(f'<div class="stat-item"><h3>📊 İlerleme</h3><h2>{tamamlanma_oranı:.0f}%</h2></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="stat-item"><h3>✅ Tamamlanan</h3><h2>{tamamlanan_görev}/{toplam_görev}</h2></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="stat-item"><h3>⏱️ Kalan</h3><h2>{toplam_görev - tamamlanan_görev}</h2></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown("---")
-    st.markdown("### 📊 Bugün Tamamlanan Görevler")
+    # Motivasyon mesajı
+    if tamamlanma_oranı == 100:
+        st.success("🎉 Mükemmel! Tüm görevleri tamamladın. Yarın da aynı enerjiyle devam et!")
+    elif tamamlanma_oranı >= 75:
+        st.info("💪 Çok iyi gidiyorsun! Biraz daha çabayla günü tamamlayacaksın.")
+    elif tamamlanma_oranı >= 50:
+        st.warning("⚠️ Yolun yarısındasın. Molalarını iyi kullan ve devam et!")
+    else:
+        st.error("🔴 Başlamak bitirmenin yarısıdır. Hemen ilk görevle başla!")
     
-    with st.expander("✅ Görev Tamamla"):
-        tamamlanan_görevler = st.multiselect(
-            "Tamamladığın görevleri seç:",
-            [f"{saat}: {aktivite}" for zaman_dilimi in program.values() 
-             for saat, aktivite in zaman_dilimi.items() if 'Çalışma' in aktivite]
+    # Not ekleme bölümü
+    with st.expander("📝 Günlük Notlarım"):
+        if 'günlük_notlar' not in st.session_state:
+            st.session_state.günlük_notlar = {}
+        
+        gün_notu = st.text_area(
+            f"{st.session_state.seçilen_gün} için notlarını yaz",
+            value=st.session_state.günlük_notlar.get(st.session_state.seçilen_gün, ""),
+            height=100,
+            key="günlük_not"
         )
         
-        if st.button("Günlük Performansı Kaydet"):
-            tarih_str = str(date.today())
-            if tarih_str not in st.session_state.günlük_çalışma_kayıtları:
-                st.session_state.günlük_çalışma_kayıtları[tarih_str] = {
-                'tamamlanan_görevler': tamamlanan_görevler,
-                'tamamlanma_oranı': len(tamamlanan_görevler) / max(1, len([a for td in program.values() for a in td.values() if 'Çalışma' in a])) * 100,
-                'gün': seçilen_gün
-            }
-            data_to_save = {
-                'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
-                'program_oluşturuldu': st.session_state.program_oluşturuldu,
-                'deneme_sonuçları': st.session_state.deneme_sonuçları,
-                'konu_durumu': st.session_state.konu_durumu,
-                'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
-                'motivasyon_puanı': st.session_state.motivasyon_puanı,
-                'hedef_sıralama': st.session_state.hedef_sıralama,
-            }
-            if save_user_data(st.session_state.kullanıcı_adı, data_to_save):
-                st.success("Günlük performans kaydedildi! 🎉")
-            else:
-                st.error("Veri kaydetme başarısız.")
+        if st.button("Notları Kaydet"):
+            st.session_state.günlük_notlar[st.session_state.seçilen_gün] = gün_notu
+            st.success("Notların kaydedildi! 📒")
+    
+    # Programı sıfırlama butonu
+    if st.button("🔄 Programı Sıfırla", type="secondary"):
+        # Sadece bugüne ait görevleri temizle
+        st.session_state.tamamlanan_görevler = [
+            g for g in st.session_state.tamamlanan_görevler 
+            if not g.startswith(st.session_state.seçilen_gün)
+        ]
+        st.success("Bugünün programı sıfırlandı. Yeni başlangıç yapabilirsin!")
+        st.rerun()
 
 def derece_saatlik_program_oluştur(gün, program_türü, bilgi, hedef_konu):
+    # Temel program şablonu
     temel_program = {
         'sabah': {
             '06:00': '🌅 Uyanış + Hafif Egzersiz',
             '06:30': '🥗 Beslenme + Vitamin',
-            '07:00': '📚 **Sabah Çalışması**',
+            '07:00': '📚 TYT Matematik Çalışması',
             '08:30': '☕ Mola + Nefes Egzersizi',
-            '08:45': '📝 **Sabah Çalışması**',
+            '08:45': '📝 TYT Türkçe Çalışması',
             '10:15': '🥤 Mola + Beyin Oyunları',
-            '10:30': '🧪 **Sabah Çalışması**',
+            '10:30': '🧪 TYT Fen Çalışması',
             '12:00': '🍽️ Öğle Yemeği'
         },
         'öğle': {
             '13:00': '😴 Kısa Dinlenme (20dk)',
-            '13:30': '📖 **Öğle Çalışması**',
+            '13:30': '📖 AYT Matematik Çalışması',
             '15:00': '🚶 Mola + Yürüyüş',
-            '15:15': '📊 **Öğle Çalışması**',
+            '15:15': '📊 AYT Fen Çalışması',
             '16:45': '☕ Mola + Gevşeme',
-            '17:00': '📋 **Öğle Çalışması**',
+            '17:00': '📋 Deneme Çözümü',
             '18:00': '🎯 Günlük Değerlendirme'
         },
         'akşam': {
             '19:00': '🍽️ Akşam Yemeği + Aile Zamanı',
-            '20:00': '📚 **Akşam Çalışması**',
-            '21:30': '📝 **Akşam Çalışması**',
+            '20:00': '📚 Eksik Konu Tekrarı',
+            '21:30': '📝 Soru Bankası Çözümü',
             '22:30': '📖 Hafif Okuma (Genel Kültür)',
             '23:00': '🧘 Meditasyon + Yarın Planı',
             '23:30': '😴 Uyku Hazırlığı'
         }
     }
 
-    # Eğer bir hedef konu seçildiyse, programı ona göre doldur
-    if hedef_konu != "Seçiniz...":
-        parts = hedef_konu.split(': ')
-        ders_konu_str = parts[0]
-        konu_adı = parts[1]
-        
-        # TYT veya AYT dersini ayır
-        ders_tyt_ayt = ders_konu_str.split(' - ')[0]
-        ders_adı = ders_konu_str.split(' - ')[1]
-
-        # Sahte bir konu dağılımı yapalım
-        konu_saatleri = {
-            '07:00': f'{hedef_konu} - Konu Anlatımı',
-            '08:45': f'{hedef_konu} - Konu Tekrarı + Soru Çözümü',
-            '10:30': f'{hedef_konu} - Test Çözümü + Yanlış Analizi',
-            '13:30': f'Diğer dersler',
-            '15:15': f'Diğer dersler',
-            '17:00': f'Deneme Sınavı',
-            '20:00': f'Geriye dönük tekrar',
-            '21:30': f'Yarınki programın hazırlanması'
-        }
-
-        # Programı güncelleyelim
-        temel_program['sabah']['07:00'] = f'📚 {hedef_konu} Konu Anlatımı'
-        temel_program['sabah']['08:45'] = f'📝 {hedef_konu} Soru Çözümü'
-        temel_program['sabah']['10:30'] = f'🧪 {hedef_konu} Konu Tekrarı'
-        temel_program['öğle']['13:30'] = f'📖 TYT Genel Tekrar'
-        temel_program['öğle']['15:15'] = f'📊 AYT Denemesi (Kısa)'
-        temel_program['öğle']['17:00'] = f'📋 Deneme Analizi'
-        temel_program['akşam']['20:00'] = f'📚 Zayıf Alan Çalışması (Farklı Konu)'
-        temel_program['akşam']['21:30'] = f'📝 Günlük Değerlendirme'
-
-    # Program türüne göre ayarlama
+    # Program türüne göre ayarlamalar
     if program_türü == "Yoğun":
-        # Çalışma saatlerini artır, mola sürelerini azalt
-        pass
+        # Daha az mola, daha fazla çalışma
+        temel_program['sabah']['08:30'] = '⏱️ Kısa Mola (5dk)'
+        temel_program['sabah']['10:15'] = '⏱️ Kısa Mola (5dk)'
+        temel_program['öğle']['15:00'] = '⏱️ Kısa Mola (5dk)'
+        temel_program['öğle']['16:45'] = '⏱️ Kısa Mola (5dk)'
+        
+    elif program_türü == "Hafif":
+        # Daha fazla mola, daha az çalışma
+        temel_program['sabah']['07:00'] = '📚 Hafif Tekrar'
+        temel_program['sabah']['08:45'] = '📝 Soru Çözümü'
+        temel_program['sabah']['10:30'] = '🧪 Konu Tekrarı'
+        temel_program['öğle']['13:30'] = '📖 Genel Tekrar'
+        temel_program['öğle']['15:15'] = '📊 Hafif Çalışma'
+        temel_program['öğle']['17:00'] = '📋 Deneme Analizi'
+        temel_program['akşam']['20:00'] = '📚 İsteğe Bağlı Çalışma'
+        
     elif program_türü == "Deneme Günü":
+        # Deneme odaklı program
         temel_program['sabah']['07:00'] = '📝 TYT Deneme Sınavı'
-        temel_program['sabah']['08:45'] = '⏳ TYT Deneme Sınavı'
+        temel_program['sabah']['08:45'] = '⏳ TYT Deneme Sınavı (Devam)'
         temel_program['sabah']['10:30'] = '📊 TYT Analizi'
         temel_program['öğle']['13:30'] = '📝 AYT Deneme Sınavı'
-        temel_program['öğle']['15:15'] = '⏳ AYT Deneme Sınavı'
+        temel_program['öğle']['15:15'] = '⏳ AYT Deneme Sınavı (Devam)'
         temel_program['öğle']['17:00'] = '📊 AYT Analizi'
-        temel_program['akşam']['20:00'] = '📚 Deneme yanlışları'
-        temel_program['akşam']['21:30'] = '📝 Zayıf konu tespiti'
+        temel_program['akşam']['20:00'] = '📚 Deneme Yanlışları'
+        temel_program['akşam']['21:30'] = '📝 Zayıf Konu Tespiti'
+
+    # Haftasonu programı
+    if gün in ["Cumartesi", "Pazar"]:
+        temel_program['sabah']['07:00'] = '📚 Haftalık Tekrar'
+        temel_program['sabah']['08:45'] = '📝 Eksik Konu Çalışması'
+        temel_program['sabah']['10:30'] = '🧪 Deneme Çözümü'
+        temel_program['öğle']['13:30'] = '📖 Genel Tekrar'
+        temel_program['öğle']['15:15'] = '🎯 Haftalık Değerlendirme'
+        temel_program['öğle']['17:00'] = '📋 Gelecek Hafta Planı'
+        temel_program['akşam']['20:00'] = '🎬 Dinlence (Film/Kitap)'
+        temel_program['akşam']['21:30'] = '📝 Hafif Tekrar'
 
     return temel_program
 
