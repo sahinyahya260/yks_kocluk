@@ -676,7 +676,6 @@ def derece_saatlik_program_oluştur(gün, program_türü, bilgi, hedef_konu):
 
 def derece_konu_takibi():
     
-    
     st.markdown('<div class="section-header">🎯 Konu Masterysi</div>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 1.1rem;">Eksik olduğun konuları en detaylı şekilde takip et.</p>', unsafe_allow_html=True)
     
@@ -1100,6 +1099,305 @@ def derece_konu_takibi():
                     "Renk"
                 ]
             }
+        },
+        "TYT Felsefe": {
+            "Temel Felsefe Konuları": {
+                "Felsefe’nin Konusu": [
+                    "Tanımı, Alanı, Özellikleri"
+                ],
+                "Bilgi Felsefesi (Epistemoloji)": [
+                    "Bilginin Doğası ve Kaynakları",
+                    "Şüphecilik, Rasyonalizm, Empirizm"
+                ],
+                "Varlık Felsefesi (Ontoloji)": [
+                    "Varlığın Ana Maddesi",
+                    "İdealizm, Realizm, Materyalizm"
+                ],
+                "Ahlak Felsefesi (Etik)": [
+                    "Ahlaki Eylemin Amacı",
+                    "Evrensel Ahlak Yasası",
+                    "Hedonizm, Utilitarizm, Egoizm"
+                ],
+                "Sanat ve Din Felsefesi": [
+                    "Sanatın Doğası (Estetik)",
+                    "Din Felsefesi"
+                ],
+                "Siyaset ve Bilim Felsefesi": [
+                    "Devletin Amacı (Siyaset Felsefesi)",
+                    "Bilimin Doğası (Bilim Felsefesi)"
+                ]
+            },
+            "Felsefe Tarihi Dönemleri": {
+                "İlk ve Orta Çağ Felsefesi": [
+                    "İlk Çağ Filozofları (Sokrates, Platon)",
+                    "Orta Çağ Felsefesi (İslam ve Hristiyan Felsefesi)"
+                ],
+                "Modern ve Çağdaş Felsefe": [
+                    "Rönesans ve Erken Modern Felsefe",
+                    "Aydınlanma ve Modern Felsefe",
+                    "20. Yüzyıl Felsefesi"
+                ]
+            }
+        },
+        "TYT Din Kültürü": {
+            "İnanç ve İbadet": {
+                "Bilgi ve İnanç": ["İslam’da Bilginin Kaynakları", "İnancın Önemi"],
+                "Din ve İslam": ["Din Kavramı", "İslam’ın Temel Özellikleri"],
+                "İslam ve İbadet": ["İbadetin Yeri ve Önemi", "Başlıca İbadetler"]
+            },
+            "Ahlak ve Değerler": {
+                "Gençlik ve Değerler": ["Gençlerin Din ve Ahlak Eğitimi"],
+                "Ahlaki Tutum ve Davranışlar": ["İslam Ahlakının Temel İlkeleri"]
+            },
+            "İslam Düşüncesi": {
+                "İslam Medeniyeti": ["Gelişimi ve Katkıları"],
+                "Allah İnancı": ["Allah’ın Varlığı ve Sıfatları", "Kur’an’da İnsan"],
+                "Hz. Muhammed ve Gençlik": ["Bir Genç Olarak Hz. Muhammed", "Genç Sahabiler"],
+                "Din ve Toplumsal Hayat": [
+                    "Din ve Aile",
+                    "Din, Kültür ve Sanat",
+                    "Din ve Çevre",
+                    "Din ve Sosyal Adalet"
+                ],
+                "İslam Düşüncesinde Yorumlar": ["Mezhepler (İtikadi, Siyasi, Fıkhi)"]
+            }
+        },
+        "AYT Matematik": {
+            "Temel ve İleri Fonksiyonlar": {
+                "Fonksiyonlar": [],
+                "Parabol": [],
+                "İkinci Dereceden Fonksiyonlar ve Grafikleri": [],
+                "Trigonometrik Fonksiyonlar (Trigonometri)": [],
+                "Üstel Fonksiyonlar – Logaritmik Fonksiyonlar": []
+            },
+            "Cebir": {
+                "Polinomlar": [],
+                "İkinci Dereceden Denklemler": []
+            },
+            "Kalkülüs (Analiz)": {
+                "Limit – Süreklilik": [],
+                "Türev": [],
+                "Belirsiz İntegral": [],
+                "Belirli İntegral": []
+            },
+            "Diğer İleri Konular": {
+                "Permütasyon – Kombinasyon – Olasılık": [],
+                "Diziler": []
+            }
+        },
+        "AYT Geometri": {
+            "Açılar ve Üçgenler": {
+                "Açılar ve Üçgenler": [
+                    "Doğruda ve Üçgende Açılar",
+                    "Dik Üçgen",
+                    "Özel Üçgenler",
+                    "İkizkenar ve Eşkenar Üçgen",
+                    "Açı Kenar Bağıntıları"
+                ],
+                "Üçgende Yardımcı Elemanlar": [
+                    "Üçgende Eşlik ve Benzerlik",
+                    "Üçgende Açıortay",
+                    "Üçgende Kenarortay",
+                    "Üçgende Alan"
+                ]
+            },
+            "Çokgenler ve Dörtgenler": {
+                "Çokgenler": [],
+                "Dörtgenler": [
+                    "Dörtgenler",
+                    "Yamuk",
+                    "Paralelkenar",
+                    "Eşkenar Dörtgen",
+                    "Deltoid",
+                    "Dikdörtgen",
+                    "Kare"
+                ]
+            },
+            "Çember ve Analitik Geometri": {
+                "Çember ve Daire": [],
+                "Analitik Geometri": [
+                    "Doğrunun Analitik İncelenmesi"
+                ]
+            },
+            "Katı Cisimler": {
+                "Katı Cisimler": [
+                    "Dikdörtgenler Prizması",
+                    "Küp",
+                    "Silindir",
+                    "Piramit",
+                    "Koni",
+                    "Küre"
+                ]
+            }
+        },
+        "AYT Türk Dili ve Edebiyatı": {
+            "Temel Edebiyat Bilgisi": {
+                "Giriş ve Kavramlar": [
+                    "Edebiyatın Tanımı ve Akımlarla İlişkisi"
+                ],
+                "Edebi Türler": [
+                    "Hikaye",
+                    "Şiir",
+                    "Roman",
+                    "Tiyatro",
+                    "Biyografi/Otobiyografi",
+                    "Mektup/E-posta",
+                    "Günlük/Blog",
+                    "Masal/Fabl",
+                    "Haber Metni",
+                    "Gezi Yazısı",
+                    "Anı (Hatıra)",
+                    "Makale",
+                    "Sohbet ve Fıkra",
+                    "Eleştiri",
+                    "Mülakat/Röportaj",
+                    "Deneme",
+                    "Söylev (Nutuk)"
+                ]
+            },
+            "Şiir ve Sanat Bilgisi": {
+                "Şiir Bilgisi": [
+                    "Şiirin Temel Unsurları",
+                    "Nazım Birimleri, Ölçü ve Uyak"
+                ],
+                "Söz Sanatları": [
+                    "Teşbih, İstiare, Mecazımürsel, Teşhis vb."
+                ]
+            },
+            "Türk Edebiyatı Dönemleri": {
+                "İslamiyet Öncesi ve Geçiş Dönemi": [
+                    "Destan, Koşuk, Sagu, Sav",
+                    "Geçiş Dönemi Eserleri"
+                ],
+                "Halk Edebiyatı": [
+                    "Anonim, Aşık Tarzı, Dinî-Tasavvufî Halk Edebiyatı"
+                ],
+                "Divan Edebiyatı": [
+                    "Nazım Biçimleri",
+                    "Önemli Şair ve Yazarlar"
+                ],
+                "Tanzimat Edebiyatı": [
+                    "Birinci ve İkinci Dönem Tanzimat"
+                ],
+                "Servet-i Fünun ve Fecr-i Ati": [],
+                "Milli Edebiyat": [],
+                "Cumhuriyet Dönemi Edebiyatı": [
+                    "Cumhuriyet Dönemi Şiir",
+                    "Cumhuriyet Dönemi Hikaye ve Roman"
+                ]
+            },
+            "Dünya Edebiyatı ve Akımlar": {
+                "Edebi Akımlar": [
+                    "Klasisizm, Romantizm, Realizm, Parnasizm vb."
+                ],
+                "Dünya Edebiyatı": [
+                    "Önemli Eserler ve Yazarları"
+                ]
+            }
+        },
+        "AYT Tarih": {
+            "İlk Çağ ve Türk İslam Tarihi": {
+                "Tarih Bilimi": ["Tarih Biliminin Tanımı ve Yardımcı Bilim Dalları"],
+                "İlk Uygarlıklar": ["Uygarlığın Doğuşu ve İlk Uygarlıklar"],
+                "İlk Türk Devletleri": ["İlk Türk Devletlerinin Siyasi ve Sosyal Yapıları"],
+                "İslam Tarihi ve Uygarlığı": ["İslamiyet'in Doğuşu ve Gelişimi"],
+                "Türk İslam Devletleri": ["Karahanlılar, Gazneliler, Büyük Selçuklu"],
+                "Türkiye Tarihi": ["Anadolu'nun Türkleşmesi ve Anadolu Selçuklu"]
+            },
+            "Osmanlı ve Dünya Tarihi": {
+                "Beylikten Devlete Osmanlı": ["Osmanlı'nın Kuruluşu ve İlk Sultanlar"],
+                "Dünya Gücü Osmanlı": ["Yükselme Dönemi ve Fetihler"],
+                "Arayış Yılları": ["Duraklama Dönemi ve Islahat Hareketleri"],
+                "En Uzun Yüzyıl (19. Yüzyıl)": ["Dağılma Dönemi ve Fikir Akımları"],
+                "Değişim Çağında Avrupa ve Osmanlı": ["Avrupa'daki Gelişmelerin Osmanlı'ya Etkileri"]
+            },
+            "İnkılap Tarihi": {
+                "20. Yüzyıl Başlarında Osmanlı ve Dünya": ["I. Dünya Savaşı ve Osmanlı'nın Son Yılları"],
+                "Milli Mücadele": ["Mondros, İşgaller, Cemiyetler, Kongreler", "Cepheler ve Lozan"],
+                "Atatürkçülük ve Türk İnkılabı": ["Atatürk İlke ve İnkılapları", "Cumhuriyet Dönemi Yenilikleri"]
+            },
+            "Yakın Dünya Tarihi": {
+                "İki Savaş Arası Dönem": ["Atatürk Dönemi Türk Dış Politikası"],
+                "II. Dünya Savaşı": ["Nedenleri, Sonuçları ve Türkiye'nin Tutumu"],
+                "Soğuk Savaş Dönemi": ["Bloklar ve Türkiye"],
+                "Toplumsal Devrim Çağı": ["Küreselleşme ve Teknolojik Gelişmeler"]
+            }
+        },
+        "AYT Coğrafya": {
+            "Doğal Sistemler": {
+                "Doğa ve İnsan": ["İnsan-Doğa Etkileşimi ve Çevresel Sorunlar"],
+                "Dünya ve Konum": ["Dünya’nın Hareketleri", "Coğrafi Konum", "Harita Bilgisi"],
+                "İklim Bilgisi": ["İklim Elemanları", "İklim Tipleri"],
+                "Yerin Şekillenmesi": ["İç ve Dış Kuvvetler"],
+                "Ekosistemler ve Biyomlar": ["Doğanın Varlıkları", "Ekosistemlerin İşleyişi"]
+            },
+            "Beşeri ve Ekonomik Sistemler": {
+                "Nüfus ve Yerleşme": ["Nüfusun Gelişimi, Dağılışı ve Göçler"],
+                "Ekonomik Faaliyetler": ["Geçim Tarzları ve Dağılışı"]
+            },
+            "Türkiye Coğrafyası": {
+                "Türkiye": [
+                    "Türkiye’nin Yeryüzü Şekilleri ve İklimi",
+                    "Doğal Varlıkları",
+                    "Yerleşme, Nüfus ve Göç"
+                ]
+            },
+            "Küresel ve Çevresel Konular": {
+                "Bölgeler ve Ülkeler": ["Bölge Türleri", "Uluslararası Etkileşimler"],
+                "Çevre ve Toplum": ["Çevresel Sorunlar", "Doğal Afetler"]
+            }
+        },
+        "AYT Fizik": {
+            "Mekanik ve Dinamik": {
+                "Kuvvet ve Hareket": [
+                    "Vektörler",
+                    "Bağıl Hareket",
+                    "Newton'un Hareket Yasaları",
+                    "İki Boyutta Hareket"
+                ],
+                "Enerji ve Momentum": ["İtme ve Çizgisel Momentum", "Tork", "Denge", "Basit Makineler"],
+                "Çembersel Hareket": ["Düzgün Çembersel Hareket", "Dönerek Öteleme", "Açısal Momentum"],
+                "Kütle Çekim ve Harmonik Hareket": ["Kütle Çekim Kuvveti", "Kepler Kanunları", "Basit Harmonik Hareket"]
+            },
+            "Elektrik ve Modern Fizik": {
+                "Elektrik ve Manyetizma": [
+                    "Elektriksel Kuvvet ve Alan",
+                    "Elektriksel Potansiyel ve Sığa",
+                    "Manyetizma ve Elektromanyetik İndüksiyon"
+                ],
+                "Dalga Mekaniği": ["Dalgalarda Kırınım, Girişim ve Doppler"],
+                "Modern Fizik": [
+                    "Atom Fiziğine Giriş ve Radyoaktivite",
+                    "Modern Fizik Temel Kavramları",
+                    "Modern Fiziğin Uygulamaları"
+                ]
+            }
+        },
+        "AYT Kimya": {
+            "Kimyanın Temel Kanunları": {
+                "Kimya Bilimi": ["Kimyanın Temel Kavramları"],
+                "Atom ve Periyodik Sistem": ["Atomun Yapısı ve Periyodik Tablo"],
+                "Kimyasal Etkileşimler": ["Türler Arası Etkileşimler"],
+                "Maddenin Halleri": []
+            },
+            "Çözeltiler ve Termodinamik": {
+                "Karışımlar": ["Homojen ve Heterojen Karışımlar"],
+                "Asitler, Bazlar ve Tuzlar": [],
+                "Kimya Her Yerde": [],
+                "Sıvı Çözeltiler ve Çözünürlük": ["Derişim Birimleri", "Koligatif Özellikler"]
+            },
+            "İleri Kimya": {
+                "Modern Atom Teorisi": ["Kuantum Sayıları ve Elektron Dizilimi"],
+                "Gazlar": ["Gaz Yasaları ve İdeal Gaz Denklemi"],
+                "Kimyasal Tepkimelerde Enerji": ["Entalpi ve Hess Yasası"],
+                "Kimyasal Tepkimelerde Hız ve Denge": ["Tepkime Hızı ve Denge"],
+                "Kimya ve Elektrik": ["Redoks Tepkimeleri", "Piller", "Elektroliz"]
+            },
+            "Organik Kimya": {
+                "Karbon Kimyasına Giriş": ["Karbonun Özellikleri"],
+                "Organik Bileşikler": ["Fonksiyonel Gruplar", "Hidrokarbonlar"],
+                "Enerji Kaynakları": ["Alternatif Enerji Kaynakları"]
+            }
         }
     }
     
@@ -1162,6 +1460,8 @@ def derece_konu_takibi():
             st.success(f"**{konu_key}** seviyesi **{yeni_seviye}** olarak güncellendi!")
     else:
         st.info("Lütfen bir alt konu seçerek seviye belirleme alanını görünür yapın.")
+    
+    
     
 def derece_performans_analizi(tyt_net, ayt_net, bilgi):
     hedef_net = hedef_net_hesapla(bilgi['hedef_sıralama'], bilgi['alan'])
