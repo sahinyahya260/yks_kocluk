@@ -1219,6 +1219,7 @@ def main():
                 st.rerun()
         
         if menu == "🏠 Ana Sayfa":
+           
             st.markdown(f'''
             <div class="hero-section">
                 <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
@@ -1287,7 +1288,7 @@ def main():
                                  color_discrete_sequence=px.colors.qualitative.Pastel)
                     
                     fig_genel.update_traces(textinfo='percent+label', pull=[0.05] * len(yuzdeler_df))
-                    st.plotly_chart(fig_genel, use_container_width=True)
+                    st.plotly_chart(fig_genel, use_container_width=True, key=f"genel_{ders}_chart")
                     
                     # Detaylar için açılır menü
                     with st.expander(f"**{ders} Konu Detayları ve Öneriler**"):
@@ -1318,7 +1319,7 @@ def main():
                                     margin=dict(t=0, b=0, l=0, r=0),
                                     annotations=[dict(text=f'{yuzde}%', x=0.5, y=0.5, font_size=20, showarrow=False)]
                                 )
-                                st.plotly_chart(fig_konu, use_container_width=True)
+                                st.plotly_chart(fig_konu, use_container_width=True, key=f"konu_{ders}_{konu}_chart")
 
                             with col_detay2:
                                 st.markdown(f"**{konu}** - *{seviye}*")
