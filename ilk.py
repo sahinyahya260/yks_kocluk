@@ -740,9 +740,6 @@ def derece_konu_takibi():
     
     mastery_seviyeleri = ["Hiç Bilmiyor", "Temel Bilgi", "Orta Seviye", "İyi Seviye", "Uzman (Derece) Seviye"]
     
-    # Yeni bir konu ekleme arayüzü
-    st.markdown('<div class="section-header">Konu Ekle</div>', unsafe_allow_html=True)
-    
     # 1. Adım: Ders seçimi
     dersler = list(yks_konulari.keys())
     secilen_ders = st.selectbox("Ders Seç", dersler, key="ders_add")
@@ -752,222 +749,39 @@ def derece_konu_takibi():
         konu_alanlari = list(yks_konulari[secilen_ders].keys())
         secilen_konu_alani = st.selectbox("Konu Alanı Seç", konu_alanlari, key="konu_alani_add")
     
-    # 3. Adım: Alt konu seçimi (Örneğin, "Sözcükte Anlam")
+    # 3. Adım: Alt konu seçimi
+    alt_konu_anahtarlari = []
     if secilen_konu_alani:
-        alt_konular_dict = yks_konulari[secilen_ders][secilen_konu_alani]
-        secilen_alt_konu = st.selectbox("Alt Konu Seç", list(alt_konular_dict.keys()), key="alt_konu_add")
+        alt_konu_anahtarlari = list(yks_konulari[secilen_ders][secilen_konu_alani].keys())
+        secilen_alt_konu = st.selectbox("Alt Konu Seç", alt_konu_anahtarlari, key="alt_konu_add")
     
-    # 4. Adım: Daha alt konu seçimi (Örneğin, "Terim Anlam")
-    daha_alt_konu = None
+    # 4. Adım: Daha alt konu seçimi
+    daha_alt_konular = []
     if secilen_alt_konu:
         daha_alt_konular = yks_konulari[secilen_ders][secilen_konu_alani][secilen_alt_konu]
-        daha_alt_konu = st.selectbox("Daha Alt Konu Seç", daha_alt_konular, key="daha_alt_konu_add")
+        secilen_daha_alt_konu = st.selectbox("Daha Alt Konu Seç", daha_alt_konular, key="daha_alt_konu_add")
     
-    if st.button("Seçimi Kaydet"):
-        if daha_alt_konu:
-            # Tüm hiyerarşiyi içeren anahtar oluştur
-            konu_key = f"{secilen_ders}>{secilen_konu_alani}>{secilen_alt_konu}>{daha_alt_konu}"
-            
-            if konu_key not in st.session_state.konu_durumu:
-                st.session_state.konu_durumu[konu_key] = "Hiç Bilmiyor"
-                st.success(f"**{konu_key}** takibe eklendi. Şimdi seviyesini belirleyebilirsiniz.")
-            else:
-                st.info(f"**{konu_key}** zaten takip listenizde.")
-        else:
-            st.warning("Lütfen eklemek için bir konu seçin.")
-    
-    st.markdown("---")
-    
-    # Kayıtlı konuları görüntüleme ve düzenleme
-    st.markdown('<div class="section-header">🧠 Mastery Seviyeni Belirle</div>', unsafe_allow_html=True)
-
-    if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
-        for konu_key, mevcut_seviye in st.session_state.konu_durumu.items():
-            col1, col2 = st.columns([2, 3])
-            
-            with col1:
-                st.markdown(f'''
-                    <div style="background-color: #f0f2f6; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-                        <strong>{konu_key}</strong>
-                    </div>
-                ''', unsafe_allow_html=True)
-            
-            with col2:
-                yeni_seviye = st.select_slider(
-                    label="",
-                    options=mastery_seviyeleri,
-                    value=mevcut_seviye,
-                    key=f"slider_{konu_key}"
-                )
-            
-            if yeni_seviye != mevcut_seviye:
-                st.session_state.konu_durumu[konu_key] = yeni_seviye
-                st.success(f"**{konu_key}** seviyesi **{yeni_seviye}** olarak güncellendi!")
+    # 5. Adım: Seviye Belirleme
+    if secilen_daha_alt_konu:
+        konu_key = f"{secilen_ders}>{secilen_konu_alani}>{secilen_alt_konu}>{secilen_daha_alt_konu}"
+        mevcut_seviye = st.session_state.konu_durumu.get(konu_key, "Hiç Bilmiyor")
+        
+        st.markdown("---")
+        st.markdown(f"**{konu_key}** için seviye belirle:")
+        
+        yeni_seviye = st.select_slider(
+            label="",
+            options=mastery_seviyeleri,
+            value=mevcut_seviye,
+            key=f"slider_{konu_key}"
+        )
+        
+        if yeni_seviye != mevcut_seviye:
+            st.session_state.konu_durumu[konu_key] = yeni_seviye
+            st.success(f"**{konu_key}** seviyesi **{yeni_seviye}** olarak güncellendi!")
     else:
-        st.info("Henüz takip ettiğin bir konu yok. Yukarıdaki seçeneklerden konu ekleyebilirsin.")
+        st.info("Lütfen bir alt konu seçerek seviye belirleme alanını görünür yapın.")
     
-
-def derece_deneme_analizi():
-    st.markdown('<div class="section-header">📈 Derece Öğrencisi Deneme Analizi</div>', unsafe_allow_html=True)
-    
-    bilgi = st.session_state.öğrenci_bilgisi
-    tema = BÖLÜM_TEMALARI[bilgi['bölüm_kategori']]
-    
-    with st.expander("➕ Detaylı Deneme Sonucu Ekle"):
-        with st.form("deneme_form"):
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                deneme_tarihi = st.date_input("📅 Deneme Tarihi")
-                deneme_adı = st.text_input("📝 Deneme Adı", placeholder="Örn: YKS Denemesi 15")
-                deneme_türü = st.selectbox("📋 Tür", ["TYT", "AYT", "TYT+AYT", "Konu Taraması"])
-            
-            with col2:
-                st.markdown("**TYT Sonuçları**")
-                tyt_turkce_d = st.number_input("Türkçe Doğru", 0, 40, 0)
-                tyt_turkce_y = st.number_input("Türkçe Yanlış", 0, 40, 0)
-                tyt_mat_d = st.number_input("Matematik Doğru", 0, 40, 0)
-                tyt_mat_y = st.number_input("Matematik Yanlış", 0, 40, 0)
-                tyt_fen_d = st.number_input("Fen Doğru", 0, 20, 0)
-                tyt_fen_y = st.number_input("Fen Yanlış", 0, 20, 0)
-                tyt_sosyal_d = st.number_input("Sosyal Doğru", 0, 20, 0)
-                tyt_sosyal_y = st.number_input("Sosyal Yanlış", 0, 20, 0)
-            
-            with col3:
-                st.markdown("**AYT Sonuçları**")
-                if bilgi['alan'] == "Sayısal":
-                    ayt_mat_d = st.number_input("AYT Mat Doğru", 0, 40, 0)
-                    ayt_mat_y = st.number_input("AYT Mat Yanlış", 0, 40, 0)
-                    ayt_fizik_d = st.number_input("Fizik Doğru", 0, 14, 0)
-                    ayt_fizik_y = st.number_input("Fizik Yanlış", 0, 14, 0)
-                    ayt_kimya_d = st.number_input("Kimya Doğru", 0, 13, 0)
-                    ayt_kimya_y = st.number_input("Kimya Yanlış", 0, 13, 0)
-                    ayt_biyoloji_d = st.number_input("Biyoloji Doğru", 0, 13, 0)
-                    ayt_biyoloji_y = st.number_input("Biyoloji Yanlış", 0, 13, 0)
-            
-            st.markdown("### 🧠 Psikolojik Durum (Derece Öğrencisi Takibi)")
-            col4, col5 = st.columns(2)
-            
-            with col4:
-                sinav_oncesi_durum = st.selectbox("Sınav Öncesi", 
-                    ["Çok Sakin", "Sakin", "Heyecanlı", "Çok Heyecanlı", "Stresli"])
-                konsantrasyon = st.slider("Konsantrasyon", 1, 10, 8)
-            
-            with col5:
-                zaman_yonetimi = st.selectbox("Zaman Yönetimi", 
-                    ["Mükemmel", "İyi", "Orta", "Zayıf", "Çok Zayıf"])
-                genel_memnuniyet = st.slider("Genel Memnuniyet", 1, 10, 7)
-            
-            if st.form_submit_button("📊 Derece Analizi Yap"):
-                tyt_net = (tyt_turkce_d + tyt_mat_d + tyt_fen_d + tyt_sosyal_d) - \
-                         (tyt_turkce_y + tyt_mat_y + tyt_fen_y + tyt_sosyal_y) / 4
-                
-                if bilgi['alan'] == "Sayısal":
-                    ayt_net = (ayt_mat_d + ayt_fizik_d + ayt_kimya_d + ayt_biyoloji_d) - \
-                             (ayt_mat_y + ayt_fizik_y + ayt_kimya_y + ayt_biyoloji_y) / 4
-                else:
-                    ayt_net = 0
-                
-                derece_analizi = derece_performans_analizi(tyt_net, ayt_net, bilgi)
-                
-                sonuç = {
-                    'tarih': str(deneme_tarihi),
-                    'deneme_adı': deneme_adı,
-                    'tür': deneme_türü,
-                    'tyt_net': tyt_net,
-                    'ayt_net': ayt_net,
-                    'tyt_detay': {
-                        'turkce': tyt_turkce_d - tyt_turkce_y/4,
-                        'matematik': tyt_mat_d - tyt_mat_y/4,
-                        'fen': tyt_fen_d - tyt_fen_y/4,
-                        'sosyal': tyt_sosyal_d - tyt_sosyal_y/4
-                    },
-                    'psikolojik': {
-                        'sinav_oncesi': sinav_oncesi_durum,
-                        'konsantrasyon': konsantrasyon,
-                        'zaman_yonetimi': zaman_yonetimi,
-                        'memnuniyet': genel_memnuniyet
-                    },
-                    'derece_analizi': derece_analizi
-                }
-                
-                st.session_state.deneme_sonuçları.append(sonuç)
-                
-                data_to_save = {
-                    'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
-                    'program_oluşturuldu': st.session_state.program_oluşturuldu,
-                    'deneme_sonuçları': st.session_state.deneme_sonuçları,
-                    'konu_durumu': st.session_state.konu_durumu,
-                    'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
-                    'motivasyon_puanı': st.session_state.motivasyon_puanı,
-                    'hedef_sıralama': st.session_state.hedef_sıralama,
-                }
-                if save_user_data(st.session_state.kullanıcı_adı, data_to_save):
-                    st.success("Derece öğrencisi analizi tamamlandı! 📊")
-                else:
-                    st.error("Veri kaydetme başarısız.")
-    
-    if st.session_state.deneme_sonuçları:
-        df = pd.DataFrame(st.session_state.deneme_sonuçları)
-        
-        tab1, tab2, tab3 = st.tabs(["📈 Net Analizi", "🎯 Alan Analizi", "🧠 Psikoloji"])
-        
-        with tab1:
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=df['tarih'], y=df['tyt_net'], 
-                                    mode='lines+markers', name='TYT Net',
-                                    line=dict(color=tema['renk'])))
-            if 'ayt_net' in df.columns:
-                fig.add_trace(go.Scatter(x=df['tarih'], y=df['ayt_net'], 
-                                        mode='lines+markers', name='AYT Net'))
-            
-            derece_hedefi = hedef_net_hesapla(bilgi['hedef_sıralama'], bilgi['alan'])
-            fig.add_hline(y=derece_hedefi, line_dash="dash", 
-                         annotation_text="Derece Hedefi")
-            
-            fig.update_layout(title="Derece Öğrencisi Net İlerleme", 
-                            xaxis_title="Tarih", yaxis_title="Net")
-            st.plotly_chart(fig, use_container_width=True)
-        
-        with tab2:
-            if len(df) > 0:
-                son_deneme = df.iloc[-1]
-                if 'tyt_detay' in son_deneme:
-                    detay = son_deneme['tyt_detay']
-                    
-                    fig = go.Figure(data=go.Scatterpolar(
-                        r=list(detay.values()),
-                        theta=list(detay.keys()),
-                        fill='toself',
-                        name='Son Deneme'
-                    ))
-                    fig.update_layout(
-                        polar=dict(
-                            radialaxis=dict(
-                                visible=True,
-                                range=[0, max(detay.values()) + 5]
-                            )),
-                        showlegend=True,
-                        title="Alan Bazlı Performans Analizi"
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-        
-        with tab3:
-            if 'psikolojik' in df.columns:
-                psiko_df = pd.json_normalize(df['psikolojik'])
-                
-                col6, col7 = st.columns(2)
-                
-                with col6:
-                    fig = px.line(df, x='tarih', y=psiko_df['konsantrasyon'], 
-                                 title='Konsantrasyon Değişimi')
-                    st.plotly_chart(fig, use_container_width=True)
-                
-                with col7:
-                    fig = px.line(df, x='tarih', y=psiko_df['memnuniyet'], 
-                                 title='Genel Memnuniyet')
-                    st.plotly_chart(fig, use_container_width=True)
-
 def derece_performans_analizi(tyt_net, ayt_net, bilgi):
     hedef_net = hedef_net_hesapla(bilgi['hedef_sıralama'], bilgi['alan'])
     
