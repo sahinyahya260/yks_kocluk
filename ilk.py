@@ -1690,11 +1690,13 @@ def psikolojik_destek_sayfası():
 def pomodoro_zamanlayıcısı_sayfası():
     
    
+    
     st.markdown('<div class="section-header">⏰ Pomodoro Zamanlayıcısı</div>', unsafe_allow_html=True)
     
-    # Görseldeki tasarıma uygun özel CSS
+    # Görseldeki tasarıma tam olarak uyması için özel CSS
     st.markdown("""
         <style>
+        /* Zamanlayıcı Kapsayıcı Kartı */
         .timer-container {
             text-align: center;
             background: rgba(255, 255, 255, 0.1);
@@ -1707,6 +1709,7 @@ def pomodoro_zamanlayıcısı_sayfası():
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        /* Zaman Metni */
         .timer-text {
             font-size: 6rem;
             font-weight: bold;
@@ -1714,10 +1717,12 @@ def pomodoro_zamanlayıcısı_sayfası():
             text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
             margin-bottom: 0.5rem;
         }
+        /* Etiket Metni */
         .timer-label {
             font-size: 1.4rem;
             color: #ccc;
         }
+        /* Butonları saran div */
         .stButton>button {
             border: none;
             border-radius: 15px;
@@ -1729,22 +1734,28 @@ def pomodoro_zamanlayıcısı_sayfası():
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        /* Buton renkleri ve hover efektleri için görseldeki tonları kullandık */
-        .start-button { border: 2px solid #3498db; }
-        .start-button:hover { background-color: #3498db; }
-        .stop-button { border: 2px solid #e74c3c; }
-        .stop-button:hover { background-color: #e74c3c; }
-        .reset-button { border: 2px solid #f1c40f; }
-        .reset-button:hover { background-color: #f1c40f; }
-        .stButton > button[kind="primary"] {
+        /* Butonlara özel renkleri ve kenarlıkları tanımlama */
+        .st-emotion-cache-1c7y3qj button {
             border: 2px solid #3498db;
         }
-        .stButton > button[kind="secondary"] {
+        .st-emotion-cache-1c7y3qj button:hover {
+            background-color: #3498db;
+        }
+        .st-emotion-cache-1c7y3qj:nth-of-type(2) button {
             border: 2px solid #e74c3c;
+        }
+        .st-emotion-cache-1c7y3qj:nth-of-type(2) button:hover {
+            background-color: #e74c3c;
+        }
+        .st-emotion-cache-1c7y3qj:nth-of-type(3) button {
+            border: 2px solid #f1c40f;
+        }
+        .st-emotion-cache-1c7y3qj:nth-of-type(3) button:hover {
+            background-color: #f1c40f;
         }
         </style>
     """, unsafe_allow_html=True)
-
+    
     # POMODORO modları ve süreleri
     POMODORO_MODES = {
         'Çalışma Modu': {'label': '📚 Çalışma', 'time': 25 * 60},
@@ -1795,6 +1806,7 @@ def pomodoro_zamanlayıcısı_sayfası():
             st.session_state.pomodoro_running = True # Otomatik başlat
             st.balloons()
             st.success(f"Süre doldu! Şimdi bir {POMODORO_MODES[st.session_state.pomodoro_mode]['label']} zamanı!")
+            st.rerun()
             
     # Zamanlayıcı arayüzü
     st.markdown('<div class="timer-container">', unsafe_allow_html=True)
