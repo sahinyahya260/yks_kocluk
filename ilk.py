@@ -1227,6 +1227,7 @@ def main():
             </div>
             ''', unsafe_allow_html=True)
             
+            # Mastery seviyelerini ve önerileri tanımla
             mastery_seviyeleri = {
                 "Hiç Bilmiyor": 0,
                 "Temel Bilgi": 25,
@@ -1245,12 +1246,13 @@ def main():
             
             if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
                 
-                # Ders ve seviye bazlı yüzde hesaplaması için veri toplama
+                # Verileri ders bazında grupla
                 ders_seviye_sayilari = {}
                 konu_detaylari = {}
                 
                 for anahtar, seviye in st.session_state.konu_durumu.items():
                     parcalar = anahtar.split('-')
+                    ders_turu = parcalar[0]
                     ders = parcalar[1]
                     konu = parcalar[2]
                     
@@ -1273,12 +1275,21 @@ def main():
                         
                     st.markdown(f"### {ders} Genel Durumu")
                     
-                    # Dersin genel durumunu çubuk grafik olarak göster
-                    yuzdeler = {seviye: (sayi / toplam_konu) * 100 for seviye, sayi in seviye_sayilari.items()}
+                    # Yüzdelik dağılımı DataFrame'e dönüştür
+                    yuzdeler_df = pd.DataFrame(seviye_sayilari.items(), columns=['Seviye', 'Sayi'])
+                    yuzdeler_df['Yüzde'] = yuzdeler_df['Sayi'] / toplam_konu * 100
                     
-                    st.bar_chart(yuzdeler, color="#3498db")
+                    # Görseldeki gibi çubuk grafik oluştur (Plotly kullanıldı)
+                    fig = px.bar(yuzdeler_df, 
+                                 x='Seviye', 
+                                 y='Yüzde',
+                                 color='Yüzde',
+                                 color_continuous_scale=px.colors.sequential.Viridis,
+                                 text_auto='.2s')
+                    fig.update_layout(xaxis_title="", yaxis_title="Yüzde (%)")
+                    st.plotly_chart(fig, use_container_width=True)
                     
-                    # Detaylı konu ilerlemelerini göster
+                    # Detaylar için açılır menü
                     with st.expander(f"**{ders} Konu Detayları ve Öneriler**"):
                         for konu_veri in konu_detaylari[ders]:
                             konu = konu_veri['konu']
