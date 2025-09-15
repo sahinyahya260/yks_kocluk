@@ -685,9 +685,7 @@ def derece_konu_takibi():
         "TYT Türkçe": {
             "Anlam Bilgisi": {
                 "Sözcükte Anlam": [
-                    "Gerçek Anlam",
-                    "Mecaz Anlam",
-                    "Terim Anlam",
+                    "Gerçek, Mecaz, Terim Anlam",
                     "Çok Anlamlılık",
                     "Deyimler ve Atasözleri",
                     "Sözcükler Arası Anlam İlişkileri"
@@ -700,8 +698,8 @@ def derece_konu_takibi():
                     "Amaç-Sonuç, Neden-Sonuç, Koşul-Sonuç"
                 ],
                 "Paragraf": [
-                    "Paragrafta Anlatım Teknikleri",
-                    "Paragrafta Düşünceyi Geliştirme Yolları",
+                    "Anlatım Teknikleri",
+                    "Düşünceyi Geliştirme Yolları",
                     "Paragrafta Yapı",
                     "Paragrafta Konu-Ana Düşünce",
                     "Paragrafta Yardımcı Düşünce"
@@ -709,30 +707,397 @@ def derece_konu_takibi():
             },
             "Dil Bilgisi": {
                 "Ses Bilgisi": [
-                    "Büyük Ünlü Uyumu",
-                    "Ünsüz Benzeşmesi",
-                    "Ünsüz Yumuşaması"
+                    "Ünlü-Ünsüz Uyumları",
+                    "Ses Olayları"
+                ],
+                "Yazım Kuralları": [
+                    "Büyük Harflerin Kullanımı",
+                    "Birleşik Kelimelerin Yazımı",
+                    "Sayıların ve Kısaltmaların Yazımı",
+                    "Bağlaçların Yazımı"
+                ],
+                "Noktalama İşaretleri": [
+                    "Nokta, Virgül",
+                    "Noktalı Virgül, İki Nokta, Üç Nokta",
+                    "Soru, Ünlem, Tırnak İşareti",
+                    "Yay Ayraç ve Kesme İşareti"
+                ],
+                "Sözcükte Yapı": [
+                    "Kök ve Gövde",
+                    "Ekler (Yapım/Çekim)",
+                    "Basit, Türemiş, Birleşik Sözcükler"
                 ],
                 "Sözcük Türleri": [
-                    "İsim",
-                    "Sıfat",
-                    "Zamir",
-                    "Edat"
+                    "İsimler ve Zamirler",
+                    "Sıfatlar ve Zarflar",
+                    "Edat, Bağlaç, Ünlem"
+                ],
+                "Fiiller": [
+                    "Fiilde Anlam",
+                    "Ek Fiil",
+                    "Fiilimsi",
+                    "Fiilde Çatı"
+                ],
+                "Cümlenin Ögeleri": [
+                    "Temel Ögeler (Yüklem, Özne, Nesne)",
+                    "Yardımcı Ögeler (Dolaylı, Zarf, Edat Tümleci)"
+                ],
+                "Cümle Türleri": [
+                    "Yüklem ve Yapılarına Göre Cümleler"
+                ],
+                "Anlatım Bozukluğu": [
+                    "Anlamsal ve Yapısal Bozukluklar"
                 ]
             }
         },
         "TYT Matematik": {
-            "Temel Kavramlar": {
-                "Sayılar": [
-                    "Rasyonel Sayılar", 
-                    "Gerçek Sayılar", 
-                    "Bölünebilme"
+            "Temel Matematik": {
+                "Temel Kavramlar": [
+                    "Sayılar",
+                    "Sayı Basamakları",
+                    "Bölme ve Bölünebilme",
+                    "EBOB – EKOK"
+                ],
+                "Temel İşlemler": [
+                    "Rasyonel Sayılar",
+                    "Basit Eşitsizlikler",
+                    "Mutlak Değer",
+                    "Üslü Sayılar",
+                    "Köklü Sayılar"
+                ],
+                "Cebirsel İfadeler": [
+                    "Çarpanlara Ayırma",
+                    "Oran Orantı",
+                    "Denklem Çözme"
                 ]
             },
             "Problemler": {
-                "Temel Problemler": [
-                    "Sayı Problemleri", 
-                    "Kesir Problemleri"
+                "Sayı Problemleri": [],
+                "Kesir Problemleri": [],
+                "Yaş Problemleri": [],
+                "Yüzde Problemleri": [],
+                "Kar-Zarar Problemleri": [],
+                "Karışım Problemleri": [],
+                "Hareket Problemleri": [],
+                "İşçi Problemleri": [],
+                "Tablo-Grafik Problemleri": [],
+                "Rutin Olmayan Problemler": []
+            },
+            "Kümeler ve Olasılık": {
+                "Fonksiyonlar ve Kümeler": [
+                    "Kümeler",
+                    "Mantık",
+                    "Fonksiyonlar"
+                ],
+                "İleri Cebir Konuları": [
+                    "Polinomlar",
+                    "2. Dereceden Denklemler"
+                ],
+                "Olasılık ve İstatistik": [
+                    "Permütasyon",
+                    "Kombinasyon",
+                    "Olasılık",
+                    "Veri – İstatistik"
+                ]
+            }
+        },
+        "TYT Geometri": {
+            "Temel Geometri": {
+                "Temel Kavramlar": [],
+                "Doğruda Açılar": [],
+                "Üçgende Açılar": []
+            },
+            "Özel Üçgenler": {
+                "Özel Üçgenler": [
+                    "Dik Üçgen",
+                    "İkizkenar Üçgen",
+                    "Eşkenar Üçgen"
+                ],
+                "Üçgen Yardımcı Elemanları": [
+                    "Açıortay",
+                    "Kenarortay",
+                    "Eşlik ve Benzerlik",
+                    "Üçgende Alan",
+                    "Açı Kenar Bağıntıları"
+                ]
+            },
+            "Çokgenler": {
+                "Genel Çokgenler": [],
+                "Özel Dörtgenler": [
+                    "Dörtgenler (Genel)",
+                    "Deltoid",
+                    "Paralelkenar",
+                    "Eşkenar Dörtgen",
+                    "Dikdörtgen",
+                    "Kare",
+                    "Yamuk"
+                ]
+            },
+            "Çember ve Katı Cisimler": {
+                "Çember ve Daire": [
+                    "Çemberde Açı",
+                    "Çemberde Uzunluk",
+                    "Dairede Çevre ve Alan"
+                ],
+                "Katı Cisimler": [
+                    "Prizmalar",
+                    "Küp",
+                    "Silindir",
+                    "Piramit",
+                    "Koni",
+                    "Küre"
+                ]
+            },
+            "Analitik Geometri": {
+                "Analitik Geometri": [
+                    "Noktanın Analitiği",
+                    "Doğrunun Analitiği",
+                    "Dönüşüm Geometrisi",
+                    "Çemberin Analitiği"
+                ]
+            }
+        },
+        "TYT Tarih": {
+            "Tarih Bilimine Giriş": {
+                "Tarih ve Zaman": [
+                    "Tarih Biliminin Tanımı",
+                    "Türklerin Kullandığı Takvimler"
+                ],
+                "İnsanlığın İlk Dönemleri": [
+                    "Tarih Öncesi Çağlar",
+                    "Yazının İcadı ve Önemi"
+                ]
+            },
+            "Türk ve İslam Tarihi": {
+                "İlk ve Orta Çağda Türk Dünyası": [
+                    "İlk Türk Devletleri (Asya Hun, Göktürk, Uygur)",
+                    "Türklerin İslamiyet'i Kabulü"
+                ],
+                "İslam Medeniyetinin Doğuşu": [
+                    "İslamiyet'in Doğuşu"
+                ],
+                "Türk-İslam Devletlerinde Kültür ve Medeniyet": [
+                    "Karahanlılar, Gazneliler, Büyük Selçuklu",
+                    "Devlet Yönetimi ve Ekonomi"
+                ],
+                "Beylikten Devlete Osmanlı Siyaseti": [
+                    "Kuruluş ve Büyüme Nedenleri",
+                    "İskan Politikası"
+                ]
+            },
+            "Osmanlı ve Avrupa Tarihi": {
+                "Dünya Gücü Osmanlı": [
+                    "Yükselme Dönemi (Fatih, Yavuz, Kanuni)",
+                    "Siyasi ve Askeri Güç"
+                ],
+                "Arayış Yılları (Duraklama)": [
+                    "Duraklama Dönemi ve Nedenleri",
+                    "Osmanlı-Avrupa İlişkileri"
+                ],
+                "En Uzun Yüzyıl (19. Yüzyıl)": [
+                    "Dağılma Dönemi",
+                    "Fikir Akımları"
+                ],
+                "20. Yüzyıl Başlarında Osmanlı": [
+                    "I. Dünya Savaşı ve Osmanlı'nın Durumu",
+                    "Wilson İlkeleri, Mondros"
+                ]
+            }
+        },
+        "TYT Coğrafya": {
+            "Doğal Sistemler": {
+                "Doğa ve İnsan": ["Doğa ve İnsan Etkileşimi"],
+                "Dünya ve Konum": [
+                    "Dünya’nın Şekli ve Hareketleri",
+                    "Coğrafi Konum",
+                    "Harita Bilgisi"
+                ],
+                "İklim Bilgisi": [
+                    "İklim Elemanları (Sıcaklık, Basınç vb.)",
+                    "İklim Tipleri"
+                ],
+                "Yerin Şekillenmesi": [
+                    "İç Kuvvetler",
+                    "Dış Kuvvetler"
+                ],
+                "Doğanın Varlıkları": [
+                    "Kayaçlar",
+                    "Su Kaynakları",
+                    "Topraklar",
+                    "Bitki Örtüsü"
+                ]
+            },
+            "Beşeri Sistemler": {
+                "Nüfus ve Yerleşme": [
+                    "Beşeri Yapı ve Yerleşme",
+                    "Nüfusun Gelişimi ve Dağılışı",
+                    "Göçlerin Nedenleri ve Sonuçları"
+                ],
+                "Ekonomik Faaliyetler": [
+                    "Geçim Tarzları"
+                ]
+            },
+            "Türkiye Coğrafyası": {
+                "Türkiye": [
+                    "Yeryüzü Şekilleri ve İklimi",
+                    "Doğal Varlıkları",
+                    "Yerleşme ve Nüfus"
+                ]
+            },
+            "Küresel ve Çevresel Konular": {
+                "Bölgeler ve Ülkeler": [
+                    "Bölge Türleri",
+                    "Konum ve Etkileşim",
+                    "Uluslararası Ulaşım"
+                ],
+                "Çevre ve Toplum": [
+                    "Çevre Sorunları",
+                    "Doğal Afetler"
+                ]
+            }
+        },
+        "TYT Biyoloji": {
+            "Yaşam Bilimi": {
+                "Canlıların Ortak Özellikleri": [],
+                "Temel Bileşikler": [
+                    "İnorganik Bileşikler",
+                    "Organik Bileşikler"
+                ]
+            },
+            "Hücre ve Canlılar": {
+                "Hücre Bilgisi": [
+                    "Prokaryot ve Ökaryot",
+                    "Organellerin Yapı ve Görevleri"
+                ],
+                "Canlılar Dünyası": [
+                    "Canlıların Sınıflandırılması",
+                    "Canlı Alemleri ve Özellikleri"
+                ]
+            },
+            "Kalıtım ve Ekoloji": {
+                "Hücre Bölünmeleri": [
+                    "Mitoz ve Eşeysiz Üreme",
+                    "Mayoz ve Eşeyli Üreme"
+                ],
+                "Kalıtım ve Çeşitlilik": [
+                    "Kalıtımın Genel İlkeleri",
+                    "Biyolojik Çeşitlilik"
+                ],
+                "Ekosistem Ekolojisi": [
+                    "Besin Zinciri",
+                    "Madde Döngüleri",
+                    "Güncel Çevre Sorunları"
+                ]
+            },
+            "İnsan ve Diğer Sistemler": {
+                "İnsan Fizyolojisi": [
+                    "Denetleyici ve Düzenleyici Sistem",
+                    "Duyu, Destek ve Hareket Sistemi",
+                    "Sindirim, Dolaşım ve Solunum",
+                    "Üriner, Üreme ve Gelişim"
+                ],
+                "Diğer Konular": [
+                    "Genden Proteine",
+                    "Enerji Dönüşümleri",
+                    "Bitki Biyolojisi"
+                ]
+            }
+        },
+        "TYT Kimya": {
+            "Kimya Bilimi": {
+                "Kimya Bilimine Giriş": [
+                    "Kimyanın Alt Dalları",
+                    "Laboratuvar Güvenlik Kuralları"
+                ],
+                "Atom ve Periyodik Sistem": [
+                    "Atom Modelleri",
+                    "Periyodik Sistemin Özellikleri"
+                ],
+                "Etkileşimler": [
+                    "Güçlü Etkileşimler",
+                    "Zayıf Etkileşimler"
+                ],
+                "Maddenin Hâlleri": [
+                    "Katı, Sıvı, Gaz, Plazma",
+                    "Hal Değişimleri"
+                ],
+                "Doğa ve Kimya": [
+                    "Su ve Hava Kirliliği",
+                    "Geri Dönüşüm"
+                ]
+            },
+            "Kimyanın Temel Yasaları": {
+                "Kimyanın Temel Kanunları": [
+                    "Kütlenin Korunumu",
+                    "Sabit ve Katlı Oranlar",
+                    "Mol Kavramı"
+                ],
+                "Karışımlar": [
+                    "Homojen ve Heterojen Karışımlar",
+                    "Derişim Birimleri"
+                ],
+                "Asitler, Bazlar ve Tuzlar": [
+                    "Asit ve Bazların Özellikleri",
+                    "pH Kavramı"
+                ],
+                "Kimya Her Yerde": [
+                    "Polimerler",
+                    "Sabun ve Deterjanlar",
+                    "İlaçlar, Gıdalar"
+                ]
+            }
+        },
+        "TYT Fizik": {
+            "Fizik Bilimine Giriş": {
+                "Fizik Bilimine Giriş": [
+                    "Fiziğin Alt Dalları",
+                    "Temel ve Türetilmiş Büyüklükler"
+                ],
+                "Madde ve Özellikleri": [
+                    "Kütle, Hacim, Özkütle",
+                    "Adezyon, Kohezyon, Yüzey Gerilimi"
+                ]
+            },
+            "Mekanik ve Enerji": {
+                "Hareket ve Kuvvet": [
+                    "Konum, Yol, Sürat, Hız",
+                    "Newton’ın Hareket Yasaları"
+                ],
+                "Enerji": [
+                    "İş, Güç, Enerji",
+                    "Enerjinin Korunumu"
+                ]
+            },
+            "Elektrik ve Basınç": {
+                "Isı ve Sıcaklık": [
+                    "Sıcaklık ve Isı",
+                    "Hal Değişimleri"
+                ],
+                "Elektrostatik": [
+                    "Yük",
+                    "Elektriklenme Çeşitleri"
+                ],
+                "Elektrik ve Manyetizma": [
+                    "Elektrik Akımı ve Direnç",
+                    "Ohm Yasası",
+                    "Manyetizma"
+                ],
+                "Basınç ve Kaldırma Kuvveti": [
+                    "Katı, Sıvı, Gaz Basıncı",
+                    "Kaldırma Kuvveti"
+                ]
+            },
+            "Dalga ve Optik": {
+                "Dalgalar": [
+                    "Dalga Hareketi",
+                    "Dalga Çeşitleri",
+                    "Yay, Su ve Ses Dalgaları"
+                ],
+                "Optik": [
+                    "Işık ve Gölge",
+                    "Yansıma ve Aynalar",
+                    "Kırılma ve Mercekler",
+                    "Renk"
                 ]
             }
         }
@@ -740,30 +1105,46 @@ def derece_konu_takibi():
     
     mastery_seviyeleri = ["Hiç Bilmiyor", "Temel Bilgi", "Orta Seviye", "İyi Seviye", "Uzman (Derece) Seviye"]
     
+    # Yeni bir konu ekleme arayüzü
+    st.markdown('<div class="section-header">Konu Ekle</div>', unsafe_allow_html=True)
+    
     # 1. Adım: Ders seçimi
     dersler = list(yks_konulari.keys())
     secilen_ders = st.selectbox("Ders Seç", dersler, key="ders_add")
     
     # 2. Adım: Konu alanı seçimi
+    konu_alanlari = []
     if secilen_ders:
         konu_alanlari = list(yks_konulari[secilen_ders].keys())
         secilen_konu_alani = st.selectbox("Konu Alanı Seç", konu_alanlari, key="konu_alani_add")
+    else:
+        secilen_konu_alani = None
     
     # 3. Adım: Alt konu seçimi
     alt_konu_anahtarlari = []
     if secilen_konu_alani:
         alt_konu_anahtarlari = list(yks_konulari[secilen_ders][secilen_konu_alani].keys())
         secilen_alt_konu = st.selectbox("Alt Konu Seç", alt_konu_anahtarlari, key="alt_konu_add")
+    else:
+        secilen_alt_konu = None
     
     # 4. Adım: Daha alt konu seçimi
     daha_alt_konular = []
     if secilen_alt_konu:
         daha_alt_konular = yks_konulari[secilen_ders][secilen_konu_alani][secilen_alt_konu]
         secilen_daha_alt_konu = st.selectbox("Daha Alt Konu Seç", daha_alt_konular, key="daha_alt_konu_add")
+    else:
+        secilen_daha_alt_konu = None
     
     # 5. Adım: Seviye Belirleme
     if secilen_daha_alt_konu:
         konu_key = f"{secilen_ders}>{secilen_konu_alani}>{secilen_alt_konu}>{secilen_daha_alt_konu}"
+        
+        # Konu zaten takip listesinde yoksa ekle ve varsayılan seviye ata
+        if konu_key not in st.session_state.konu_durumu:
+            st.session_state.konu_durumu[konu_key] = "Hiç Bilmiyor"
+            st.success(f"**{konu_key}** takibe eklendi. Şimdi seviyesini belirleyebilirsiniz.")
+        
         mevcut_seviye = st.session_state.konu_durumu.get(konu_key, "Hiç Bilmiyor")
         
         st.markdown("---")
