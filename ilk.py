@@ -1059,6 +1059,7 @@ def main():
         
         if menu == "🏠 Ana Sayfa":
            
+            
             st.markdown(f'''
             <div class="hero-section">
                 <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
@@ -1133,13 +1134,25 @@ def main():
                 ders_seviye_sayilari = {}
                 konu_detaylari = {}
                 
+                # Ders bazında bitirme yüzdesi için yeni sözlük
+                ders_bitirme_yüzdeleri = {}
+                
+                # Puanlama sistemi
+                puanlar = {
+                    "Hiç Bilmiyor": 0,
+                    "Temel Bilgi": 1,
+                    "Orta Seviye": 2,
+                    "İyi Seviye": 3,
+                    "Uzman (Derece) Seviye": 4
+                }
+
                 for anahtar, seviye in st.session_state.konu_durumu.items():
-                    parcalar = anahtar.split('>') # YENİ ANAHTAR AYRIŞTIRMASI
+                    parcalar = anahtar.split('>') 
                     if len(parcalar) >= 4:
                         ders = parcalar[0].strip()
-                        konu_adı = " > ".join(parcalar[1:]).strip() # Daha açıklayıcı konu adı oluştur
+                        konu_adı = " > ".join(parcalar[1:]).strip() 
                     else:
-                        continue # Hatalı veya eski formatlı anahtarları atla
+                        continue 
                     
                     if ders not in ders_seviye_sayilari:
                         ders_seviye_sayilari[ders] = {s: 0 for s in mastery_seviyeleri.keys()}
@@ -1150,14 +1163,29 @@ def main():
                     ders_seviye_sayilari[ders][seviye] += 1
                     konu_detaylari[ders].append({"konu": konu_adı, "seviye": seviye})
 
+                    # Ders bazlı puanlama için
+                    if ders not in ders_bitirme_yüzdeleri:
+                        ders_bitirme_yüzdeleri[ders] = {"toplam_puan": 0, "konu_sayısı": 0}
+                    
+                    ders_bitirme_yüzdeleri[ders]["toplam_puan"] += puanlar.get(seviye, 0)
+                    ders_bitirme_yüzdeleri[ders]["konu_sayısı"] += 1
+
+
                 for ders, seviye_sayilari in ders_seviye_sayilari.items():
                     toplam_konu = sum(seviye_sayilari.values())
                     
                     if toplam_konu == 0:
                         continue
+
+                    # Genel bitirme yüzdesini hesapla
+                    toplam_puan = ders_bitirme_yüzdeleri[ders]["toplam_puan"]
+                    maksimum_puan = ders_bitirme_yüzdeleri[ders]["konu_sayısı"] * 4 # Her konu için maksimum puan 4
+                    bitirme_yuzdesi = int((toplam_puan / maksimum_puan) * 100) if maksimum_puan > 0 else 0
                         
                     st.markdown(f"### {ders} Genel Durumu")
-                    
+                    st.markdown(f"**Genel Bitirme Yüzdesi:** `{bitirme_yuzdesi}%`")
+                    st.progress(bitirme_yuzdesi / 100)
+
                     # Yüzdelik dağılımı DataFrame'e dönüştür
                     yuzdeler_df = pd.DataFrame(seviye_sayilari.items(), columns=['Seviye', 'Sayi'])
                     yuzdeler_df['Yüzde'] = yuzdeler_df['Sayi'] / toplam_konu
@@ -1214,8 +1242,6 @@ def main():
                                 """, unsafe_allow_html=True)
             else:
                 st.info("Henüz 'Konu Masterysi' bölümüne veri girmediniz. Lütfen konularınızı tamamlayın.")
-           
-            
         elif menu == "⏰ Pomodoro Zamanlayıcısı":
             pomodoro_zamanlayıcısı_sayfası()
 
