@@ -678,14 +678,16 @@ def derece_konu_takibi():
     
     
     st.markdown('<div class="section-header">🎯 Konu Masterysi</div>', unsafe_allow_html=True)
-    st.markdown('<p style="font-size: 1.1rem;">Eksik olduğun konuları tamamla ve ilerlemeni takip et.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="font-size: 1.1rem;">Eksik olduğun konuları en detaylı şekilde takip et.</p>', unsafe_allow_html=True)
     
-    # YKS konularını hiyerarşik olarak tanımla
+    # YKS konularını 4 seviyeli hiyerarşik olarak tanımla
     yks_konulari = {
         "TYT Türkçe": {
             "Anlam Bilgisi": {
                 "Sözcükte Anlam": [
-                    "Gerçek, Mecaz, Terim Anlam",
+                    "Gerçek Anlam",
+                    "Mecaz Anlam",
+                    "Terim Anlam",
                     "Çok Anlamlılık",
                     "Deyimler ve Atasözleri",
                     "Sözcükler Arası Anlam İlişkileri"
@@ -721,10 +723,17 @@ def derece_konu_takibi():
         },
         "TYT Matematik": {
             "Temel Kavramlar": {
-                "Sayılar": ["Rasyonel Sayılar", "Gerçek Sayılar", "Bölünebilme"]
+                "Sayılar": [
+                    "Rasyonel Sayılar", 
+                    "Gerçek Sayılar", 
+                    "Bölünebilme"
+                ]
             },
             "Problemler": {
-                "Temel Problemler": ["Sayı Problemleri", "Kesir Problemleri"]
+                "Temel Problemler": [
+                    "Sayı Problemleri", 
+                    "Kesir Problemleri"
+                ]
             }
         }
     }
@@ -743,19 +752,29 @@ def derece_konu_takibi():
         konu_alanlari = list(yks_konulari[secilen_ders].keys())
         secilen_konu_alani = st.selectbox("Konu Alanı Seç", konu_alanlari, key="konu_alani_add")
     
-    # 3. Adım: Alt konu seçimi
+    # 3. Adım: Alt konu seçimi (Örneğin, "Sözcükte Anlam")
     if secilen_konu_alani:
-        alt_konular = yks_konulari[secilen_ders][secilen_konu_alani]
-        secilen_alt_konu = st.selectbox("Alt Konu Seç", alt_konular, key="alt_konu_add")
+        alt_konular_dict = yks_konulari[secilen_ders][secilen_konu_alani]
+        secilen_alt_konu = st.selectbox("Alt Konu Seç", list(alt_konular_dict.keys()), key="alt_konu_add")
+    
+    # 4. Adım: Daha alt konu seçimi (Örneğin, "Terim Anlam")
+    daha_alt_konu = None
+    if secilen_alt_konu:
+        daha_alt_konular = yks_konulari[secilen_ders][secilen_konu_alani][secilen_alt_konu]
+        daha_alt_konu = st.selectbox("Daha Alt Konu Seç", daha_alt_konular, key="daha_alt_konu_add")
     
     if st.button("Seçimi Kaydet"):
-        konu_key = f"{secilen_ders}>{secilen_konu_alani}>{secilen_alt_konu}"
-        
-        if konu_key not in st.session_state.konu_durumu:
-            st.session_state.konu_durumu[konu_key] = "Hiç Bilmiyor"
-            st.success(f"**{konu_key}** takibe eklendi. Şimdi seviyesini belirleyebilirsiniz.")
+        if daha_alt_konu:
+            # Tüm hiyerarşiyi içeren anahtar oluştur
+            konu_key = f"{secilen_ders}>{secilen_konu_alani}>{secilen_alt_konu}>{daha_alt_konu}"
+            
+            if konu_key not in st.session_state.konu_durumu:
+                st.session_state.konu_durumu[konu_key] = "Hiç Bilmiyor"
+                st.success(f"**{konu_key}** takibe eklendi. Şimdi seviyesini belirleyebilirsiniz.")
+            else:
+                st.info(f"**{konu_key}** zaten takip listenizde.")
         else:
-            st.info(f"**{konu_key}** zaten takip listenizde.")
+            st.warning("Lütfen eklemek için bir konu seçin.")
     
     st.markdown("---")
     
@@ -764,20 +783,29 @@ def derece_konu_takibi():
 
     if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
         for konu_key, mevcut_seviye in st.session_state.konu_durumu.items():
-            st.markdown(f"**{konu_key}**")
+            col1, col2 = st.columns([2, 3])
             
-            yeni_seviye = st.select_slider(
-                "Seviye:",
-                options=mastery_seviyeleri,
-                value=mevcut_seviye,
-                key=f"slider_{konu_key}"
-            )
+            with col1:
+                st.markdown(f'''
+                    <div style="background-color: #f0f2f6; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                        <strong>{konu_key}</strong>
+                    </div>
+                ''', unsafe_allow_html=True)
+            
+            with col2:
+                yeni_seviye = st.select_slider(
+                    label="",
+                    options=mastery_seviyeleri,
+                    value=mevcut_seviye,
+                    key=f"slider_{konu_key}"
+                )
             
             if yeni_seviye != mevcut_seviye:
                 st.session_state.konu_durumu[konu_key] = yeni_seviye
                 st.success(f"**{konu_key}** seviyesi **{yeni_seviye}** olarak güncellendi!")
     else:
         st.info("Henüz takip ettiğin bir konu yok. Yukarıdaki seçeneklerden konu ekleyebilirsin.")
+    
 
 def derece_deneme_analizi():
     st.markdown('<div class="section-header">📈 Derece Öğrencisi Deneme Analizi</div>', unsafe_allow_html=True)
