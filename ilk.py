@@ -1219,7 +1219,7 @@ def main():
                 st.rerun()
         
         if menu == "🏠 Ana Sayfa":
-            elif menu == "🏠 Ana Sayfa":
+            
             st.markdown(f'''
             <div class="hero-section">
                 <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
