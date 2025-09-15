@@ -1264,7 +1264,7 @@ def main():
                     <h2 style="color: {tema['renk']};">{motivasyon}%</h2>
                 </div>
                 ''', unsafe_allow_html=True)
-                elif menu == "🏠 Ana Sayfa":
+               
             st.markdown('<div class="section-header">📈 Genel Durum</div>', unsafe_allow_html=True)
             
             # Konu Masterysi panelinden gelen veriyi çek
