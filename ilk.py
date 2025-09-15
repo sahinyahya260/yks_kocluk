@@ -1689,7 +1689,7 @@ def psikolojik_destek_sayfası():
     st.info("Unutma, bu süreçte yalnız değilsin. Kendine iyi bakmak, en az ders çalışmak kadar önemlidir. Başarılar dileriz!")
 def pomodoro_zamanlayıcısı_sayfası():
     
-   def pomodoro_zamanlayıcısı_sayfası():
+   
     st.markdown('<div class="section-header">⏰ Pomodoro Zamanlayıcısı</div>', unsafe_allow_html=True)
     
     # Görseldeki tasarıma uygun özel CSS
