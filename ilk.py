@@ -1688,118 +1688,145 @@ def psikolojik_destek_sayfası():
     st.markdown("---")
     st.info("Unutma, bu süreçte yalnız değilsin. Kendine iyi bakmak, en az ders çalışmak kadar önemlidir. Başarılar dileriz!")
 def pomodoro_zamanlayıcısı_sayfası():
-    st.markdown('<div class="section-header">⏰ Akıllı Çalışma Zamanlayıcısı</div>', unsafe_allow_html=True)
     
-    # Zamanlayıcı durumlarını yönet
+    st.markdown('<div class="section-header">⏰ Pomodoro Zamanlayıcısı</div>', unsafe_allow_html=True)
+    
+    # Görseldeki tasarıma uygun özel CSS
+    st.markdown("""
+        <style>
+        .timer-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            margin: 2rem auto;
+            max-width: 500px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .timer-text {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+            margin-bottom: 0.5rem;
+        }
+        .timer-label {
+            font-size: 1.4rem;
+            color: #ccc;
+        }
+        .stButton>button {
+            border: none;
+            border-radius: 15px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            background-color: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        /* Buton renkleri ve hover efektleri için görseldeki tonları kullandık */
+        .start-button { border: 2px solid #3498db; }
+        .start-button:hover { background-color: #3498db; }
+        .stop-button { border: 2px solid #e74c3c; }
+        .stop-button:hover { background-color: #e74c3c; }
+        .reset-button { border: 2px solid #f1c40f; }
+        .reset-button:hover { background-color: #f1c40f; }
+        .stButton > button[kind="primary"] {
+            border: 2px solid #3498db;
+        }
+        .stButton > button[kind="secondary"] {
+            border: 2px solid #e74c3c;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # POMODORO modları ve süreleri
     POMODORO_MODES = {
-        "Pomodoro (25dk)": {"time": 25 * 60, "label": "Çalışma Modu"},
-        "Kısa Mola (5dk)": {"time": 5 * 60, "label": "Kısa Mola"},
-        "Uzun Mola (15dk)": {"time": 15 * 60, "label": "Uzun Mola"},
-        "Derin Odak (50dk)": {"time": 50 * 60, "label": "Derin Odak"}
+        'Çalışma Modu': {'label': '📚 Çalışma', 'time': 25 * 60},
+        'Kısa Mola': {'label': '☕ Kısa Mola', 'time': 5 * 60},
+        'Uzun Mola': {'label': '🏖️ Uzun Mola', 'time': 15 * 60}
     }
+    
+    # Session state'i başlat
+    if 'pomodoro_mode' not in st.session_state:
+        st.session_state.pomodoro_mode = 'Çalışma Modu'
+        st.session_state.pomodoro_time = POMODORO_MODES['Çalışma Modu']['time']
+        st.session_state.pomodoro_running = False
+        st.session_state.pomodoro_count = 0
 
-    # Ana zamanlayıcı ekranı
-    timer_display = st.empty()
+    # Zamanlayıcı fonksiyonları
+    def start_timer():
+        st.session_state.pomodoro_running = True
 
-    # Butonlar için kolonlar
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("▶️ Başla", use_container_width=True):
-            st.session_state.pomodoro_running = True
-    with col2:
-        if st.button("⏸️ Duraklat", use_container_width=True):
-            st.session_state.pomodoro_running = False
-    with col3:
-        if st.button("🔄 Sıfırla", use_container_width=True):
-            st.session_state.pomodoro_running = False
-            st.session_state.pomodoro_time = POMODORO_MODES[st.session_state.pomodoro_mode]["time"]
-            st.session_state.pomodoro_count = 0
+    def stop_timer():
+        st.session_state.pomodoro_running = False
 
-    st.markdown("---")
-    
-    col4, col5, col6, col7 = st.columns(4)
-    with col4:
-        if st.button("🍅 Pomodoro (25dk)", use_container_width=True):
-            st.session_state.pomodoro_mode = "Pomodoro (25dk)"
-            st.session_state.pomodoro_time = POMODORO_MODES["Pomodoro (25dk)"]["time"]
-            st.session_state.pomodoro_running = False
-    with col5:
-        if st.button("☕ Kısa Mola (5dk)", use_container_width=True):
-            st.session_state.pomodoro_mode = "Kısa Mola (5dk)"
-            st.session_state.pomodoro_time = POMODORO_MODES["Kısa Mola (5dk)"]["time"]
-            st.session_state.pomodoro_running = False
-    with col6:
-        if st.button("🛌 Uzun Mola (15dk)", use_container_width=True):
-            st.session_state.pomodoro_mode = "Uzun Mola (15dk)"
-            st.session_state.pomodoro_time = POMODORO_MODES["Uzun Mola (15dk)"]["time"]
-            st.session_state.pomodoro_running = False
-    with col7:
-        if st.button("🧠 Derin Odak (50dk)", use_container_width=True):
-            st.session_state.pomodoro_mode = "Derin Odak (50dk)"
-            st.session_state.pomodoro_time = POMODORO_MODES["Derin Odak (50dk)"]["time"]
-            st.session_state.pomodoro_running = False
-    
-    st.markdown("---")
-    
-    # Pomodoro sayacı ve ilerleme çubuğu
-    pomodoro_progress_bar = st.progress(0)
-    pomodoro_progress_text = st.empty()
-    pomodoro_progress_text.text(f"Bugünkü Pomodoro: {st.session_state.pomodoro_count}/8")
-    
-    # Zamanlayıcıyı başlat
+    def reset_timer():
+        st.session_state.pomodoro_running = False
+        st.session_state.pomodoro_mode = 'Çalışma Modu'
+        st.session_state.pomodoro_time = POMODORO_MODES['Çalışma Modu']['time']
+        st.session_state.pomodoro_count = 0
+
+    # Zamanlayıcıyı güncelleme
     if st.session_state.pomodoro_running:
-        while st.session_state.pomodoro_time > 0 and st.session_state.pomodoro_running:
-            mins, secs = divmod(st.session_state.pomodoro_time, 60)
-            timer_display.markdown(f"""
-                <div style="
-                    text-align: center; 
-                    font-size: 5rem; 
-                    font-weight: bold; 
-                    background: rgba(255,255,255,0.1); 
-                    border-radius: 10px;
-                    padding: 2rem;
-                ">
-                    {mins:02}:{secs:02}
-                </div>
-                <p style="text-align:center; font-size:1.2rem; color:#ccc;">{POMODORO_MODES[st.session_state.pomodoro_mode]['label']}</p>
-            """, unsafe_allow_html=True)
-            
-            time.sleep(1)
-            st.session_state.pomodoro_time -= 1
-            st.rerun()
-            
+        time.sleep(1)
+        st.session_state.pomodoro_time -= 1
+        
+        # Süre bittiğinde
         if st.session_state.pomodoro_time <= 0:
             st.session_state.pomodoro_running = False
             
-            if st.session_state.pomodoro_mode == "Pomodoro (25dk)":
+            # Modlar arası geçiş
+            if st.session_state.pomodoro_mode == 'Çalışma Modu':
                 st.session_state.pomodoro_count += 1
-                pomodoro_progress_bar.progress(min(st.session_state.pomodoro_count / 8, 1.0))
-                st.balloons()
-                st.success("Pomodoro tamamlandı! Şimdi kısa bir mola ver.")
-                st.session_state.pomodoro_mode = "Kısa Mola (5dk)"
-                st.session_state.pomodoro_time = POMODORO_MODES["Kısa Mola (5dk)"]["time"]
+                if st.session_state.pomodoro_count % 4 == 0:
+                    st.session_state.pomodoro_mode = 'Uzun Mola'
+                else:
+                    st.session_state.pomodoro_mode = 'Kısa Mola'
+            else:
+                st.session_state.pomodoro_mode = 'Çalışma Modu'
             
-            st.rerun()
+            st.session_state.pomodoro_time = POMODORO_MODES[st.session_state.pomodoro_mode]['time']
+            st.session_state.pomodoro_running = True # Otomatik başlat
+            st.balloons()
+            st.success(f"Süre doldu! Şimdi bir {POMODORO_MODES[st.session_state.pomodoro_mode]['label']} zamanı!")
+            
+    # Zamanlayıcı arayüzü
+    st.markdown('<div class="timer-container">', unsafe_allow_html=True)
+    
+    minutes = st.session_state.pomodoro_time // 60
+    seconds = st.session_state.pomodoro_time % 60
+    time_str = f"{minutes:02d}:{seconds:02d}"
+    
+    st.markdown(f'<p class="timer-label">{POMODORO_MODES[st.session_state.pomodoro_mode]["label"]}</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="timer-text">{time_str}</p>', unsafe_allow_html=True)
+        
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Kontrol butonları
+    col_start, col_stop, col_reset = st.columns(3)
+    
+    with col_start:
+        if not st.session_state.pomodoro_running:
+            if st.button("▶️ Başlat", use_container_width=True, key="start_button"):
+                start_timer()
+                st.experimental_rerun()
+        else:
+            if st.button("⏸️ Durdur", use_container_width=True, key="stop_button"):
+                stop_timer()
+                st.experimental_rerun()
 
-    # Zamanlayıcı çalışmıyorsa mevcut durumu göster
-    else:
-        mins, secs = divmod(st.session_state.pomodoro_time, 60)
-        timer_display.markdown(f"""
-            <div style="
-                text-align: center; 
-                font-size: 5rem; 
-                font-weight: bold; 
-                background: rgba(255,255,255,0.1); 
-                border-radius: 10px;
-                padding: 2rem;
-            ">
-                {mins:02}:{secs:02}
-            </div>
-            <p style="text-align:center; font-size:1.2rem; color:#ccc;">{POMODORO_MODES[st.session_state.pomodoro_mode]['label']}</p>
-        """, unsafe_allow_html=True)
-        pomodoro_progress_bar.progress(min(st.session_state.pomodoro_count / 8, 1.0))
-        pomodoro_progress_text.text(f"Bugünkü Pomodoro: {st.session_state.pomodoro_count}/8")
-
+    with col_stop:
+        if st.button("⏹️ Sıfırla", use_container_width=True, key="reset_button"):
+            reset_timer()
+            st.experimental_rerun()
+            
+    with col_reset:
+        st.markdown(f'<p style="text-align: center; color: #ccc; font-size: 0.9rem; margin-top: 10px;">Tamamlanan Pomodoro: <strong>{st.session_state.pomodoro_count}</strong></p>', unsafe_allow_html=True)
 def main():
     initialize_session_state()
     
