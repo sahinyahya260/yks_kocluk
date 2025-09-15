@@ -12,7 +12,10 @@ import json
 import os
 import random
 import time
-
+import streamlit as st
+import time
+from datetime import datetime
+import random
 # Veri kaydetme fonksiyonu
 def save_user_data(username, data):
     """Kullanıcı verilerini JSON dosyasına kaydeder."""
@@ -498,9 +501,11 @@ def öğrenci_bilgi_formu():
 
 def derece_günlük_program():
     
-    st.markdown('<div class="section-header">📅 Mükemmel Ders Programı Asistanı</div>', unsafe_allow_html=True)
 
-    # Renkli ve modern arayüz için CSS stilleri
+
+    st.markdown('<div class="section-header">📅 Mükemmel Ders Programı Asistanı</div>', unsafe_allow_html=True)
+    
+    # CSS stilleri
     st.markdown("""
         <style>
         .program-card {
@@ -546,24 +551,6 @@ def derece_günlük_program():
             font-size: 0.9rem;
             color: #bdc3c7;
         }
-        .tyt-tag {
-            background-color: #3498db;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-align: center;
-        }
-        .ayt-tag {
-            background-color: #e74c3c;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-align: center;
-        }
         .stButton>button {
             width: 100%;
             border-radius: 10px;
@@ -573,46 +560,151 @@ def derece_günlük_program():
             color: white;
             border: none;
         }
+        .strategy-tip {
+            background-color: #2c3e50;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
         </style>
     """, unsafe_allow_html=True)
     
-    # Konu veri tabanı (Örnek TYT/AYT konuları)
-    KONULAR = {
+    # Dersler ve konular (TYT ve AYT)
+    YKS_KONULARI = {
         'TYT': {
-            'Türkçe': ['Sözcükte Anlam', 'Cümlede Anlam', 'Paragraf', 'Sözcük Türleri'],
-            'Matematik': ['Temel Kavramlar', 'Sayı Kümeleri', 'Bölme-Bölünebilme', 'Rasyonel Sayılar'],
-            'Coğrafya': ['Coğrafyanın Konusu', 'Dünya’nın Şekli ve Hareketleri', 'İklim Bilgisi'],
-            'Tarih': ['Tarih Bilimi', 'İlk Çağ Uygarlıkları', 'İslam Tarihi'],
-            'Kimya': ['Kimya Bilimi', 'Atom ve Yapısı', 'Periyodik Sistem'],
-            'Biyoloji': ['Canlıların Ortak Özellikleri', 'Hücre', 'Canlılar Dünyası'],
-            'Fizik': ['Fizik Bilimi', 'Madde ve Özellikleri', 'Isı ve Sıcaklık'],
-            'Felsefe': ['Felsefenin Alanı', 'Bilgi Felsefesi'],
+            'Türkçe': ['Sözcükte Anlam', 'Cümlede Anlam', 'Paragraf', 'Sözcük Türleri', 'Cümle Çeşitleri'],
+            'Matematik': ['Temel Kavramlar', 'Sayı Kümeleri', 'Bölme-Bölünebilme', 'Rasyonel Sayılar', 'Eşitsizlikler', 'Mutlak Değer'],
+            'Geometri': ['Temel Geometrik Kavramlar', 'Doğruda Açılar', 'Üçgende Açılar', 'Dik Üçgen'],
+            'Fizik': ['Fizik Bilimi', 'Madde ve Özellikleri', 'Isı ve Sıcaklık', 'Hareket ve Kuvvet'],
+            'Kimya': ['Kimya Bilimi', 'Atom ve Yapısı', 'Periyodik Sistem', 'Kimyasal Türler Arası Etkileşimler'],
+            'Biyoloji': ['Canlıların Ortak Özellikleri', 'Hücre', 'Canlılar Dünyası', 'Kalıtım'],
+            'Tarih': ['Tarih Bilimi', 'İlk Çağ Uygarlıkları', 'İslam Tarihi', 'Türklerde Devlet Yapısı'],
+            'Coğrafya': ['Coğrafyanın Konusu', 'Dünya’nın Şekli ve Hareketleri', 'İklim Bilgisi', 'Harita Bilgisi'],
+            'Felsefe': ['Felsefenin Alanı', 'Bilgi Felsefesi', 'Varlık Felsefesi'],
             'Din Kültürü': ['Din ve İslam', 'İslam ve İbadetler']
         },
         'AYT': {
-            'Matematik': ['Polinomlar', 'İkinci Dereceden Denklemler', 'Parabol', 'Fonksiyonlar', 'Trigonometri'],
-            'Edebiyat': ['Şiir Bilgisi', 'Türk Şiiri', 'Tanzimat Edebiyatı', 'Servet-i Fünun Edebiyatı'],
-            'Tarih': ['İlk Türk Devletleri', 'Osmanlı Kuruluş', 'Kurtuluş Savaşı'],
-            'Coğrafya': ['Ekosistem', 'Nüfus Politikaları', 'Sanayi ve Ulaşım'],
-            'Fizik': ['Vektörler', 'Newton’ın Hareket Yasaları', 'Elektrik'],
-            'Kimya': ['Modern Atom Teorisi', 'Gazlar', 'Sıvı Çözeltiler']
+            'Matematik': ['Polinomlar', 'İkinci Dereceden Denklemler', 'Parabol', 'Trigonometri', 'Logaritma', 'Limit ve Süreklilik'],
+            'Fizik': ['Vektörler', 'Newton’ın Hareket Yasaları', 'Elektrik', 'Basit Harmonik Hareket', 'Dalga Mekaniği'],
+            'Kimya': ['Modern Atom Teorisi', 'Gazlar', 'Sıvı Çözeltiler', 'Kimyasal Denge', 'Enerji Kaynakları'],
+            'Biyoloji': ['Nükleik Asitler', 'Protein Sentezi', 'Canlılık ve Enerji', 'Dolaşım Sistemi', 'Endokrin Sistem'],
+            'Edebiyat': ['Şiir Bilgisi', 'Türk Şiiri', 'Tanzimat Edebiyatı', 'Servet-i Fünun Edebiyatı', 'Divan Edebiyatı'],
+            'Tarih': ['İlk Türk Devletleri', 'Osmanlı Kuruluş Dönemi', 'Kurtuluş Savaşı', 'Cumhuriyet Dönemi'],
+            'Coğrafya': ['Ekosistem', 'Nüfus Politikaları', 'Sanayi ve Ulaşım']
         }
     }
     
     # Session state'i başlat
     if 'program_detaylari' not in st.session_state:
         st.session_state.program_detaylari = None
+    if 'kisi_bilgileri' not in st.session_state:
+        st.session_state.kisi_bilgileri = None
 
-    if st.session_state.program_detaylari is None:
+    def generate_professional_program(bilgiler):
+        program = {}
+        gunler = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
+        
+        # En zor dersleri belirle
+        zor_dersler = bilgiler['zor_dersler']
+        
+        # TYT-AYT dengesi
+        tyt_ders_sayisi = int(bilgiler['tyt_ayt_orani'] / 100 * 4) # Günde 4 ders bloku varsayımı
+        ayt_ders_sayisi = 4 - tyt_ders_sayisi
+
+        # Konu listelerini hazırla
+        tyt_konu_listesi = [(k, v) for k, v in YKS_KONULARI['TYT'].items()]
+        ayt_konu_listesi = [(k, v) for k, v in YKS_KONULARI['AYT'].items()]
+        
+        random.shuffle(tyt_konu_listesi)
+        random.shuffle(ayt_konu_listesi)
+        
+        # Programı oluştur
+        for gun in gunler:
+            gun_programi = []
+            
+            # Günün stratejisi
+            st.session_state.gunun_stratejisi = {
+                'Pazartesi': "Haftaya sağlam bir başlangıç yap. En zor dersini sabah erken saatlerde çalış.",
+                'Salı': "Ders tekrarını ihmal etme. Önceki gün çalıştığın konudan soru çözerek pekiştir.",
+                'Çarşamba': "Zihinsel yorgunluğun arttığı gün. Zor ve kolay dersleri karıştırarak çalış.",
+                'Perşembe': "Hafta sonu denemesine hazırlan. Eksik konularına blitz tekrar (hızlı tekrar) yap.",
+                'Cuma': "TYT ve AYT derslerini dengeli bir şekilde tekrar et. Bu hafta çalıştığın konuların genel tekrarını yap.",
+                'Cumartesi': "Deneme çözümü ve analizi çok önemli. Yanlışlarından ders çıkar ve not al.",
+                'Pazar': "Dinlenmeye ve motivasyonunu yenilemeye odaklan. Haftalık planını gözden geçir."
+            }
+
+            # Ders blokları
+            ders_bloklari = []
+            # Zor dersleri önceliklendir
+            for ders_adi in zor_dersler:
+                if ders_adi in YKS_KONULARI['TYT'] and YKS_KONULARI['TYT'][ders_adi]:
+                    konu = YKS_KONULARI['TYT'][ders_adi].pop(0)
+                    ders_bloklari.append({'ders': ders_adi, 'konu': konu, 'tür': 'TYT'})
+                elif ders_adi in YKS_KONULARI['AYT'] and YKS_KONULARI['AYT'][ders_adi]:
+                    konu = YKS_KONULARI['AYT'][ders_adi].pop(0)
+                    ders_bloklari.append({'ders': ders_adi, 'konu': konu, 'tür': 'AYT'})
+            
+            # Kalan dersleri ekle
+            tyt_sayac = len([b for b in ders_bloklari if b['tür'] == 'TYT'])
+            ayt_sayac = len([b for b in ders_bloklari if b['tür'] == 'AYT'])
+            
+            while tyt_sayac < tyt_ders_sayisi and tyt_konu_listesi:
+                ders, konular = tyt_konu_listesi.pop(0)
+                if konular:
+                    ders_bloklari.append({'ders': ders, 'konu': konular.pop(0), 'tür': 'TYT'})
+                    tyt_sayac += 1
+            
+            while ayt_sayac < ayt_ders_sayisi and ayt_konu_listesi:
+                ders, konular = ayt_konu_listesi.pop(0)
+                if konular:
+                    ders_bloklari.append({'ders': ders, 'konu': konular.pop(0), 'tür': 'AYT'})
+                    ayt_sayac += 1
+            
+            random.shuffle(ders_bloklari)
+            
+            # Zaman çizelgesi
+            saat = 9  # Başlangıç saati
+            
+            # Sabah bloku
+            for i in range(2):
+                if not ders_bloklari: break
+                ders = ders_bloklari.pop(0)
+                gun_programi.append({'saat': f"{saat:02d}:00", 'aktivite': f"Konu Çalışması: {ders['ders']} - {ders['konu']}", 'tip': ders['tür'], 'icon': '📚'})
+                saat += 1
+                gun_programi.append({'saat': f"{saat:02d}:00", 'aktivite': f"Soru Çözümü: {ders['ders']}", 'tip': ders['tür'], 'icon': '📝'})
+                saat += 1
+            
+            gun_programi.append({'saat': f"{saat:02d}:00", 'aktivite': "Öğle Yemeği & Uzun Mola", 'tip': 'Mola', 'icon': '🍽️'})
+            saat += 1
+            
+            # Öğleden sonra bloku
+            for i in range(2):
+                if not ders_bloklari: break
+                ders = ders_bloklari.pop(0)
+                gun_programi.append({'saat': f"{saat:02d}:00", 'aktivite': f"Konu Çalışması: {ders['ders']} - {ders['konu']}", 'tip': ders['tür'], 'icon': '📚'})
+                saat += 1
+                gun_programi.append({'saat': f"{saat:02d}:00", 'aktivite': f"Soru Çözümü: {ders['ders']}", 'tip': ders['tür'], 'icon': '📝'})
+                saat += 1
+            
+            gun_programi.append({'saat': f"{saat:02d}:00", 'aktivite': "Akşam Yemeği & Dinlenme", 'tip': 'Mola', 'icon': '🧘'})
+            saat += 1
+            
+            # Akşam tekrar bloku
+            gun_programi.append({'saat': f"{saat:02d}:00", 'aktivite': "Aktif Hatırlama & Blitz Tekrar", 'tip': 'Tekrar', 'icon': '🧠'})
+
+            program[gun] = gun_programi
+        return program
+
+    if st.session_state.kisi_bilgileri is None:
         st.info("🎯 Lütfen güncel durumunu girerek sana özel profesyonel programını oluşturalım.")
         
         with st.form("program_giriş_formu"):
             st.subheader("Haftalık Hedefler ve Durum Analizi")
             
-            # Öğrencinin güçlü ve zayıf derslerini belirleme
-            zayif_dersler = st.multiselect(
+            zor_dersler = st.multiselect(
                 'Bu hafta en çok odaklanmak istediğin, zorlandığın dersler neler?',
-                options=list(KONULAR['TYT'].keys()) + list(KONULAR['AYT'].keys()),
+                options=list(YKS_KONULARI['TYT'].keys()) + list(YKS_KONULARI['AYT'].keys()),
                 help="Buraya eklediğin derslere programında daha çok yer verilecektir."
             )
             
@@ -621,74 +713,58 @@ def derece_günlük_program():
                 min_value=0, max_value=100, value=70, format="%d%% TYT"
             )
             
-            # Programı oluşturan ana fonksiyon
             submitted = st.form_submit_button("Programımı Oluştur")
             
             if submitted:
-                # Verimlilik sırasına göre konuları belirle
-                tyt_konu_sayisi = int((len(KONULAR['TYT']) + len(KONULAR['AYT'])) * (tyt_ayt_orani / 100))
-                ayt_konu_sayisi = (len(KONULAR['TYT']) + len(KONULAR['AYT'])) - tyt_konu_sayisi
-                
-                # Zayıf dersleri önceliklendirerek konuya göre program oluşturma mantığı
-                haftalik_plan = []
-                tyt_dersleri = list(KONULAR['TYT'].keys())
-                ayt_dersleri = list(KONULAR['AYT'].keys())
-                
-                # Zayıf dersleri en başa al
-                for ders in zayif_dersler:
-                    if ders in tyt_dersleri:
-                        if len(KONULAR['TYT'][ders]) > 0:
-                            haftalik_plan.append({'ders': ders, 'konu': KONULAR['TYT'][ders][0], 'tur': 'TYT'})
-                            KONULAR['TYT'][ders].pop(0)
-                            
-                    elif ders in ayt_dersleri:
-                         if len(KONULAR['AYT'][ders]) > 0:
-                            haftalik_plan.append({'ders': ders, 'konu': KONULAR['AYT'][ders][0], 'tur': 'AYT'})
-                            KONULAR['AYT'][ders].pop(0)
-
-                # Kalan konuları ekle
-                tum_dersler = tyt_dersleri + ayt_dersleri
-                random.shuffle(tum_dersler)
-                
-                for ders in tum_dersler:
-                    if ders in KONULAR['TYT'] and KONULAR['TYT'][ders]:
-                        haftalik_plan.append({'ders': ders, 'konu': KONULAR['TYT'][ders][0], 'tur': 'TYT'})
-                    elif ders in KONULAR['AYT'] and KONULAR['AYT'][ders]:
-                        haftalik_plan.append({'ders': ders, 'konu': KONULAR['AYT'][ders][0], 'tur': 'AYT'})
-                
-                st.session_state.program_detaylari = haftalik_plan
+                st.session_state.kisi_bilgileri = {
+                    'zor_dersler': zor_dersler,
+                    'tyt_ayt_orani': tyt_ayt_orani
+                }
+                st.session_state.program_detaylari = generate_professional_program(st.session_state.kisi_bilgileri)
                 st.rerun()
-
     else:
         st.markdown(f"""
             <div class="program-card">
                 <h3>Bu Haftaki Sınav Stratejin</h3>
-                <p style="color:#bdc3c7;">İşte senin için özel olarak hazırlanmış haftalık konu planın. Bu plana sadık kalarak eksiklerini hızla tamamlayabilirsin.</p>
+                <p style="color:#bdc3c7;">
+                    İşte senin için özel olarak hazırlanmış, eksiklerine ve çalışma alışkanlıklarına göre tasarlanmış haftalık planın. 
+                    Bu plana sadık kalarak hedeflerine ulaşabilirsin.
+                </p>
             </div>
         """, unsafe_allow_html=True)
         
-        # Her bir konuyu ayrı bir kartta göster
-        for konu in st.session_state.program_detaylari:
-            tur_tag = 'tyt-tag' if konu['tur'] == 'TYT' else 'ayt-tag'
+        gunler = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
+
+        for gun in gunler:
+            st.markdown(f'<div class="program-card">', unsafe_allow_html=True)
+            st.markdown(f'<h3>{gun}</h3>', unsafe_allow_html=True)
             
+            # Günün stratejisi ipucu
             st.markdown(f"""
-                <div class="program-topic">
-                    <span class="topic-icon" style="color: {'#3498db' if konu['tur'] == 'TYT' else '#e74c3c'};">{AKTIVITE_AYARLARI.get('ders')['icon']}</span>
-                    <div class="topic-details">
-                        <strong>{konu['ders']} - {konu['konu']}</strong>
-                        <span class="{tur_tag}">{konu['tur']}</span>
-                    </div>
+                <div class="strategy-tip">
+                    <strong>Günün Stratejisi:</strong> {st.session_state.gunun_stratejisi.get(gun, 'Bugün verimliliğini en üst seviyeye çıkarmaya odaklan.')}
                 </div>
             """, unsafe_allow_html=True)
+            
+            gun_programi = st.session_state.program_detaylari.get(gun, [])
+            
+            for aktivite in gun_programi:
+                st.markdown(f"""
+                    <div class="program-topic">
+                        <span class="topic-icon">{aktivite['icon']}</span>
+                        <div class="topic-details">
+                            <strong>{aktivite['aktivite']}</strong>
+                            <span>{aktivite['saat']}</span>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown("---")
-        
-        st.warning("⚠️ Not: Bu program, eksik konularına ve girmiş olduğun verilere göre otomatik oluşturulmuştur. Daha detaylı bir program için her gün tamamladığın konuları işaretlemeyi unutma.")
-        
-        if st.button("Programı Sıfırla ve Yeni Haftaya Başla", key="reset_program"):
+        if st.button("Yeni Haftaya Başla ve Programı Yeniden Oluştur"):
+            st.session_state.kisi_bilgileri = None
             st.session_state.program_detaylari = None
             st.rerun()
-
 def derece_konu_takibi():
     
     
