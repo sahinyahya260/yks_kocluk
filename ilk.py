@@ -1219,6 +1219,17 @@ def main():
                 st.rerun()
         
         if menu == "🏠 Ana Sayfa":
+             st.markdown('<div class="section-header">📊 Genel İlerleme</div>', unsafe_allow_html=True)
+             if st.session_state.konu_durumu:
+                 tamamla_map = {"Başlangıç": 0, "Orta": 0.5, "İleri": 0.75, "Uzman": 1.0}
+                 toplam = 0
+                 for konu, seviye in st.session_state.konu_durumu.items():
+                toplam += tamamla_map.get(seviye, 0)
+                yüzde = (toplam / len(st.session_state.konu_durumu)) * 100
+                st.progress(int(yüzde))
+                    st.write(f"### ✅ Konu Tamamlama Oranı: %{yüzde:.1f}")
+            else:
+                        st.info("Henüz konu işlenmedi. Konu Masterysi bölümünden işleme başlayın!")
             st.markdown(f'''
             <div class="hero-section">
                 <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
