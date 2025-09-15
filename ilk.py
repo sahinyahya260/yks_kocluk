@@ -11,6 +11,68 @@ import hashlib
 import json
 import os
 import random
+import time
+
+def pomodoro_timer():
+    st.markdown('<div class="section-header">⏱️ Akıllı Çalışma Zamanlayıcısı</div>', unsafe_allow_html=True)
+
+    if "pomodoro_state" not in st.session_state:
+        st.session_state.pomodoro_state = {
+            "mode": "Çalışma Modu",
+            "time_left": 25*60,
+            "running": False,
+            "completed": 0,
+            "target": 8
+        }
+
+    state = st.session_state.pomodoro_state
+
+    # Dakika:sn formatı
+    mins, secs = divmod(state["time_left"], 60)
+    st.markdown(f"<h2 style='text-align:center'>{mins:02d}:{secs:02d} ({state['mode']})</h2>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("▶️ Başla"):
+            state["running"] = True
+    with col2:
+        if st.button("⏸️ Duraklat"):
+            state["running"] = False
+    with col3:
+        if st.button("🔄 Sıfırla"):
+            state.update({"mode": "Çalışma Modu", "time_left": 25*60, "running": False})
+
+    st.markdown("### 🎯 Mod Seç")
+    col4, col5, col6, col7 = st.columns(4)
+    with col4:
+        if st.button("🍅 Pomodoro (25dk)"):
+            state.update({"mode": "Çalışma Modu", "time_left": 25*60, "running": False})
+    with col5:
+        if st.button("☕ Kısa Mola (5dk)"):
+            state.update({"mode": "Kısa Mola", "time_left": 5*60, "running": False})
+    with col6:
+        if st.button("😴 Uzun Mola (15dk)"):
+            state.update({"mode": "Uzun Mola", "time_left": 15*60, "running": False})
+    with col7:
+        if st.button("🚀 Derin Odak (50dk)"):
+            state.update({"mode": "Derin Odak", "time_left": 50*60, "running": False})
+
+    # İlerleme
+    progress = state["completed"] / state["target"]
+    st.progress(progress)
+    st.write(f"Bugünkü Pomodoro: {state['completed']}/{state['target']}")
+
+    # Çalışma modundaysa süreyi azalt
+    if state["running"]:
+        state["time_left"] -= 1
+        if state["time_left"] <= 0:
+            state["running"] = False
+            if state["mode"] == "Çalışma Modu":
+                state["completed"] += 1
+            st.success(f"{state['mode']} tamamlandı! 🎉")
+
+        time.sleep(1)
+        st.experimental_rerun()
 
 # Veri kaydetme fonksiyonu
 def save_user_data(username, data):
@@ -1077,6 +1139,8 @@ def main():
             
             menu = st.selectbox("📋 Derece Menüsü", [
                 "🏠 Ana Sayfa",
+                "⏱️ Pomodoro Zamanlayıcı",
+
                 "📅 Günlük Program", 
                 "🎯 Konu Masterysi",
                 "📈 Deneme Analizi",
@@ -1150,6 +1214,10 @@ def main():
             
         elif menu == "🎯 Konu Masterysi":
             derece_konu_takibi()
+        
+        elif menu == "⏱️ Pomodoro Zamanlayıcı":
+                pomodoro_timer()
+
             
         elif menu == "📈 Deneme Analizi":
             derece_deneme_analizi()
