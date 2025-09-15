@@ -1227,62 +1227,6 @@ def main():
             </div>
             ''', unsafe_allow_html=True)
             
-            # Ana sayfada kullanmak için mastery seviyelerini tanımlıyoruz.
-            mastery_seviyeleri = {
-                "Hiç Bilmiyor": 0,
-                "Temel Bilgi": 25,
-                "Orta Seviye": 50,
-                "İyi Seviye": 75,
-                "Uzman (Derece) Seviye": 100
-            }
-
-            # İlerleme çubukları ve genel durum
-            st.markdown('<div class="section-header">📈 Konu Tamamlama Durumu</div>', unsafe_allow_html=True)
-            
-            if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
-                konu_ilerleme_yuzdeleri = {}
-                for anahtar, seviye in st.session_state.konu_durumu.items():
-                    # Ders ve konuyu ayır
-                    parcalar = anahtar.split('-')
-                    ders_turu = parcalar[0]
-                    ders = parcalar[1]
-                    konu = parcalar[2]
-                    
-                    # Yüzdelik değeri al
-                    yuzde = mastery_seviyeleri.get(seviye, 0)
-                    
-                    # Her ders için ortalama ilerlemeyi hesapla
-                    if ders not in konu_ilerleme_yuzdeleri:
-                        konu_ilerleme_yuzdeleri[ders] = {'toplam_yuzde': 0, 'sayi': 0}
-                    
-                    konu_ilerleme_yuzdeleri[ders]['toplam_yuzde'] += yuzde
-                    konu_ilerleme_yuzdeleri[ders]['sayi'] += 1
-                
-                # İlerleme çubuklarını göster
-                for ders, veriler in konu_ilerleme_yuzdeleri.items():
-                    ortalama_yuzde = veriler['toplam_yuzde'] / veriler['sayi']
-                    st.write(f"**{ders} Konu Tamamlama:**")
-                    st.progress(ortalama_yuzde / 100)
-                    st.write(f"**%{round(ortalama_yuzde, 1)} tamamlandı**")
-                
-                # Genel hedef durumu
-                toplam_yuzde = sum(v['toplam_yuzde'] for v in konu_ilerleme_yuzdeleri.values())
-                toplam_konu = sum(v['sayi'] for v in konu_ilerleme_yuzdeleri.values())
-                
-                genel_ortalama = toplam_yuzde / toplam_konu if toplam_konu > 0 else 0
-                
-                st.markdown('### 🎯 Genel Hedef Durumu', unsafe_allow_html=True)
-                st.metric(
-                    label="Ortalama Konu İlerlemesi", 
-                    value=f"%{round(genel_ortalama, 1)}", 
-                    delta="Tüm konuların ortalaması"
-                )
-            else:
-                st.info("Henüz 'Konu Masterysi' bölümüne veri girmediniz. Lütfen konularınızı tamamlayın.")
-            
-            # --- Mevcut Hızlı İstatistikler ---
-            st.markdown('<div class="section-header">🚀 Hızlı İstatistikler</div>', unsafe_allow_html=True)
-            
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
@@ -1320,52 +1264,6 @@ def main():
                     <h2 style="color: {tema['renk']};">{motivasyon}%</h2>
                 </div>
                 ''', unsafe_allow_html=True)
-            
-            st.markdown(f'''
-            <div class="hero-section">
-                <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
-                <p style="font-size: 1.3rem;">"{bilgi['hedef_bölüm']}" hedefine giden yolda!</p>
-            </div>
-            ''', unsafe_allow_html=True)
-            
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                konu_sayısı = len(st.session_state.konu_durumu)
-                st.markdown(f'''
-                <div class="metric-card">
-                    <h3>📚 Toplam Konu</h3>
-                    <h2 style="color: {tema['renk']};">{konu_sayısı}</h2>
-                </div>
-                ''', unsafe_allow_html=True)
-            
-            with col2:
-                deneme_sayısı = len(st.session_state.deneme_sonuçları)
-                st.markdown(f'''
-                <div class="metric-card">
-                    <h3>📝 Toplam Deneme</h3>
-                    <h2 style="color: {tema['renk']};">{deneme_sayısı}</h2>
-                </div>
-                ''', unsafe_allow_html=True)
-            
-            with col3:
-                çalışma_günü = len(st.session_state.günlük_çalışma_kayıtları)
-                st.markdown(f'''
-                <div class="metric-card">
-                    <h3>📅 Çalışma Günü</h3>
-                    <h2 style="color: {tema['renk']};">{çalışma_günü}</h2>
-                </div>
-                ''', unsafe_allow_html=True)
-            
-            with col4:
-                motivasyon = st.session_state.motivasyon_puanı
-                st.markdown(f'''
-                <div class="metric-card">
-                    <h3>💪 Motivasyon</h3>
-                    <h2 style="color: {tema['renk']};">{motivasyon}%</h2>
-                </div>
-                ''', unsafe_allow_html=True)
-                
             
         elif menu == "⏰ Pomodoro Zamanlayıcısı":
             pomodoro_zamanlayıcısı_sayfası()
