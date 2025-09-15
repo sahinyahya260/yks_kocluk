@@ -1689,84 +1689,91 @@ def psikolojik_destek_sayfası():
     st.info("Unutma, bu süreçte yalnız değilsin. Kendine iyi bakmak, en az ders çalışmak kadar önemlidir. Başarılar dileriz!")
 def pomodoro_zamanlayıcısı_sayfası():
     
-    st.markdown('<div class="section-header">⏰ Pomodoro Zamanlayıcısı</div>', unsafe_allow_html=True)
+   
+    st.markdown('<div class="section-header">⏰ Akıllı Çalışma Zamanlayıcısı</div>', unsafe_allow_html=True)
     
-    # Görseldeki tasarıma tam olarak uyması için özel CSS
+    # Özel CSS ile fotoğraftaki tasarımı oluşturma
     st.markdown("""
-        <style>
-        /* Zamanlayıcı Kapsayıcı Kartı */
-        .timer-container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 3rem 2rem;
-            margin: 2rem auto;
-            max-width: 500px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        /* Zaman Metni */
-        .timer-text {
-            font-size: 6rem;
-            font-weight: bold;
-            color: #ffffff;
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
-            margin-bottom: 0.5rem;
-        }
-        /* Etiket Metni */
-        .timer-label {
-            font-size: 1.4rem;
-            color: #ccc;
-        }
-        /* Butonları saran div */
-        .stButton>button {
-            border: none;
-            border-radius: 15px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            font-weight: bold;
-            color: #fff;
-            background-color: transparent;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        /* Butonlara özel renkleri ve kenarlıkları tanımlama */
-        .st-emotion-cache-1c7y3qj button {
-            border: 2px solid #3498db;
-        }
-        .st-emotion-cache-1c7y3qj button:hover {
-            background-color: #3498db;
-        }
-        .st-emotion-cache-1c7y3qj:nth-of-type(2) button {
-            border: 2px solid #e74c3c;
-        }
-        .st-emotion-cache-1c7y3qj:nth-of-type(2) button:hover {
-            background-color: #e74c3c;
-        }
-        .st-emotion-cache-1c7y3qj:nth-of-type(3) button {
-            border: 2px solid #f1c40f;
-        }
-        .st-emotion-cache-1c7y3qj:nth-of-type(3) button:hover {
-            background-color: #f1c40f;
-        }
-        </style>
+    <style>
+    .pomodoro-container {
+        background: #2c3e50;
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 1rem auto;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        color: white;
+        font-family: 'Arial', sans-serif;
+    }
+    .timer-display {
+        font-size: 3.5rem;
+        font-weight: bold;
+        margin: 1rem 0;
+        color: #ecf0f1;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .mode-display {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        color: #bdc3c7;
+    }
+    .pomodoro-button {
+        background: #34495e;
+        border: none;
+        border-radius: 50px;
+        padding: 10px 20px;
+        margin: 0.5rem;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 120px;
+    }
+    .pomodoro-button:hover {
+        background: #3498db;
+        transform: translateY(-2px);
+    }
+    .mode-selector {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 1.5rem 0;
+    }
+    .mode-option {
+        padding: 8px 15px;
+        border-radius: 20px;
+        background: #34495e;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .mode-option.active {
+        background: #3498db;
+    }
+    .stats-display {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 15px;
+    }
+    </style>
     """, unsafe_allow_html=True)
     
     # POMODORO modları ve süreleri
     POMODORO_MODES = {
-        'Çalışma Modu': {'label': '📚 Çalışma', 'time': 25 * 60},
-        'Kısa Mola': {'label': '☕ Kısa Mola', 'time': 5 * 60},
-        'Uzun Mola': {'label': '🏖️ Uzun Mola', 'time': 15 * 60}
+        'Pomodoro': {'label': 'Pomodoro (25dk)', 'time': 25 * 60, 'color': '#e74c3c'},
+        'Kısa Mola': {'label': 'Kısa Mola (5dk)', 'time': 5 * 60, 'color': '#2ecc71'},
+        'Uzun Mola': {'label': 'Uzun Mola (15dk)', 'time': 15 * 60, 'color': '#9b59b6'},
+        'Derin Odak': {'label': 'Derin Odak (50dk)', 'time': 50 * 60, 'color': '#f39c12'}
     }
     
     # Session state'i başlat
     if 'pomodoro_mode' not in st.session_state:
-        st.session_state.pomodoro_mode = 'Çalışma Modu'
-        st.session_state.pomodoro_time = POMODORO_MODES['Çalışma Modu']['time']
+        st.session_state.pomodoro_mode = 'Pomodoro'
+        st.session_state.pomodoro_time = POMODORO_MODES['Pomodoro']['time']
         st.session_state.pomodoro_running = False
         st.session_state.pomodoro_count = 0
+        st.session_state.pomodoro_goal = 8
 
     # Zamanlayıcı fonksiyonları
     def start_timer():
@@ -1777,9 +1784,12 @@ def pomodoro_zamanlayıcısı_sayfası():
 
     def reset_timer():
         st.session_state.pomodoro_running = False
-        st.session_state.pomodoro_mode = 'Çalışma Modu'
-        st.session_state.pomodoro_time = POMODORO_MODES['Çalışma Modu']['time']
-        st.session_state.pomodoro_count = 0
+        st.session_state.pomodoro_time = POMODORO_MODES[st.session_state.pomodoro_mode]['time']
+
+    def set_mode(mode):
+        st.session_state.pomodoro_mode = mode
+        st.session_state.pomodoro_time = POMODORO_MODES[mode]['time']
+        st.session_state.pomodoro_running = False
 
     # Zamanlayıcıyı güncelleme
     if st.session_state.pomodoro_running:
@@ -1790,55 +1800,71 @@ def pomodoro_zamanlayıcısı_sayfası():
         if st.session_state.pomodoro_time <= 0:
             st.session_state.pomodoro_running = False
             
-            # Modlar arası geçiş
-            if st.session_state.pomodoro_mode == 'Çalışma Modu':
+            # Pomodoro tamamlandıysa sayacı artır
+            if st.session_state.pomodoro_mode == 'Pomodoro':
                 st.session_state.pomodoro_count += 1
+                st.balloons()
+                st.success("Pomodoro tamamlandı! Bir mola zamanı!")
+            
+            # Otomatik olarak bir sonraki moda geç
+            if st.session_state.pomodoro_mode == 'Pomodoro':
                 if st.session_state.pomodoro_count % 4 == 0:
-                    st.session_state.pomodoro_mode = 'Uzun Mola'
+                    set_mode('Uzun Mola')
                 else:
-                    st.session_state.pomodoro_mode = 'Kısa Mola'
+                    set_mode('Kısa Mola')
             else:
-                st.session_state.pomodoro_mode = 'Çalışma Modu'
+                set_mode('Pomodoro')
             
-            st.session_state.pomodoro_time = POMODORO_MODES[st.session_state.pomodoro_mode]['time']
-            st.session_state.pomodoro_running = True # Otomatik başlat
-            st.balloons()
-            st.success(f"Süre doldu! Şimdi bir {POMODORO_MODES[st.session_state.pomodoro_mode]['label']} zamanı!")
+            st.session_state.pomodoro_running = True
             st.rerun()
-            
-    # Zamanlayıcı arayüzü
-    st.markdown('<div class="timer-container">', unsafe_allow_html=True)
     
+    # Zamanlayıcı arayüzü
+    st.markdown('<div class="pomodoro-container">', unsafe_allow_html=True)
+    
+    # Zaman gösterimi
     minutes = st.session_state.pomodoro_time // 60
     seconds = st.session_state.pomodoro_time % 60
     time_str = f"{minutes:02d}:{seconds:02d}"
     
-    st.markdown(f'<p class="timer-label">{POMODORO_MODES[st.session_state.pomodoro_mode]["label"]}</p>', unsafe_allow_html=True)
-    st.markdown(f'<p class="timer-text">{time_str}</p>', unsafe_allow_html=True)
-        
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="timer-display">{time_str}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="mode-display">{POMODORO_MODES[st.session_state.pomodoro_mode]["label"]}</div>', unsafe_allow_html=True)
     
     # Kontrol butonları
-    col_start, col_stop, col_reset = st.columns(3)
+    col1, col2, col3 = st.columns(3)
     
-    with col_start:
-        if not st.session_state.pomodoro_running:
-            if st.button("▶️ Başlat", use_container_width=True, key="start_button"):
-                start_timer()
-                st.rerun()
-        else:
-            if st.button("⏸️ Durdur", use_container_width=True, key="stop_button"):
-                stop_timer()
-                st.rerun()
-
-    with col_stop:
+    with col1:
+        if st.button("▶️ Başla", use_container_width=True, key="start_button") and not st.session_state.pomodoro_running:
+            start_timer()
+            st.rerun()
+    
+    with col2:
+        if st.button("⏸️ Durdur", use_container_width=True, key="stop_button") and st.session_state.pomodoro_running:
+            stop_timer()
+            st.rerun()
+    
+    with col3:
         if st.button("⏹️ Sıfırla", use_container_width=True, key="reset_button"):
             reset_timer()
             st.rerun()
-            
-    with col_reset:
-        st.markdown(f'<p style="text-align: center; color: #ccc; font-size: 0.9rem; margin-top: 10px;">Tamamlanan Pomodoro: <strong>{st.session_state.pomodoro_count}</strong></p>', unsafe_allow_html=True)
-      
+    
+    # Mod seçici
+    st.markdown('<div class="mode-selector">', unsafe_allow_html=True)
+    for mode in POMODORO_MODES:
+        is_active = "active" if st.session_state.pomodoro_mode == mode else ""
+        if st.button(mode, key=f"mode_{mode}"):
+            set_mode(mode)
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # İlerleme istatistikleri
+    st.markdown('<div class="stats-display">', unsafe_allow_html=True)
+    st.markdown(f"**Bugünkü Pomodoro**")
+    progress = st.session_state.pomodoro_count / st.session_state.pomodoro_goal
+    st.markdown(f"{st.session_state.pomodoro_count}/{st.session_state.pomodoro_goal}")
+    st.progress(progress)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 def main():
     initialize_session_state()
     
