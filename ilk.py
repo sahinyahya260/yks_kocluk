@@ -1570,7 +1570,123 @@ def derece_öneriler():
         
         for alışkanlık in alışkanlıklar:
             st.markdown(f"• {alışkanlık}")
+def psikolojik_destek_sayfası():
+    st.markdown('<div class="section-header">🧠 Verimli Öğrenme Teknikleri</div>', unsafe_allow_html=True)
+    st.markdown('<p style="font-size: 1.1rem;">Bilgiyi kalıcı hale getirmek ve öğrenme verimini artırmak için bu etkili teknikleri kullanabilirsin.</p>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Her bir tekniği ayrı bir blokta göster
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        st.markdown("<p style='font-size: 3rem;'>🧠</p>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("### Feynman Tekniği")
+        st.markdown("Konuyu 5 yaşındaki bir çocuğa anlatabilecek kadar basitleştir. Bu, konuyu ne kadar iyi anladığını test eder.")
+        st.button("Dene →", key="feynman")
 
+    st.markdown("---")
+
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        st.markdown("<p style='font-size: 3rem;'>🎯</p>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("### Aktif Hatırlama (Active Recall)")
+        st.markdown("Kitaba veya deftere bakmadan konuyu hatırlamaya çalış. Beynini zorlayarak bilgiyi daha derinlemesine işlersin.")
+        st.button("Başla →", key="active_recall")
+
+    st.markdown("---")
+
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        st.markdown("<p style='font-size: 3rem;'>🔄</p>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("### Interleaving (Karışık Çalışma)")
+        st.markdown("Farklı konuları veya dersleri art arda çalış. Bu yöntem, beynin bilgiyi ayırt etme ve bağlantı kurma yeteneğini güçlendirir.")
+        st.button("Uygula →", key="interleaving")
+
+    st.markdown("---")
+
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        st.markdown("<p style='font-size: 3rem;'>🎨</p>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("### Mind Mapping (Zihin Haritası)")
+        st.markdown("Konuları anahtar kelimeler ve görsellerle bir ağaç gibi organize et. Beyin, bu görsel bağlantıları daha kolay hatırlar.")
+        st.button("Oluştur →", key="mind_mapping")
+
+    st.markdown("---")
+
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        st.markdown("<p style='font-size: 3rem;'>📝</p>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("### Cornell Not Alma Tekniği")
+        st.markdown("Sayfayı üç bölüme ayırarak not al. Bu sistematik teknik, hem öğrenmeyi hem de tekrarı kolaylaştırır.")
+        st.button("Öğren →", key="cornell")
+
+    st.markdown("---")
+    
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        st.markdown("<p style='font-size: 3rem;'>⚡</p>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("### Blitz Tekrar")
+        st.markdown("Öğrendiğin bir konuyu kısa süre sonra (örneğin 24 saat içinde) hızlıca tekrar et. Bu, bilginin uzun süreli hafızaya geçişini sağlar.")
+        st.button("Hızlan →", key="blitz")
+    st.markdown('<div class="section-header">💡 Psikolojik Destek ve Motivasyon</div>', unsafe_allow_html=True)
+    st.markdown('<p style="font-size: 1.1rem;">Sınav sürecinde psikolojik sağlığını korumak, başarının anahtarlarından biridir. İşte bu zorlu yolda sana destek olacak bazı ipuçları:</p>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    st.markdown("### 🧠 Zihinsel Hazırlık ve Odaklanma")
+    st.write("""
+    **Sınav Kaygısıyla Başa Çıkma:**
+    Sınav kaygısı, her öğrencinin yaşadığı doğal bir duygudur. Önemli olan bu kaygıyı yönetebilmektir. Nefes egzersizleri yaparak veya kısa molalar vererek zihnini dinlendirebilirsin.
+    """)
+    st.write("""
+    **Olumlu Düşünce Yapısı Geliştirme:**
+    Kendine güvenmek, motivasyonunu artırır. "Yapabilirim", "Başaracağım" gibi olumlu ifadeleri sıkça tekrarla. Başarısızlıkları birer öğrenme fırsatı olarak gör.
+    """)
+    st.write("""
+    **Hedef Belirleme:**
+    Gerçekçi ve ulaşılabilir hedefler belirlemek, motivasyonunu yüksek tutar. Büyük hedefini küçük parçalara bölerek her başarıda kendini ödüllendir.
+    """)
+    
+    st.markdown("---")
+
+    st.markdown("### 🏃🏻‍♀️ Fiziksel Sağlık ve Dinlenme")
+    st.write("""
+    **Düzenli Uyku:**
+    Uyku, beynin öğrendiklerini pekiştirdiği en önemli zamandır. Günde 7-8 saat uyumaya özen göster. Yorgun bir zihinle çalışmak verimini düşürür.
+    """)
+    st.write("""
+    **Sağlıklı Beslenme:**
+    Beyin, doğru yakıtla çalışır. Dengeli ve düzenli beslenerek enerjini yüksek tut. Şekerli ve işlenmiş gıdalardan uzak durmaya çalış.
+    """)
+    st.write("""
+    **Egzersiz Yapma:**
+    Düzenli egzersiz, stresi azaltır ve ruh halini iyileştirir. Günde 20-30 dakika yürüyüş yapmak bile zihnini tazeleyebilir.
+    """)
+    
+    st.markdown("---")
+
+    st.markdown("### 🧘🏻‍♀️ Duygusal Destek ve Stratejiler")
+    st.write("""
+    **Destek Çevresi Oluşturma:**
+    Ailen, arkadaşların ve öğretmenlerinle konuşmak, yükünü hafifletebilir. Duygularını paylaşmaktan çekinme.
+    """)
+    st.write("""
+    **Kendine Karşı Nazik Olma:**
+    Her zaman mükemmel olmak zorunda değilsin. Hata yaptığında kendine kızmak yerine, bu durumdan ders çıkar. Mola vermek, kendini şımartmak için fırsat yarat.
+    """)
+    st.write("""
+    **Zaman Yönetimi:**
+    Etkili bir program oluşturmak, kontrol hissini artırır ve stresi azaltır. Programına dinlenme molalarını ve hobilerini de eklemeyi unutma.
+    """)
+    
+    st.markdown("---")
+    st.info("Unutma, bu süreçte yalnız değilsin. Kendine iyi bakmak, en az ders çalışmak kadar önemlidir. Başarılar dileriz!")
 def pomodoro_zamanlayıcısı_sayfası():
     st.markdown('<div class="section-header">⏰ Akıllı Çalışma Zamanlayıcısı</div>', unsafe_allow_html=True)
     
@@ -1713,6 +1829,7 @@ def main():
             
             menu = st.selectbox("📋 Derece Menüsü", [
                 "🏠 Ana Sayfa",
+                "🧠 Psikolojik Taktiklerim",
                 "⏰ Pomodoro Zamanlayıcısı",
                 "📅 Günlük Program", 
                 "🎯 YKS Konuların Burda",
@@ -1921,6 +2038,9 @@ def main():
                                 """, unsafe_allow_html=True)
             else:
                 st.info("Henüz 'Konu Masterysi' bölümüne veri girmediniz. Lütfen konularınızı tamamlayın.")
+        elif menu == "🧠 Psikolojik Taktiklerim":
+            psikolojik_destek_sayfası()
+            
         elif menu == "⏰ Pomodoro Zamanlayıcısı":
             pomodoro_zamanlayıcısı_sayfası()
 
