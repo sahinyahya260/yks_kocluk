@@ -506,16 +506,21 @@ def öğrenci_bilgi_formu():
 def derece_günlük_program():
     
 
-    @dataclass
-    class OgrenciProfili:
-        isim: str
-        hedef_puan: int
-        mevcut_seviye: Dict[str, int]  # Her ders için 1-100 arası
-        zayif_konular: Dict[str, List[str]]
-        guclu_konular: Dict[str, List[str]]
-        gunluk_calisma_saati: int
-        sinav_tarihi: datetime.date
-        son_deneme_puanlari: Dict[str, List[int]]
+    import datetime
+from dataclasses import dataclass
+from typing import Dict, List, Tuple
+import json
+
+@dataclass
+class OgrenciProfili:
+    isim: str
+    hedef_puan: int
+    mevcut_seviye: Dict[str, int]  # Her ders için 1-100 arası
+    zayif_konular: Dict[str, List[str]]
+    guclu_konular: Dict[str, List[str]]
+    gunluk_calisma_saati: int
+    sinav_tarihi: datetime.date
+    son_deneme_puanlari: Dict[str, List[int]]
 
 @dataclass
 class HaftalikStrateji:
@@ -555,7 +560,7 @@ class UltraProfesyonelTYTAYTSistemi:
             'sinava_yakin': {'tyt_oran': 30, 'ayt_oran': 45, 'deneme_oran': 35}
         }
 
-    def def_gunluk_program(self, ogrenci: OgrenciProfili) -> Dict:
+    def gunluk_program_olustur(self, ogrenci: OgrenciProfili) -> Dict:
         """Ultra profesyonel TYT-AYT günlük program oluşturucu"""
         
         bugun = datetime.date.today()
@@ -967,7 +972,7 @@ def main():
     sistem = UltraProfesyonelTYTAYTSistemi()
     
     # Günlük programı oluştur
-    program = sistem.def_gunluk_program(ornek_ogrenci)
+    program = sistem.gunluk_program_olustur(ornek_ogrenci)
     
     # Sonuçları yazdır
     print("=" * 60)
@@ -1303,9 +1308,6 @@ UltraProfesyonelTYTAYTSistemi._risk_analizi_yap = _risk_analizi_yap
 
 if __name__ == "__main__":
     main()
-
-
-    
 def derece_konu_takibi():
     
     
