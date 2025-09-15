@@ -1244,6 +1244,158 @@ def main():
                 "Uzman (Derece) Seviye": "Tebrikler! Bu konu tamamen cebinde. Sadece tekrar amaçlı deneme çözerken karşına çıkan soruları kontrol etmen yeterli. Yeni konulara yönelerek zamanını daha verimli kullan."
             }
             
+            # --- Hızlı İstatistikler ---
+            st.markdown('<div class="section-header">🚀 Hızlı İstatistikler</div>', unsafe_allow_html=True)
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                konu_sayısı = len(st.session_state.konu_durumu) if 'konu_durumu' in st.session_state else 0
+                st.markdown(f'''
+                <div class="metric-card">
+                    <h3>📚 Toplam Konu</h3>
+                    <h2 style="color: {tema['renk']};">{konu_sayısı}</h2>
+                </div>
+                ''', unsafe_allow_html=True)
+            
+            with col2:
+                deneme_sayısı = len(st.session_state.deneme_sonuçları) if 'deneme_sonuçları' in st.session_state else 0
+                st.markdown(f'''
+                <div class="metric-card">
+                    <h3>📝 Toplam Deneme</h3>
+                    <h2 style="color: {tema['renk']};">{deneme_sayısı}</h2>
+                </div>
+                ''', unsafe_allow_html=True)
+            
+            with col3:
+                çalışma_günü = len(st.session_state.günlük_çalışma_kayıtları) if 'günlük_çalışma_kayıtları' in st.session_state else 0
+                st.markdown(f'''
+                <div class="metric-card">
+                    <h3>📅 Çalışma Günü</h3>
+                    <h2 style="color: {tema['renk']};">{çalışma_günü}</h2>
+                </div>
+                ''', unsafe_allow_html=True)
+            
+            with col4:
+                motivasyon = st.session_state.motivasyon_puanı if 'motivasyon_puanı' in st.session_state else 0
+                st.markdown(f'''
+                <div class="metric-card">
+                    <h3>💪 Motivasyon</h3>
+                    <h2 style="color: {tema['renk']};">{motivasyon}%</h2>
+                </div>
+                ''', unsafe_allow_html=True)
+
+            # --- Konu Tamamlama Analizi ---
+            st.markdown('<div class="section-header">📈 Konu Tamamlama Analizi</div>', unsafe_allow_html=True)
+            
+            if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
+                
+                # Verileri ders bazında grupla
+                ders_seviye_sayilari = {}
+                konu_detaylari = {}
+                
+                for anahtar, seviye in st.session_state.konu_durumu.items():
+                    parcalar = anahtar.split('-')
+                    ders = parcalar[1]
+                    konu = parcalar[2]
+                    
+                    if ders not in ders_seviye_sayilari:
+                        ders_seviye_sayilari[ders] = {s: 0 for s in mastery_seviyeleri.keys()}
+                    
+                    if ders not in konu_detaylari:
+                        konu_detaylari[ders] = []
+                    
+                    ders_seviye_sayilari[ders][seviye] += 1
+                    konu_detaylari[ders].append({"konu": konu, "seviye": seviye})
+
+                for ders, seviye_sayilari in ders_seviye_sayilari.items():
+                    toplam_konu = sum(seviye_sayilari.values())
+                    
+                    if toplam_konu == 0:
+                        continue
+                        
+                    st.markdown(f"### {ders} Genel Durumu")
+                    
+                    # Yüzdelik dağılımı DataFrame'e dönüştür
+                    yuzdeler_df = pd.DataFrame(seviye_sayilari.items(), columns=['Seviye', 'Sayi'])
+                    yuzdeler_df['Yüzde'] = yuzdeler_df['Sayi'] / toplam_konu
+                    
+                    # Genel ders durumu için dairesel (donut) grafik
+                    fig_genel = px.pie(yuzdeler_df,
+                                 values='Sayi',
+                                 names='Seviye',
+                                 title=f"{ders} Konu Dağılımı",
+                                 hole=0.4,
+                                 labels={'Seviye': 'Seviye', 'Sayi': 'Konu Sayısı'},
+                                 color_discrete_sequence=px.colors.qualitative.Pastel)
+                    
+                    fig_genel.update_traces(textinfo='percent+label', pull=[0.05] * len(yuzdeler_df))
+                    st.plotly_chart(fig_genel, use_container_width=True, key=f"genel_{ders}_chart")
+                    
+                    # Detaylar için açılır menü
+                    with st.expander(f"**{ders} Konu Detayları ve Öneriler**"):
+                        for konu_veri in konu_detaylari[ders]:
+                            konu = konu_veri['konu']
+                            seviye = konu_veri['seviye']
+                            yuzde = mastery_seviyeleri[seviye]
+                            
+                            col_detay1, col_detay2 = st.columns([1, 4])
+                            
+                            with col_detay1:
+                                # Konu için küçük dairesel ilerleme göstergesi
+                                fig_konu = go.Figure(go.Pie(
+                                    values=[yuzde, 100 - yuzde],
+                                    labels=['Tamamlandı', 'Kalan'],
+                                    hole=0.8,
+                                    marker_colors=['#3498db', '#ecf0f1'],
+                                    hoverinfo='none',
+                                    textinfo='text',
+                                    text=[f'{yuzde}%', ''],
+                                    textfont_size=20,
+                                    textfont_color='#2c3e50',
+                                    showlegend=False
+                                ))
+                                fig_konu.update_layout(
+                                    width=150,
+                                    height=150,
+                                    margin=dict(t=0, b=0, l=0, r=0),
+                                    annotations=[dict(text=f'{yuzde}%', x=0.5, y=0.5, font_size=20, showarrow=False)]
+                                )
+                                st.plotly_chart(fig_konu, use_container_width=True, key=f"konu_{ders}_{konu}_chart")
+
+                            with col_detay2:
+                                st.markdown(f"**{konu}** - *{seviye}*")
+                                st.markdown(f"""
+                                    <div style="background-color: #ecf0f1; border-left: 5px solid #3498db; padding: 10px; margin-top: 10px; border-radius: 5px;">
+                                        <strong>İpucu:</strong> {oneriler[seviye]}
+                                    </div>
+                                """, unsafe_allow_html=True)
+            else:
+                st.info("Henüz 'Konu Masterysi' bölümüne veri girmediniz. Lütfen konularınızı tamamlayın.")
+            st.markdown(f'''
+            <div class="hero-section">
+                <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
+                <p style="font-size: 1.3rem;">"{bilgi['hedef_bölüm']}" hedefine giden yolda!</p>
+            </div>
+            ''', unsafe_allow_html=True)
+            
+            # Mastery seviyelerini ve önerileri tanımla
+            mastery_seviyeleri = {
+                "Hiç Bilmiyor": 0,
+                "Temel Bilgi": 25,
+                "Orta Seviye": 50,
+                "İyi Seviye": 75,
+                "Uzman (Derece) Seviye": 100
+            }
+
+            oneriler = {
+                "Hiç Bilmiyor": "Bu konuyu öğrenmeye başlamalısın! Temelini sağlamlaştırmak için 50-75 arası basit soru çözerek konuya giriş yap.",
+                "Temel Bilgi": "Konuyu orta seviyeye taşımak için konu anlatımı videoları izle ve en az 100-150 arası orta düzey soru çöz. Yanlışlarını mutlaka not al.",
+                "Orta Seviye": "İyi seviyeye çıkmak için farklı kaynaklardan zor sorular çözerek kendini dene. Bu konudan deneme sınavı sorularına ağırlık ver ve 200'den fazla soruyla pekiştir.",
+                "İyi Seviye": "Artık bir uzmansın! Bu konuyu tam anlamıyla oturtmak için çıkmış sorular ve efsane zorlayıcı sorularla pratik yap. Sadece denemelerde karşına çıkan sorulara odaklan.",
+                "Uzman (Derece) Seviye": "Tebrikler! Bu konu tamamen cebinde. Sadece tekrar amaçlı deneme çözerken karşına çıkan soruları kontrol etmen yeterli. Yeni konulara yönelerek zamanını daha verimli kullan."
+            }
+            
             if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
                 
                 # Verileri ders bazında grupla
