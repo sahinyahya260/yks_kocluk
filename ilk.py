@@ -1220,34 +1220,6 @@ def main():
         
         if menu == "🏠 Ana Sayfa":
             
-            st.markdown('<div class="section-header">📈 Genel Durum</div>', unsafe_allow_html=True)
-
-            # Örnek ilerleme verileri
-            # NOT: Bu verileri, kullanıcıdan alınan gerçek verilere göre dinamik olarak güncellemeyi unutmayın.
-            konu_ilerleme = {
-                "TYT Matematik": 70,
-                "TYT Türkçe": 40
-            }
-            hedef_ilerleme = {
-                "Hukuk": 3
-            }
-
-            st.markdown('### Konu Tamamlama Durumu', unsafe_allow_html=True)
-            for konu, yuzde in konu_ilerleme.items():
-                st.write(f"**{konu}:**")
-                st.progress(yuzde / 100)
-                st.write(f"**%{yuzde} tamamlandı**")
-            
-            st.markdown('### Hedef Durumu', unsafe_allow_html=True)
-            for hedef, yuzde in hedef_ilerleme.items():
-                st.metric(label=f"{hedef} Hedefi", value=f"%{yuzde}", delta="Hedefe Yaklaşıldı")
-            
-            # Eski Ana Sayfa içeriği bu satırın altından devam edebilir
-            st.markdown('<div class="section-header">🚀 Hızlı İstatistikler</div>', unsafe_allow_html=True)
-            
-            col1, col2, col3, col4 = st.columns(4)
-            
-            ... # Geri kalan kodunuz buraya gelecek
             st.markdown(f'''
             <div class="hero-section">
                 <div class="main-header">{tema['icon']} {bilgi['isim']}'in Derece Yolculuğu</div>
@@ -1292,6 +1264,39 @@ def main():
                     <h2 style="color: {tema['renk']};">{motivasyon}%</h2>
                 </div>
                 ''', unsafe_allow_html=True)
+                elif menu == "🏠 Ana Sayfa":
+            st.markdown('<div class="section-header">📈 Genel Durum</div>', unsafe_allow_html=True)
+            
+            # Konu Masterysi panelinden gelen veriyi çek
+            if 'konular_mastery' in st.session_state and st.session_state.konular_mastery:
+                konu_ilerleme = st.session_state.konular_mastery
+                
+                # Ortak bir hedefe doğru ilerlemeyi hesapla
+                # Tüm konuların ortalama tamamlanma yüzdesini alıyoruz
+                ortalama_ilerleme = sum(konu_ilerleme.values()) / len(konu_ilerleme)
+                
+                st.markdown('### Konu Tamamlama Durumu', unsafe_allow_html=True)
+                for konu, yuzde in konu_ilerleme.items():
+                    st.write(f"**{konu}:**")
+                    st.progress(yuzde / 100)
+                    st.write(f"**%{yuzde} tamamlandı**")
+
+                st.markdown('### Hedef Durumu', unsafe_allow_html=True)
+                # Hedef yüzdesini ortalama tamamlanma yüzdesi olarak göster
+                st.metric(
+                    label="Genel Hedef", 
+                    value=f"%{round(ortalama_ilerleme, 2)}", 
+                    delta="Ortalama Konu İlerlemesi"
+                )
+            else:
+                st.info("Henüz 'Konu Masterysi' bölümüne veri girmediniz.")
+
+            # Eski Ana Sayfa içeriği bu satırın altından devam edebilir
+            st.markdown('<div class="section-header">🚀 Hızlı İstatistikler</div>', unsafe_allow_html=True)
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            # ... Geri kalan kodunuz buraya gelecek
             
         elif menu == "⏰ Pomodoro Zamanlayıcısı":
             pomodoro_zamanlayıcısı_sayfası()
