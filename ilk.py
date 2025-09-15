@@ -1689,6 +1689,7 @@ def psikolojik_destek_sayfası():
     st.info("Unutma, bu süreçte yalnız değilsin. Kendine iyi bakmak, en az ders çalışmak kadar önemlidir. Başarılar dileriz!")
 def pomodoro_zamanlayıcısı_sayfası():
     
+   def pomodoro_zamanlayıcısı_sayfası():
     st.markdown('<div class="section-header">⏰ Pomodoro Zamanlayıcısı</div>', unsafe_allow_html=True)
     
     # Görseldeki tasarıma uygun özel CSS
@@ -1814,16 +1815,16 @@ def pomodoro_zamanlayıcısı_sayfası():
         if not st.session_state.pomodoro_running:
             if st.button("▶️ Başlat", use_container_width=True, key="start_button"):
                 start_timer()
-                st.experimental_rerun()
+                st.rerun()
         else:
             if st.button("⏸️ Durdur", use_container_width=True, key="stop_button"):
                 stop_timer()
-                st.experimental_rerun()
+                st.rerun()
 
     with col_stop:
         if st.button("⏹️ Sıfırla", use_container_width=True, key="reset_button"):
             reset_timer()
-            st.experimental_rerun()
+            st.rerun()
             
     with col_reset:
         st.markdown(f'<p style="text-align: center; color: #ccc; font-size: 0.9rem; margin-top: 10px;">Tamamlanan Pomodoro: <strong>{st.session_state.pomodoro_count}</strong></p>', unsafe_allow_html=True)
