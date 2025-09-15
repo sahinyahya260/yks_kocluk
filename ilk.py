@@ -506,14 +506,11 @@ def öğrenci_bilgi_formu():
 def derece_günlük_program():
     
 
-    import datetime
-from dataclasses import dataclass
-from typing import Dict, List, Tuple
-import json
+    
 
-@dataclass
-class OgrenciProfili:
-    isim: str
+    @dataclass
+    class OgrenciProfili:
+        isim: str
     hedef_puan: int
     mevcut_seviye: Dict[str, int]  # Her ders için 1-100 arası
     zayif_konular: Dict[str, List[str]]
