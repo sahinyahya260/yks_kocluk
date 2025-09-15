@@ -506,11 +506,14 @@ def öğrenci_bilgi_formu():
 def derece_günlük_program():
     
 
-    
+    import datetime
+from dataclasses import dataclass
+from typing import Dict, List, Tuple
+import json
 
-    @dataclass
-    class OgrenciProfili:
-        isim: str
+@dataclass
+class OgrenciProfili:
+    isim: str
     hedef_puan: int
     mevcut_seviye: Dict[str, int]  # Her ders için 1-100 arası
     zayif_konular: Dict[str, List[str]]
@@ -577,16 +580,16 @@ class UltraProfesyonelTYTAYTSistemi:
             seviye = 'sinava_yakin'
         
         # Haftalık stratejiyi oluştur
-        haftalik_strateji = self._haftalik_strateji_olustur(ogrenci, seviye, kalan_hafta)
+        haftalik_strateji = self.haftalik_strateji_olustur(ogrenci, seviye, kalan_hafta)
         
         # Günlük programı oluştur
-        gunluk_program = self._gunluk_program_olustur(ogrenci, haftalik_strateji)
+        gunluk_program = self.gunluk_program_detay_olustur(ogrenci, haftalik_strateji)
         
         # Performans takibi ve uyarılar
-        performans_analizi = self._performans_analizi(ogrenci)
+        performans_analizi = self.performans_analizi(ogrenci)
         
         # Motivasyon ve taktik önerileri
-        taktik_onerileri = self._taktik_onerileri_olustur(ogrenci, seviye)
+        taktik_onerileri = self.taktik_onerileri_olustur(ogrenci, seviye)
         
         return {
             'gunluk_program': gunluk_program,
@@ -595,10 +598,10 @@ class UltraProfesyonelTYTAYTSistemi:
             'taktik_onerileri': taktik_onerileri,
             'kalan_gun': kalan_gun,
             'seviye': seviye,
-            'hedef_analizi': self._hedef_analizi(ogrenci)
+            'hedef_analizi': self.hedef_analizi(ogrenci)
         }
     
-    def _haftalik_strateji_olustur(self, ogrenci: OgrenciProfili, seviye: str, kalan_hafta: int) -> HaftalikStrateji:
+    def haftalik_strateji_olustur(self, ogrenci: OgrenciProfili, seviye: str, kalan_hafta: int) -> HaftalikStrateji:
         """Haftalık strateji oluşturma"""
         
         strateji = self.strateji_sablonlari[seviye]
@@ -609,25 +612,25 @@ class UltraProfesyonelTYTAYTSistemi:
             if puan < 60:
                 zayif_dersler.append(ders)
         
-        # Önceli dersleri belirle (zayıf dersler + hedef puana göre)
-        oncelik_dersleri = self._oncelik_dersleri_belirle(ogrenci, zayif_dersler)
+        # Öncelikli dersleri belirle (zayıf dersler + hedef puana göre)
+        oncelik_dersleri = self.oncelik_dersleri_belirle(ogrenci, zayif_dersler)
         
         # Konu dağılımını hesapla
-        konu_dagilimi = self._konu_dagilimi_hesapla(ogrenci, strateji, oncelik_dersleri)
+        konu_dagilimi = self.konu_dagilimi_hesapla(ogrenci, strateji, oncelik_dersleri)
         
         # Deneme planını oluştur
-        deneme_plani = self._deneme_plani_olustur(strateji, kalan_hafta)
+        deneme_plani = self.deneme_plani_olustur(strateji, kalan_hafta)
         
         return HaftalikStrateji(
             hafta_no=53 - kalan_hafta,
             oncelik_dersleri=oncelik_dersleri,
             konu_dagilimi=konu_dagilimi,
             deneme_plani=deneme_plani,
-            revizyon_konulari=self._revizyon_konulari_belirle(ogrenci),
-            hedef_soru_sayilari=self._hedef_soru_sayilari_belirle(ogrenci, seviye)
+            revizyon_konulari=self.revizyon_konulari_belirle(ogrenci),
+            hedef_soru_sayilari=self.hedef_soru_sayilari_belirle(ogrenci, seviye)
         )
     
-    def _gunluk_program_olustur(self, ogrenci: OgrenciProfili, haftalik_strateji: HaftalikStrateji) -> Dict:
+    def gunluk_program_detay_olustur(self, ogrenci: OgrenciProfili, haftalik_strateji: HaftalikStrateji) -> Dict:
         """Günlük detay program oluşturma"""
         
         bugun = datetime.date.today()
@@ -648,9 +651,8 @@ class UltraProfesyonelTYTAYTSistemi:
         
         # Saatleri derslere dağıt
         ders_saatleri = {}
-        toplam_oran = 0
         
-        for ders in haftalik_strateji.oncelik_dersleri[:4]:  # İlk 4 öncelikli ders
+        for i, ders in enumerate(haftalik_strateji.oncelik_dersleri[:4]):  # İlk 4 öncelikli ders
             if ders in ogrenci.mevcut_seviye:
                 # Zayıf derslere daha fazla süre ayır
                 if ogrenci.mevcut_seviye[ders] < 50:
@@ -661,7 +663,6 @@ class UltraProfesyonelTYTAYTSistemi:
                     oran = 0.2
                 
                 ders_saatleri[ders] = int(gunluk_saat * oran)
-                toplam_oran += oran
         
         # Kalan zamanı deneme ve tekrara ayır
         kalan_saat = gunluk_saat - sum(ders_saatleri.values())
@@ -673,17 +674,17 @@ class UltraProfesyonelTYTAYTSistemi:
             ders_saatleri['Tekrar ve Soru Çözümü'] = kalan_saat
         
         # Detaylı saat programı oluştur
-        detayli_program = self._detayli_saat_programi_olustur(ders_saatleri, haftalik_strateji)
+        detayli_program = self.detayli_saat_programi_olustur(ders_saatleri, haftalik_strateji)
         
         return {
             'gun_adi': gun_adi,
-            'gun_teması': gun_programlari.get(gun_adi, 'Standart çalışma günü'),
+            'gun_temasi': gun_programlari.get(gun_adi, 'Standart çalışma günü'),
             'ders_saatleri': ders_saatleri,
             'detayli_program': detayli_program,
-            'gunluk_hedefler': self._gunluk_hedefler_belirle(ders_saatleri, haftalik_strateji)
+            'gunluk_hedefler': self.gunluk_hedefler_belirle(ders_saatleri, haftalik_strateji)
         }
     
-    def _detayli_saat_programi_olustur(self, ders_saatleri: Dict[str, int], haftalik_strateji: HaftalikStrateji) -> List[Dict]:
+    def detayli_saat_programi_olustur(self, ders_saatleri: Dict[str, int], haftalik_strateji: HaftalikStrateji) -> List[Dict]:
         """Saatlik detay program"""
         
         program = []
@@ -695,9 +696,9 @@ class UltraProfesyonelTYTAYTSistemi:
                 program.append({
                     'saat': f"{baslangic_saat + len(program):02d}:00-{baslangic_saat + len(program) + 1:02d}:00",
                     'ders': ders,
-                    'aktivite': self._aktivite_belirle(ders, i, haftalik_strateji),
-                    'hedef_soru': haftalik_strateji.hedef_soru_sayilari.get(ders, 20) // saat,
-                    'odaklanma_konusu': self._odaklanma_konusu_belirle(ders, haftalik_strateji)
+                    'aktivite': self.aktivite_belirle(ders, i, haftalik_strateji),
+                    'hedef_soru': haftalik_strateji.hedef_soru_sayilari.get(ders, 20) // saat if saat > 0 else 0,
+                    'odaklanma_konusu': self.odaklanma_konusu_belirle(ders, haftalik_strateji)
                 })
                 
                 # Her saatin ardından kısa mola
@@ -712,7 +713,7 @@ class UltraProfesyonelTYTAYTSistemi:
         
         return program
     
-    def _aktivite_belirle(self, ders: str, saat_sirasi: int, haftalik_strateji: HaftalikStrateji) -> str:
+    def aktivite_belirle(self, ders: str, saat_sirasi: int, haftalik_strateji: HaftalikStrateji) -> str:
         """Her saat için özel aktivite belirleme"""
         
         aktiviteler = {
@@ -731,7 +732,7 @@ class UltraProfesyonelTYTAYTSistemi:
         else:
             return aktiviteler.get(saat_sirasi, "Soru çözümü ve pekiştirme")
     
-    def _odaklanma_konusu_belirle(self, ders: str, haftalik_strateji: HaftalikStrateji) -> str:
+    def odaklanma_konusu_belirle(self, ders: str, haftalik_strateji: HaftalikStrateji) -> str:
         """Her ders için odaklanma konusu"""
         
         if ders in haftalik_strateji.konu_dagilimi:
@@ -741,7 +742,7 @@ class UltraProfesyonelTYTAYTSistemi:
         
         return "Genel konu tekrarı"
     
-    def _oncelik_dersleri_belirle(self, ogrenci: OgrenciProfili, zayif_dersler: List[str]) -> List[str]:
+    def oncelik_dersleri_belirle(self, ogrenci: OgrenciProfili, zayif_dersler: List[str]) -> List[str]:
         """Öncelikli dersleri belirleme"""
         
         oncelik_liste = []
@@ -766,7 +767,7 @@ class UltraProfesyonelTYTAYTSistemi:
         
         return oncelik_liste
     
-    def _konu_dagilimi_hesapla(self, ogrenci: OgrenciProfili, strateji: Dict, oncelik_dersleri: List[str]) -> Dict:
+    def konu_dagilimi_hesapla(self, ogrenci: OgrenciProfili, strateji: Dict, oncelik_dersleri: List[str]) -> Dict:
         """Konu dağılımını hesapla"""
         
         konu_dagilimi = {}
@@ -793,7 +794,7 @@ class UltraProfesyonelTYTAYTSistemi:
         
         return konu_dagilimi
     
-    def _deneme_plani_olustur(self, strateji: Dict, kalan_hafta: int) -> Dict[str, int]:
+    def deneme_plani_olustur(self, strateji: Dict, kalan_hafta: int) -> Dict[str, int]:
         """Deneme planı oluşturma"""
         
         haftalik_deneme = max(1, int(strateji['deneme_oran'] / 5))
@@ -805,7 +806,7 @@ class UltraProfesyonelTYTAYTSistemi:
             'Hiz_Denemesi': 1 if kalan_hafta < 8 else 0
         }
     
-    def _revizyon_konulari_belirle(self, ogrenci: OgrenciProfili) -> List[str]:
+    def revizyon_konulari_belirle(self, ogrenci: OgrenciProfili) -> List[str]:
         """Revizyon konuları"""
         
         revizyon_liste = []
@@ -815,7 +816,7 @@ class UltraProfesyonelTYTAYTSistemi:
         
         return revizyon_liste
     
-    def _hedef_soru_sayilari_belirle(self, ogrenci: OgrenciProfili, seviye: str) -> Dict[str, int]:
+    def hedef_soru_sayilari_belirle(self, ogrenci: OgrenciProfili, seviye: str) -> Dict[str, int]:
         """Günlük hedef soru sayıları"""
         
         base_sorular = {
@@ -827,7 +828,7 @@ class UltraProfesyonelTYTAYTSistemi:
         
         return base_sorular[seviye]
     
-    def _gunluk_hedefler_belirle(self, ders_saatleri: Dict[str, int], haftalik_strateji: HaftalikStrateji) -> List[str]:
+    def gunluk_hedefler_belirle(self, ders_saatleri: Dict[str, int], haftalik_strateji: HaftalikStrateji) -> List[str]:
         """Günlük hedefleri belirleme"""
         
         hedefler = []
@@ -842,35 +843,35 @@ class UltraProfesyonelTYTAYTSistemi:
         
         return hedefler
     
-    def _performans_analizi(self, ogrenci: OgrenciProfili) -> Dict:
+    def performans_analizi(self, ogrenci: OgrenciProfili) -> Dict:
         """Performans analizi"""
         
         analiz = {
-            'güçlü_yönler': [],
-            'gelişim_alanları': [],
-            'uyarılar': [],
-            'öneriler': []
+            'guclu_yonler': [],
+            'gelisim_alanlari': [],
+            'uyarilar': [],
+            'oneriler': []
         }
         
         for ders, puan in ogrenci.mevcut_seviye.items():
             if puan > 75:
-                analiz['güçlü_yönler'].append(f"{ders} dersinde çok iyi durumdasınız ({puan}%)")
+                analiz['guclu_yonler'].append(f"{ders} dersinde çok iyi durumdasınız ({puan}%)")
             elif puan < 50:
-                analiz['gelişim_alanları'].append(f"{ders} dersi acil müdahale gerektiriyor ({puan}%)")
-                analiz['uyarılar'].append(f"⚠️ {ders} dersine daha fazla zaman ayırın!")
+                analiz['gelisim_alanlari'].append(f"{ders} dersi acil müdahale gerektiriyor ({puan}%)")
+                analiz['uyarilar'].append(f"⚠️ {ders} dersine daha fazla zaman ayırın!")
         
         # Deneme performansı analizi
         for ders, puanlar in ogrenci.son_deneme_puanlari.items():
             if len(puanlar) > 1:
                 trend = puanlar[-1] - puanlar[-2]
                 if trend > 0:
-                    analiz['öneriler'].append(f"✅ {ders} dersinde yükseliştesiniz (+{trend})")
+                    analiz['oneriler'].append(f"✅ {ders} dersinde yükseliştesiniz (+{trend})")
                 elif trend < -5:
-                    analiz['uyarılar'].append(f"📉 {ders} dersinde düşüş var ({trend})")
+                    analiz['uyarilar'].append(f"📉 {ders} dersinde düşüş var ({trend})")
         
         return analiz
     
-    def _taktik_onerileri_olustur(self, ogrenci: OgrenciProfili, seviye: str) -> List[str]:
+    def taktik_onerileri_olustur(self, ogrenci: OgrenciProfili, seviye: str) -> List[str]:
         """Taktik önerileri"""
         
         taktikler = []
@@ -911,7 +912,7 @@ class UltraProfesyonelTYTAYTSistemi:
         
         return taktikler
     
-    def _hedef_analizi(self, ogrenci: OgrenciProfili) -> Dict:
+    def hedef_analizi(self, ogrenci: OgrenciProfili) -> Dict:
         """Hedef analizi"""
         
         mevcut_ortalama = sum(ogrenci.mevcut_seviye.values()) / len(ogrenci.mevcut_seviye)
@@ -926,22 +927,24 @@ class UltraProfesyonelTYTAYTSistemi:
         return {
             'mevcut_tahmini_puan': round(tahmini_toplam),
             'hedef_puan': ogrenci.hedef_puan,
-            'puan_farkı': round(hedef_fark),
-            'ulaşılabilirlik': 'Yüksek' if hedef_fark < 50 else 'Orta' if hedef_fark < 100 else 'Zor',
-            'gereken_gelişim': round(hedef_fark / len(ogrenci.mevcut_seviye))
+            'puan_farki': round(hedef_fark),
+            'ulasilabilirlik': 'Yüksek' if hedef_fark < 50 else 'Orta' if hedef_fark < 100 else 'Zor',
+            'gereken_gelisim': round(hedef_fark / len(ogrenci.mevcut_seviye)) if len(ogrenci.mevcut_seviye) > 0 else 0
         }
 
 
-# Örnek kullanım
-def main():
-    # Örnek öğrenci profili
+# Örnek kullanım fonksiyonu - kodunuzda def_gunluk_program() yerine bu fonksiyonu kullanın
+def def_gunluk_program():
+    """Sizin mevcut def_gunluk_program fonksiyonunuz yerine bu kodu kullanın"""
+    
+    # Örnek öğrenci profili - gerçek verilerle değiştirin
     ornek_ogrenci = OgrenciProfili(
         isim="Ahmet Yılmaz",
         hedef_puan=420,
         mevcut_seviye={
             'Matematik': 65,
             'Türkçe': 70,
-            'Sosyal': 45,  # Zayıf
+            'Sosyal': 45,  # Zayıf - coğrafya örneği
             'Fen': 55,
             'AYT_Matematik': 40,  # Zayıf
             'Fizik': 35,  # Çok zayıf
@@ -949,7 +952,7 @@ def main():
             'Biyoloji': 60
         },
         zayif_konular={
-            'Sosyal': ['Tarih-Osmanlı', 'Coğrafya-Iklim'],
+            'Sosyal': ['Tarih-Osmanlı', 'Coğrafya-İklim'],
             'AYT_Matematik': ['Türev', 'İntegral'],
             'Fizik': ['Elektrik', 'Manyetizma']
         },
@@ -971,340 +974,15 @@ def main():
     # Günlük programı oluştur
     program = sistem.gunluk_program_olustur(ornek_ogrenci)
     
-    # Sonuçları yazdır
-    print("=" * 60)
-    print("🎯 ULTRA PROFESYONEL TYT-AYT KİŞİSEL PROGRAM")
-    print("=" * 60)
-    
-    print(f"\n👤 Öğrenci: {ornek_ogrenci.isim}")
-    print(f"🎯 Hedef Puan: {ornek_ogrenci.hedef_puan}")
-    print(f"📅 Kalan Gün: {program['kalan_gun']}")
-    print(f"📊 Seviye: {program['seviye'].upper()}")
-    
-    print(f"\n📈 HEDEF ANALİZİ:")
-    hedef_analizi = program['hedef_analizi']
-    print(f"• Mevcut Tahmini Puan: {hedef_analizi['mevcut_tahmini_puan']}")
-    print(f"• Puan Farkı: {hedef_analizi['puan_farkı']}")
-    print(f"• Ulaşılabilirlik: {hedef_analizi['ulaşılabilirlik']}")
-    
-    print(f"\n📚 HAFTALIK STRATEJİ:")
-    strateji = program['haftalik_strateji']
-    print(f"• Öncelik Dersleri: {', '.join(strateji.oncelik_dersleri[:4])}")
-    print(f"• Deneme Planı: {strateji.deneme_plani}")
-    
-    print(f"\n⏰ BUGÜNÜN PROGRAMI:")
-    gunluk = program['gunluk_program']
-    print(f"• Gün Teması: {gunluk['gun_teması']}")
-    print(f"• Ders Saatleri: {gunluk['ders_saatleri']}")
-    
-    print(f"\n🕐 DETAYLI SAAT PROGRAMı:")
-    for aktivite in gunluk['detayli_program'][:8]:  # İlk 8 saati göster
-        print(f"{aktivite['saat']} | {aktivite['ders']} | {aktivite['aktivite']}")
-    
-    print(f"\n🎯 GÜNLÜK HEDEFLER:")
-    for hedef in gunluk['gunluk_hedefler']:
-        print(f"• {hedef}")
-    
-    print(f"\n💪 PERFORMANS ANALİZİ:")
-    performans = program['performans_analizi']
-    
-    if performans['güçlü_yönler']:
-        print("✅ Güçlü Yönler:")
-        for guc in performans['güçlü_yönler']:
-            print(f"   • {guc}")
-    
-    if performans['uyarılar']:
-        print("⚠️  Uyarılar:")
-        for uyari in performans['uyarılar']:
-            print(f"   • {uyari}")
-    
-    if performans['gelişim_alanları']:
-        print("📈 Gelişim Alanları:")
-        for alan in performans['gelişim_alanları']:
-            print(f"   • {alan}")
-    
-    print(f"\n🎪 TAKTİK ÖNERİLERİ:")
-    for taktik in program['taktik_onerileri']:
-        print(f"• {taktik}")
-    
-    print(f"\n🔄 REVİZYON KONULARI:")
-    for konu in strateji.revizyon_konulari:
-        print(f"• {konu}")
-    
-    print("\n" + "=" * 60)
-    print("📊 HAFTALIK TAKIP TABLOSU")
-    print("=" * 60)
-    
-    # Haftalık takip sistemi
-    haftalik_takip = sistem._haftalik_takip_sistemi_olustur(ornek_ogrenci, program)
-    
-    for gun, program_detay in haftalik_takip.items():
-        print(f"\n{gun.upper()}:")
-        print(f"• Ana Odak: {program_detay['ana_odak']}")
-        print(f"• Hedef Net: {program_detay['hedef_net']}")
-        print(f"• Özel Taktik: {program_detay['ozel_taktik']}")
-
-def _haftalik_takip_sistemi_olustur(self, ogrenci: OgrenciProfili, program: Dict) -> Dict:
-    """7 günlük takip sistemi"""
-    
-    gunler = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
-    haftalik_takip = {}
-    
-    # Her gün için özel strateji
-    gun_stratejileri = {
-        'Pazartesi': {
-            'ana_odak': 'Matematik Yoğun Gün',
-            'hedef_net': {'Matematik': 25, 'AYT_Mat': 15},
-            'ozel_taktik': 'Haftaya güçlü başlangıç, temel konuları pekiştir'
-        },
-        'Salı': {
-            'ana_odak': 'TYT Karma Çalışma',
-            'hedef_net': {'Türkçe': 30, 'Sosyal': 20, 'Fen': 15},
-            'ozel_taktik': 'Çeşitlilik ile motivasyonu yüksek tut'
-        },
-        'Çarşamba': {
-            'ana_odak': 'AYT Ağırlıklı Gün',
-            'hedef_net': {'Fizik': 8, 'Kimya': 10, 'Biyoloji': 12},
-            'ozel_taktik': 'Zor konulara odaklan, detay çalışması'
-        },
-        'Perşembe': {
-            'ana_odak': 'Zayıf Dersler Günü',
-            'hedef_net': self._zayif_dersler_hedefi_belirle(ogrenci),
-            'ozel_taktik': 'Eksikleri kapatma, temel seviye güçlendirme'
-        },
-        'Cuma': {
-            'ana_odak': 'Deneme ve Değerlendirme',
-            'hedef_net': {'TYT_Deneme': 1, 'AYT_Deneme': 1},
-            'ozel_taktik': 'Gerçek sınav havasında çalış, zaman yönetimi'
-        },
-        'Cumartesi': {
-            'ana_odak': 'Kapsamlı Tekrar Günü',
-            'hedef_net': self._kapsamli_tekrar_hedefi(ogrenci),
-            'ozel_taktik': 'Haftalık öğrenilenleri pekiştir'
-        },
-        'Pazar': {
-            'ana_odak': 'Hafif Tekrar ve Planlama',
-            'hedef_net': {'Genel_Tekrar': 50, 'Haftalik_Plan': 1},
-            'ozel_taktik': 'Dinlenerek çalış, gelecek haftayı planla'
-        }
-    }
-    
-    for gun in gunler:
-        haftalik_takip[gun] = gun_stratejileri[gun]
-    
-    return haftalik_takip
-
-def _zayif_dersler_hedefi_belirle(self, ogrenci: OgrenciProfili) -> Dict[str, int]:
-    """Zayıf dersler için özel hedef"""
-    
-    hedefler = {}
-    
-    for ders, puan in ogrenci.mevcut_seviye.items():
-        if puan < 60:  # Zayıf ders
-            if puan < 40:
-                hedefler[ders] = 15  # Çok zayıf
-            else:
-                hedefler[ders] = 20  # Orta zayıf
-    
-    return hedefler
-
-def _kapsamli_tekrar_hedefi(self, ogrenci: OgrenciProfili) -> Dict[str, int]:
-    """Cumartesi kapsamlı tekrar hedefi"""
-    
-    return {
-        'Matematik_Tekrar': 20,
-        'Türkçe_Tekrar': 25,
-        'Sosyal_Tekrar': 15,
-        'Fen_Tekrar': 15,
-        'AYT_Tekrar': 25
-    }
-
-# Ek özellikler için sistem metodları ekleniyor
-
-def haftalik_performans_raporu_olustur(self, ogrenci: OgrenciProfili) -> Dict:
-    """Haftalık performans raporu"""
-    
-    return {
-        'basari_orani': self._basari_orani_hesapla(ogrenci),
-        'gelisim_trendi': self._gelisim_trendi_analiz(ogrenci),
-        'onerileri': self._haftalik_onerileri_olustur(ogrenci),
-        'motivasyon_puani': self._motivasyon_puani_hesapla(ogrenci),
-        'risk_analizi': self._risk_analizi_yap(ogrenci)
-    }
-
-def _basari_orani_hesapla(self, ogrenci: OgrenciProfili) -> Dict:
-    """Başarı oranı hesaplama"""
-    
-    toplam_puan = sum(ogrenci.mevcut_seviye.values())
-    maksimum_puan = len(ogrenci.mevcut_seviye) * 100
-    
-    return {
-        'genel_oran': round((toplam_puan / maksimum_puan) * 100, 1),
-        'tyt_oran': self._tyt_basari_orani(ogrenci),
-        'ayt_oran': self._ayt_basari_orani(ogrenci)
-    }
-
-def _tyt_basari_orani(self, ogrenci: OgrenciProfili) -> float:
-    """TYT başarı oranı"""
-    
-    tyt_dersleri = ['Matematik', 'Türkçe', 'Sosyal', 'Fen']
-    tyt_toplam = sum(ogrenci.mevcut_seviye.get(ders, 0) for ders in tyt_dersleri)
-    
-    return round(tyt_toplam / (len(tyt_dersleri) * 100) * 100, 1)
-
-def _ayt_basari_orani(self, ogrenci: OgrenciProfili) -> float:
-    """AYT başarı oranı"""
-    
-    ayt_dersleri = ['AYT_Matematik', 'Fizik', 'Kimya', 'Biyoloji']
-    ayt_toplam = sum(ogrenci.mevcut_seviye.get(ders, 0) for ders in ayt_dersleri)
-    
-    return round(ayt_toplam / (len(ayt_dersleri) * 100) * 100, 1)
-
-def _gelisim_trendi_analiz(self, ogrenci: OgrenciProfili) -> Dict:
-    """Gelişim trendi analizi"""
-    
-    trendler = {}
-    
-    for ders, puanlar in ogrenci.son_deneme_puanlari.items():
-        if len(puanlar) >= 3:
-            son_uc = puanlar[-3:]
-            trend = 'Yükseliş' if son_uc[-1] > son_uc[0] else 'Düşüş' if son_uc[-1] < son_uc[0] else 'Sabit'
-            degisim = son_uc[-1] - son_uc[0]
-            
-            trendler[ders] = {
-                'trend': trend,
-                'degisim': degisim,
-                'istikrar': abs(max(son_uc) - min(son_uc)) < 10
-            }
-    
-    return trendler
-
-def _haftalik_onerileri_olustur(self, ogrenci: OgrenciProfili) -> List[str]:
-    """Haftalık öneriler"""
-    
-    onerileri = []
-    
-    # Performansa göre öneriler
-    ortalama = sum(ogrenci.mevcut_seviye.values()) / len(ogrenci.mevcut_seviye)
-    
-    if ortalama < 50:
-        onerileri.append("🚨 Acil temel seviye çalışması gerekiyor")
-        onerileri.append("📚 Konu anlatım videolarına ağırlık verin")
-    elif ortalama < 70:
-        onerileri.append("📈 Soru çözümü sayısını artırın")
-        onerileri.append("🎯 Orta seviye sorulara odaklanın")
-    else:
-        onerileri.append("🏆 Zor soru taktiklerini geliştirin")
-        onerileri.append("⚡ Hız çalışmalarına başlayın")
-    
-    return onerileri
-
-def _motivasyon_puani_hesapla(self, ogrenci: OgrenciProfili) -> Dict:
-    """Motivasyon puanı hesaplama"""
-    
-    puan = 0
-    
-    # Hedef gerçekçiliği
-    mevcut_ortalama = sum(ogrenci.mevcut_seviye.values()) / len(ogrenci.mevcut_seviye)
-    tahmini_puan = mevcut_ortalama * 7.5  # Basit hesaplama
-    
-    if abs(ogrenci.hedef_puan - tahmini_puan) < 50:
-        puan += 25  # Gerçekçi hedef
-    
-    # Gelişim trendi
-    for puanlar in ogrenci.son_deneme_puanlari.values():
-        if len(puanlar) >= 2 and puanlar[-1] > puanlar[-2]:
-            puan += 15  # Pozitif trend
-    
-    # Çalışma disiplini
-    if ogrenci.gunluk_calisma_saati >= 6:
-        puan += 20
-    
-    # Zaman yönetimi
-    bugun = datetime.date.today()
-    kalan_gun = (ogrenci.sinav_tarihi - bugun).days
-    if kalan_gun > 60:
-        puan += 15  # Yeterli zaman
-    
-    # Güçlü derslerin varlığı
-    guclu_ders_sayisi = sum(1 for puan in ogrenci.mevcut_seviye.values() if puan > 70)
-    puan += guclu_ders_sayisi * 5
-    
-    return {
-        'puan': min(puan, 100),
-        'seviye': 'Yüksek' if puan > 75 else 'Orta' if puan > 50 else 'Düşük',
-        'tavsiye': self._motivasyon_tavsiyesi(puan)
-    }
-
-def _motivasyon_tavsiyesi(self, puan: int) -> str:
-    """Motivasyon tavsiyesi"""
-    
-    if puan > 75:
-        return "🔥 Harika gidiyorsunuz! Bu tempoyu koruyun!"
-    elif puan > 50:
-        return "💪 İyi durumdasınız, küçük iyileştirmelerle daha da iyi olacak!"
-    else:
-        return "🌱 Başlangıç zor ama doğru yoldasınız. Sabırlı olun!"
-
-def _risk_analizi_yap(self, ogrenci: OgrenciProfili) -> Dict:
-    """Risk analizi"""
-    
-    riskler = []
-    oncelik_seviyesi = 'Düşük'
-    
-    # Zaman riski
-    bugun = datetime.date.today()
-    kalan_gun = (ogrenci.sinav_tarihi - bugun).days
-    
-    if kalan_gun < 30:
-        riskler.append("⏰ Sınava çok az zaman kaldı")
-        oncelik_seviyesi = 'Yüksek'
-    elif kalan_gun < 60:
-        riskler.append("📅 Sınav yaklaşıyor, tempoyu artırın")
-        oncelik_seviyesi = 'Orta'
-    
-    # Performans riski
-    zayif_ders_sayisi = sum(1 for puan in ogrenci.mevcut_seviye.values() if puan < 50)
-    
-    if zayif_ders_sayisi > 3:
-        riskler.append("📉 Çok fazla zayıf ders var")
-        oncelik_seviyesi = 'Yüksek'
-    elif zayif_ders_sayisi > 1:
-        riskler.append("⚠️ Zayıf derslere odaklanın")
-        if oncelik_seviyesi == 'Düşük':
-            oncelik_seviyesi = 'Orta'
-    
-    # Deneme performans riski
-    for ders, puanlar in ogrenci.son_deneme_puanlari.items():
-        if len(puanlar) >= 2:
-            son_iki = puanlar[-2:]
-            if son_iki[-1] < son_iki[0] - 10:
-                riskler.append(f"📊 {ders} denemelerinde düşüş")
-    
-    return {
-        'riskler': riskler,
-        'oncelik_seviyesi': oncelik_seviyesi,
-        'acil_mudahale': len(riskler) > 2
-    }
+    return program
 
 
-# UltraProfesyonelTYTAYTSistemi sınıfına ek metodları ekleme
-UltraProfesyonelTYTAYTSistemi._haftalik_takip_sistemi_olustur = _haftalik_takip_sistemi_olustur
-UltraProfesyonelTYTAYTSistemi._zayif_dersler_hedefi_belirle = _zayif_dersler_hedefi_belirle
-UltraProfesyonelTYTAYTSistemi._kapsamli_tekrar_hedefi = _kapsamli_tekrar_hedefi
-UltraProfesyonelTYTAYTSistemi.haftalik_performans_raporu_olustur = haftalik_performans_raporu_olustur
-UltraProfesyonelTYTAYTSistemi._basari_orani_hesapla = _basari_orani_hesapla
-UltraProfesyonelTYTAYTSistemi._tyt_basari_orani = _tyt_basari_orani
-UltraProfesyonelTYTAYTSistemi._ayt_basari_orani = _ayt_basari_orani
-UltraProfesyonelTYTAYTSistemi._gelisim_trendi_analiz = _gelisim_trendi_analiz
-UltraProfesyonelTYTAYTSistemi._haftalik_onerileri_olustur = _haftalik_onerileri_olustur
-UltraProfesyonelTYTAYTSistemi._motivasyon_puani_hesapla = _motivasyon_puani_hesapla
-UltraProfesyonelTYTAYTSistemi._motivasyon_tavsiyesi = _motivasyon_tavsiyesi
-UltraProfesyonelTYTAYTSistemi._risk_analizi_yap = _risk_analizi_yap
-
-
+# Test etmek için
 if __name__ == "__main__":
-    main()
+    program = def_gunluk_program()
+    print("Program başarıyla oluşturuldu!")
+    print(f"Seviye: {program['seviye']}")
+    print(f"Kalan gün: {program['kalan_gun']}")
 def derece_konu_takibi():
     
     
