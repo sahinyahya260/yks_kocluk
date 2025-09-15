@@ -1739,6 +1739,7 @@ def pomodoro_zamanlayıcısı_sayfası():
         justify-content: center;
         gap: 10px;
         margin: 1.5rem 0;
+        flex-wrap: wrap;
     }
     .mode-option {
         padding: 8px 15px;
@@ -1746,6 +1747,9 @@ def pomodoro_zamanlayıcısı_sayfası():
         background: #34495e;
         cursor: pointer;
         transition: all 0.3s ease;
+        border: none;
+        color: white;
+        font-size: 0.9rem;
     }
     .mode-option.active {
         background: #3498db;
@@ -1759,7 +1763,7 @@ def pomodoro_zamanlayıcısı_sayfası():
     </style>
     """, unsafe_allow_html=True)
     
-    # POMODORO modları ve süreleri
+    # POMODORO modları ve süreleri - Türkçe anahtarlarla
     POMODORO_MODES = {
         'Pomodoro': {'label': 'Pomodoro (25dk)', 'time': 25 * 60, 'color': '#e74c3c'},
         'Kısa Mola': {'label': 'Kısa Mola (5dk)', 'time': 5 * 60, 'color': '#2ecc71'},
@@ -1767,12 +1771,24 @@ def pomodoro_zamanlayıcısı_sayfası():
         'Derin Odak': {'label': 'Derin Odak (50dk)', 'time': 50 * 60, 'color': '#f39c12'}
     }
     
-    # Session state'i başlat
+    # Session state'i başlat - Varsayılan modu kontrol et
     if 'pomodoro_mode' not in st.session_state:
         st.session_state.pomodoro_mode = 'Pomodoro'
-        st.session_state.pomodoro_time = POMODORO_MODES['Pomodoro']['time']
+    
+    # Eğer mevcut mod tanımlı değilse, varsayılan moda dön
+    if st.session_state.pomodoro_mode not in POMODORO_MODES:
+        st.session_state.pomodoro_mode = 'Pomodoro'
+    
+    if 'pomodoro_time' not in st.session_state:
+        st.session_state.pomodoro_time = POMODORO_MODES[st.session_state.pomodoro_mode]['time']
+    
+    if 'pomodoro_running' not in st.session_state:
         st.session_state.pomodoro_running = False
+    
+    if 'pomodoro_count' not in st.session_state:
         st.session_state.pomodoro_count = 0
+    
+    if 'pomodoro_goal' not in st.session_state:
         st.session_state.pomodoro_goal = 8
 
     # Zamanlayıcı fonksiyonları
@@ -1787,9 +1803,12 @@ def pomodoro_zamanlayıcısı_sayfası():
         st.session_state.pomodoro_time = POMODORO_MODES[st.session_state.pomodoro_mode]['time']
 
     def set_mode(mode):
-        st.session_state.pomodoro_mode = mode
-        st.session_state.pomodoro_time = POMODORO_MODES[mode]['time']
-        st.session_state.pomodoro_running = False
+        if mode in POMODORO_MODES:
+            st.session_state.pomodoro_mode = mode
+            st.session_state.pomodoro_time = POMODORO_MODES[mode]['time']
+            st.session_state.pomodoro_running = False
+        else:
+            st.error("Geçersiz mod seçildi!")
 
     # Zamanlayıcıyı güncelleme
     if st.session_state.pomodoro_running:
@@ -1847,19 +1866,23 @@ def pomodoro_zamanlayıcısı_sayfası():
             reset_timer()
             st.rerun()
     
-    # Mod seçici
-    st.markdown('<div class="mode-selector">', unsafe_allow_html=True)
-    for mode in POMODORO_MODES:
-        is_active = "active" if st.session_state.pomodoro_mode == mode else ""
-        if st.button(mode, key=f"mode_{mode}"):
-            set_mode(mode)
-            st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Mod seçici - Streamlit butonlarıyla
+    st.markdown("**Mod Seçin:**")
+    mode_cols = st.columns(4)
+    
+    modes = list(POMODORO_MODES.keys())
+    for i, mode in enumerate(modes):
+        with mode_cols[i]:
+            if st.button(POMODORO_MODES[mode]["label"], key=f"mode_{mode}", 
+                        use_container_width=True,
+                        type="primary" if st.session_state.pomodoro_mode == mode else "secondary"):
+                set_mode(mode)
+                st.rerun()
     
     # İlerleme istatistikleri
     st.markdown('<div class="stats-display">', unsafe_allow_html=True)
     st.markdown(f"**Bugünkü Pomodoro**")
-    progress = st.session_state.pomodoro_count / st.session_state.pomodoro_goal
+    progress = min(1.0, st.session_state.pomodoro_count / st.session_state.pomodoro_goal)
     st.markdown(f"{st.session_state.pomodoro_count}/{st.session_state.pomodoro_goal}")
     st.progress(progress)
     st.markdown('</div>', unsafe_allow_html=True)
