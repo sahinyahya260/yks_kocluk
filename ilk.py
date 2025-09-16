@@ -556,7 +556,7 @@ class UltraProfesyonelTYTAYTSistemi:
             'sinava_yakin': {'tyt_oran': 30, 'ayt_oran': 45, 'deneme_oran': 35}
         }
 
-    def gunluk_program_olustur(self, ogrenci: OgrenciProfili) -> Dict:
+    def gunluk_program_olustur()
         """Ultra profesyonel TYT-AYT günlük program oluşturucu"""
         
         bugun = datetime.date.today()
