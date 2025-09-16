@@ -505,480 +505,672 @@ def öğrenci_bilgi_formu():
 
 def derece_günlük_program():
     
-
+    st.markdown('<div class="section-header">📅 Kişiselleştirilmiş Derece Programı</div>', unsafe_allow_html=True)
     
-     @dataclass
-     class OgrenciProfili:
-        isim: str
-        hedef_puan: int
-        mevcut_seviye: Dict[str, int]  # Her ders için 1-100 arası
-        zayif_konular: Dict[str, List[str]]
-        guclu_konular: Dict[str, List[str]]
-        gunluk_calisma_saati: int
-        sinav_tarihi: datetime.date
-        son_deneme_puanlari: Dict[str, List[int]]
-
-@dataclass
-class HaftalikStrateji:
-    hafta_no: int
-    oncelik_dersleri: List[str]
-    konu_dagilimi: Dict[str, Dict[str, int]]  # ders -> konu -> saat
-    deneme_plani: Dict[str, int]
-    revizyon_konulari: List[str]
-    hedef_soru_sayilari: Dict[str, int]
-
-class UltraProfesyonelTYTAYTSistemi:
-    def __init__(self):
-        self.tyt_dersleri = {
-            'Matematik': ['Temel Kavramlar', 'Denklemler', 'Fonksiyonlar', 'Logaritma', 
-                         'Diziler', 'Polinomlar', 'Trigonometri', 'Analitik Geometri'],
-            'Türkçe': ['Anlam Bilgisi', 'Cümle Bilgisi', 'Paragraf', 'Anlatım Bozuklukları',
-                      'Yazım ve Noktalama', 'Edebiyat Tarihi', 'Nazım-Nesir'],
-            'Sosyal': ['Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'Psikoloji'],
-            'Fen': ['Fizik', 'Kimya', 'Biyoloji']
-        }
-        
-        self.ayt_dersleri = {
-            'AYT_Matematik': ['Limit-Süreklilik', 'Türev', 'İntegral', 'Katı Cisimler',
-                             'Olasılık', 'İstatistik', 'Diziler ve Seriler'],
-            'Fizik': ['Kuvvet-Hareket', 'Enerji', 'Momentum', 'Dalgalar', 'Elektrik',
-                     'Manyetizma', 'Modern Fizik'],
-            'Kimya': ['Atom Teorisi', 'Periyodik Sistem', 'Kimyasal Bağlar', 'Asit-Baz',
-                     'Elektrokimya', 'Organik Kimya', 'Nükleer Kimya'],
-            'Biyoloji': ['Hücre', 'Kalıtım', 'Ekoloji', 'Sinir Sistemi', 'Dolaşım',
-                        'Solunum', 'Boşaltım', 'Üreme']
-        }
-        
-        self.strateji_sablonlari = {
-            'baslangic': {'tyt_oran': 70, 'ayt_oran': 30, 'deneme_oran': 15},
-            'orta': {'tyt_oran': 60, 'ayt_oran': 35, 'deneme_oran': 20},
-            'ileri': {'tyt_oran': 45, 'ayt_oran': 40, 'deneme_oran': 25},
-            'sinava_yakin': {'tyt_oran': 30, 'ayt_oran': 45, 'deneme_oran': 35}
-        }
-
-    def gunluk_program_olustur()
-        """Ultra profesyonel TYT-AYT günlük program oluşturucu"""
-        
-        bugun = datetime.date.today()
-        kalan_gun = (ogrenci.sinav_tarihi - bugun).days
-        kalan_hafta = max(1, kalan_gun // 7)
-        
-        # Öğrenci seviyesini belirle
-        ortalama_seviye = sum(ogrenci.mevcut_seviye.values()) / len(ogrenci.mevcut_seviye)
-        
-        if ortalama_seviye < 40:
-            seviye = 'baslangic'
-        elif ortalama_seviye < 65:
-            seviye = 'orta'
-        elif ortalama_seviye < 80:
-            seviye = 'ileri'
-        else:
-            seviye = 'sinava_yakin'
-        
-        # Haftalık stratejiyi oluştur
-        haftalik_strateji = self.haftalik_strateji_olustur(ogrenci, seviye, kalan_hafta)
-        
-        # Günlük programı oluştur
-        gunluk_program = self.gunluk_program_detay_olustur(ogrenci, haftalik_strateji)
-        
-        # Performans takibi ve uyarılar
-        performans_analizi = self.performans_analizi(ogrenci)
-        
-        # Motivasyon ve taktik önerileri
-        taktik_onerileri = self.taktik_onerileri_olustur(ogrenci, seviye)
-        
-        return {
-            'gunluk_program': gunluk_program,
-            'haftalik_strateji': haftalik_strateji,
-            'performans_analizi': performans_analizi,
-            'taktik_onerileri': taktik_onerileri,
-            'kalan_gun': kalan_gun,
-            'seviye': seviye,
-            'hedef_analizi': self.hedef_analizi(ogrenci)
-        }
+    bilgi = st.session_state.öğrenci_bilgisi
+    tema = BÖLÜM_TEMALARI[bilgi['bölüm_kategori']]
+    strateji = DERECE_STRATEJİLERİ[bilgi['sınıf']]
     
-    def haftalik_strateji_olustur(self, ogrenci: OgrenciProfili, seviye: str, kalan_hafta: int) -> HaftalikStrateji:
-        """Haftalık strateji oluşturma"""
+    # Öğrencinin konu durumunu analiz et
+    def konu_analizi():
+        """Öğrencinin hangi konulardan başlayacağını belirler"""
+        zayıf_konular = []
+        orta_konular = []
+        güçlü_konular = []
         
-        strateji = self.strateji_sablonlari[seviye]
-        
-        # Zayıf dersleri öncelikle belirle
-        zayif_dersler = []
-        for ders, puan in ogrenci.mevcut_seviye.items():
-            if puan < 60:
-                zayif_dersler.append(ders)
-        
-        # Öncelikli dersleri belirle (zayıf dersler + hedef puana göre)
-        oncelik_dersleri = self.oncelik_dersleri_belirle(ogrenci, zayif_dersler)
-        
-        # Konu dağılımını hesapla
-        konu_dagilimi = self.konu_dagilimi_hesapla(ogrenci, strateji, oncelik_dersleri)
-        
-        # Deneme planını oluştur
-        deneme_plani = self.deneme_plani_olustur(strateji, kalan_hafta)
-        
-        return HaftalikStrateji(
-            hafta_no=53 - kalan_hafta,
-            oncelik_dersleri=oncelik_dersleri,
-            konu_dagilimi=konu_dagilimi,
-            deneme_plani=deneme_plani,
-            revizyon_konulari=self.revizyon_konulari_belirle(ogrenci),
-            hedef_soru_sayilari=self.hedef_soru_sayilari_belirle(ogrenci, seviye)
-        )
-    
-    def gunluk_program_detay_olustur(self, ogrenci: OgrenciProfili, haftalik_strateji: HaftalikStrateji) -> Dict:
-        """Günlük detay program oluşturma"""
-        
-        bugun = datetime.date.today()
-        gun_adi = bugun.strftime('%A')
-        
-        # Haftanın günlerine göre program ayarlama
-        gun_programlari = {
-            'Monday': 'Yoğun matematik günü',
-            'Tuesday': 'TYT karma gün',
-            'Wednesday': 'AYT odaklı gün', 
-            'Thursday': 'Zayıf dersler günü',
-            'Friday': 'Deneme ve değerlendirme',
-            'Saturday': 'Kapsamlı tekrar',
-            'Sunday': 'Hafif tekrar ve dinlenme'
-        }
-        
-        gunluk_saat = ogrenci.gunluk_calisma_saati
-        
-        # Saatleri derslere dağıt
-        ders_saatleri = {}
-        
-        for i, ders in enumerate(haftalik_strateji.oncelik_dersleri[:4]):  # İlk 4 öncelikli ders
-            if ders in ogrenci.mevcut_seviye:
-                # Zayıf derslere daha fazla süre ayır
-                if ogrenci.mevcut_seviye[ders] < 50:
-                    oran = 0.3
-                elif ogrenci.mevcut_seviye[ders] < 70:
-                    oran = 0.25
+        if 'konu_durumu' in st.session_state and st.session_state.konu_durumu:
+            for konu, seviye in st.session_state.konu_durumu.items():
+                if seviye in ["Hiç Bilmiyor", "Temel Bilgi"]:
+                    zayıf_konular.append(konu)
+                elif seviye == "Orta Seviye":
+                    orta_konular.append(konu)
                 else:
-                    oran = 0.2
-                
-                ders_saatleri[ders] = int(gunluk_saat * oran)
+                    güçlü_konular.append(konu)
         
-        # Kalan zamanı deneme ve tekrara ayır
-        kalan_saat = gunluk_saat - sum(ders_saatleri.values())
-        
-        if gun_adi == 'Friday':
-            ders_saatleri['Deneme Çözümü'] = max(2, kalan_saat // 2)
-            ders_saatleri['Değerlendirme'] = kalan_saat - ders_saatleri['Deneme Çözümü']
-        else:
-            ders_saatleri['Tekrar ve Soru Çözümü'] = kalan_saat
-        
-        # Detaylı saat programı oluştur
-        detayli_program = self.detayli_saat_programi_olustur(ders_saatleri, haftalik_strateji)
-        
-        return {
-            'gun_adi': gun_adi,
-            'gun_temasi': gun_programlari.get(gun_adi, 'Standart çalışma günü'),
-            'ders_saatleri': ders_saatleri,
-            'detayli_program': detayli_program,
-            'gunluk_hedefler': self.gunluk_hedefler_belirle(ders_saatleri, haftalik_strateji)
-        }
+        return zayıf_konular, orta_konular, güçlü_konular
     
-    def detayli_saat_programi_olustur(self, ders_saatleri: Dict[str, int], haftalik_strateji: HaftalikStrateji) -> List[Dict]:
-        """Saatlik detay program"""
+    zayıf_konular, orta_konular, güçlü_konular = konu_analizi()
+    
+    # Haftalık program oluşturucu
+    def haftalık_program_oluştur():
+        """Öğrenciye özel haftalık program oluşturur"""
+        program = {}
+        günler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
         
-        program = []
-        baslangic_saat = 9  # Sabah 9'da başlangıç
+        # Öğrencinin çalışma saatine göre günlük dağılım
+        günlük_saat = bilgi['çalışma_saati']
         
-        for ders, saat in ders_saatleri.items():
-            for i in range(saat):
-                # Her ders saati için detay
-                program.append({
-                    'saat': f"{baslangic_saat + len(program):02d}:00-{baslangic_saat + len(program) + 1:02d}:00",
-                    'ders': ders,
-                    'aktivite': self.aktivite_belirle(ders, i, haftalik_strateji),
-                    'hedef_soru': haftalik_strateji.hedef_soru_sayilari.get(ders, 20) // saat if saat > 0 else 0,
-                    'odaklanma_konusu': self.odaklanma_konusu_belirle(ders, haftalik_strateji)
+        # Derslerin öncelik sırası (zayıf konular önce)
+        ders_öncelikleri = {}
+        
+        # Zayıf konulardan dersleri çıkar ve önceliklendir
+        for konu in zayıf_konular:
+            ders = konu.split('>')[0].strip() if '>' in konu else konu
+            if ders not in ders_öncelikleri:
+                ders_öncelikleri[ders] = {"zayıf": 0, "orta": 0, "güçlü": 0}
+            ders_öncelikleri[ders]["zayıf"] += 1
+        
+        for konu in orta_konular:
+            ders = konu.split('>')[0].strip() if '>' in konu else konu
+            if ders not in ders_öncelikleri:
+                ders_öncelikleri[ders] = {"zayıf": 0, "orta": 0, "güçlü": 0}
+            ders_öncelikleri[ders]["orta"] += 1
+        
+        for konu in güçlü_konular:
+            ders = konu.split('>')[0].strip() if '>' in konu else konu
+            if ders not in ders_öncelikleri:
+                ders_öncelikleri[ders] = {"zayıf": 0, "orta": 0, "güçlü": 0}
+            ders_öncelikleri[ders]["güçlü"] += 1
+        
+        # Haftalık strateji dağılımını al
+        haftalık_dağılım = strateji['haftalık_dağılım']
+        
+        for gün in günler:
+            program[gün] = []
+            
+            if gün == "Pazar":
+                # Pazar günü deneme ve tekrar odaklı
+                program[gün].append({
+                    "saat": "09:00-12:00",
+                    "aktivite": "Deneme Sınavı",
+                    "detay": f"{bilgi['alan']} alanına uygun tam deneme",
+                    "hedef": "Gerçek sınav simülasyonu"
                 })
+                program[gün].append({
+                    "saat": "14:00-16:00", 
+                    "aktivite": "Deneme Analizi",
+                    "detay": "Yanlış çözümleri ve eksik konuları tespit et",
+                    "hedef": "Zayıf noktaları belirle"
+                })
+                program[gün].append({
+                    "saat": "16:30-18:00",
+                    "aktivite": "Haftalık Değerlendirme",
+                    "detay": "Geçen haftanın başarılarını ve eksiklerini değerlendir",
+                    "hedef": "Gelecek hafta planlaması"
+                })
+            
+            elif gün in ["Cumartesi"]:
+                # Cumartesi grup çalışması veya tekrar günü
+                program[gün].append({
+                    "saat": "10:00-12:00",
+                    "aktivite": "Zayıf Konular Tekrarı",
+                    "detay": f"Bu hafta çalışılan konulardan zayıf olanları: {', '.join([k.split('>')[-1] for k in zayıf_konular[:3]])}",
+                    "hedef": "Konuları pekiştir"
+                })
+                program[gün].append({
+                    "saat": "14:00-17:00",
+                    "aktivite": "Problem Çözme Maratonu", 
+                    "detay": f"Matematik ve Fen için yoğun soru çözümü",
+                    "hedef": "Hız ve doğruluk artırma"
+                })
+            
+            else:
+                # Hafta içi günleri için detaylı program
+                sabah_slots = [
+                    {"saat": "08:00-10:00", "dönem": "Sabah"},
+                    {"saat": "10:30-12:30", "dönem": "Geç Sabah"}
+                ]
                 
-                # Her saatin ardından kısa mola
-                if (len(program)) % 2 == 0 and len(program) < sum(ders_saatleri.values()):
-                    program.append({
-                        'saat': f"{baslangic_saat + len(program):02d}:00-{baslangic_saat + len(program):02d}:15",
-                        'ders': 'MOLA',
-                        'aktivite': 'Kısa dinlenme, nefes alma egzersizi',
-                        'hedef_soru': 0,
-                        'odaklanma_konusu': 'Zihin dinlendirme'
-                    })
+                öğleden_sonra_slots = [
+                    {"saat": "14:00-16:00", "dönem": "Öğleden Sonra"},
+                    {"saat": "16:30-18:30", "dönem": "İkindi"},
+                    {"saat": "19:30-21:30", "dönem": "Akşam"}
+                ]
+                
+                # Günlük ders dağılımı
+                günlük_dersler = []
+                
+                # Zayıf konulardan öncelikli dersler seç
+                if zayıf_konular:
+                    for konu in zayıf_konular[:2]:  # Günde max 2 zayıf konu
+                        ders = konu.split('>')[0].strip()
+                        alt_konu = konu.split('>')[-1].strip()
+                        günlük_dersler.append({
+                            "ders": ders,
+                            "konu": alt_konu,
+                            "tip": "Zayıf Konu",
+                            "süre": 2,
+                            "aktivite": "Konu Anlatımı + Basit Sorular"
+                        })
+                
+                # Orta seviye konulardan ekle
+                if orta_konular and len(günlük_dersler) < 3:
+                    for konu in orta_konular[:2]:
+                        ders = konu.split('>')[0].strip()
+                        alt_konu = konu.split('>')[-1].strip()
+                        günlük_dersler.append({
+                            "ders": ders,
+                            "konu": alt_konu, 
+                            "tip": "Orta Seviye",
+                            "süre": 1.5,
+                            "aktivite": "Soru Çözümü + Pekiştirme"
+                        })
+                
+                # Güçlü konulardan hız çalışması
+                if güçlü_konular and len(günlük_dersler) < 4:
+                    for konu in güçlü_konular[:1]:
+                        ders = konu.split('>')[0].strip()
+                        alt_konu = konu.split('>')[-1].strip()
+                        günlük_dersler.append({
+                            "ders": ders,
+                            "konu": alt_konu,
+                            "tip": "Güçlü Konu",
+                            "süre": 1,
+                            "aktivite": "Hız + Zor Sorular"
+                        })
+                
+                # Eğer yeterli kişisel konu yoksa, genel stratejiyi uygula
+                if len(günlük_dersler) == 0:
+                    günlük_dersler = [
+                        {"ders": "TYT Matematik", "konu": "Güncel Zayıf Alan", "tip": "Temel", "süre": 2, "aktivite": "Konu + Soru"},
+                        {"ders": "TYT Türkçe", "konu": "Paragraf", "tip": "Orta", "süre": 1.5, "aktivite": "Soru Çözümü"},
+                        {"ders": "AYT", "konu": "Alan Dersleri", "tip": "İleri", "süre": 2, "aktivite": "Zorlu Problemler"}
+                    ]
+                
+                # Slotlara yerleştir
+                tüm_slots = sabah_slots + öğleden_sonra_slots
+                
+                for i, ders_bilgi in enumerate(günlük_dersler[:len(tüm_slots)]):
+                    if i < len(tüm_slots):
+                        slot = tüm_slots[i]
+                        
+                        # Renk kodları
+                        renk_map = {
+                            "Zayıf Konu": "🔴",
+                            "Orta Seviye": "🟡", 
+                            "Güçlü Konu": "🟢",
+                            "Temel": "🔵",
+                            "Orta": "🟠",
+                            "İleri": "🟣"
+                        }
+                        
+                        program[gün].append({
+                            "saat": slot["saat"],
+                            "aktivite": f"{renk_map.get(ders_bilgi['tip'], '📚')} {ders_bilgi['ders']}",
+                            "detay": f"{ders_bilgi['konu']} - {ders_bilgi['aktivite']}",
+                            "hedef": f"{ders_bilgi['tip']} seviye çalışma - {ders_bilgi['süre']} saat"
+                        })
         
         return program
     
-    def aktivite_belirle(self, ders: str, saat_sirasi: int, haftalik_strateji: HaftalikStrateji) -> str:
-        """Her saat için özel aktivite belirleme"""
-        
-        aktiviteler = {
-            0: "Konu tekrarı ve temel kavram pekiştirme",
-            1: "Soru çözümü ve uygulama",
-            2: "Zor sorular ve taktik geliştirme",
-            3: "Deneme soruları ve zaman yönetimi"
-        }
-        
-        if ders == "Deneme Çözümü":
-            return "Full deneme sınavı çözümü"
-        elif ders == "Değerlendirme":
-            return "Deneme analizi ve eksik konu tespiti"
-        elif ders == "Tekrar ve Soru Çözümü":
-            return "Genel tekrar ve karışık soru çözümü"
-        else:
-            return aktiviteler.get(saat_sirasi, "Soru çözümü ve pekiştirme")
+    # Ana program arayüzü
+    st.markdown(f'''
+    <div class="info-card">
+        <h3>{tema['icon']} {bilgi['isim']} için Özel Program</h3>
+        <p><strong>Sınıf:</strong> {bilgi['sınıf']} | <strong>Alan:</strong> {bilgi['alan']} | <strong>Hedef:</strong> {bilgi['hedef_bölüm']}</p>
+        <p><strong>Günlük Çalışma Hedefi:</strong> {bilgi['çalışma_saati']} saat</p>
+        <p><strong>Program Stratejisi:</strong> {strateji['günlük_strateji']}</p>
+    </div>
+    ''', unsafe_allow_html=True)
     
-    def odaklanma_konusu_belirle(self, ders: str, haftalik_strateji: HaftalikStrateji) -> str:
-        """Her ders için odaklanma konusu"""
-        
-        if ders in haftalik_strateji.konu_dagilimi:
-            konular = list(haftalik_strateji.konu_dagilimi[ders].keys())
-            if konular:
-                return konular[0]  # En öncelikli konu
-        
-        return "Genel konu tekrarı"
+    # Konu durumu özeti
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("🔴 Zayıf Konular", len(zayıf_konular))
+    with col2:
+        st.metric("🟡 Orta Konular", len(orta_konular))
+    with col3:
+        st.metric("🟢 Güçlü Konular", len(güçlü_konular))
     
-    def oncelik_dersleri_belirle(self, ogrenci: OgrenciProfili, zayif_dersler: List[str]) -> List[str]:
-        """Öncelikli dersleri belirleme"""
-        
-        oncelik_liste = []
-        
-        # Zayıf dersleri önce ekle
-        oncelik_liste.extend(zayif_dersler[:3])
-        
-        # Hedef puana göre önemli dersleri ekle
-        if ogrenci.hedef_puan > 400:
-            onemli_dersler = ['AYT_Matematik', 'Fizik', 'Kimya']
-        else:
-            onemli_dersler = ['Matematik', 'Türkçe', 'Sosyal']
-        
-        for ders in onemli_dersler:
-            if ders not in oncelik_liste and ders in ogrenci.mevcut_seviye:
-                oncelik_liste.append(ders)
-        
-        # Diğer dersleri ekle
-        for ders in ogrenci.mevcut_seviye.keys():
-            if ders not in oncelik_liste:
-                oncelik_liste.append(ders)
-        
-        return oncelik_liste
+    # Haftalık program göster
+    program = haftalık_program_oluştur()
     
-    def konu_dagilimi_hesapla(self, ogrenci: OgrenciProfili, strateji: Dict, oncelik_dersleri: List[str]) -> Dict:
-        """Konu dağılımını hesapla"""
-        
-        konu_dagilimi = {}
-        
-        for ders in oncelik_dersleri:
-            konu_dagilimi[ders] = {}
-            
-            if ders in ogrenci.zayif_konular:
-                # Zayıf konulara öncelik ver
-                for konu in ogrenci.zayif_konular[ders][:3]:
-                    konu_dagilimi[ders][konu] = 3
-            
-            # Genel konuları ekle
-            if ders in self.tyt_dersleri:
-                konular = self.tyt_dersleri[ders][:2]
-            elif ders in self.ayt_dersleri:
-                konular = self.ayt_dersleri[ders][:2]
+    st.markdown("### 📋 Bu Haftanın Derece Programı")
+    
+    # Günlük programları göster
+    for gün, aktiviteler in program.items():
+        with st.expander(f"📅 {gün} Programı"):
+            if aktiviteler:
+                for aktivite in aktiviteler:
+                    st.markdown(f'''
+                    <div class="program-item">
+                        <strong>⏰ {aktivite['saat']}</strong><br>
+                        <strong>📚 {aktivite['aktivite']}</strong><br>
+                        <small>🎯 {aktivite['detay']}</small><br>
+                        <em>✨ Hedef: {aktivite['hedef']}</em>
+                    </div>
+                    ''', unsafe_allow_html=True)
             else:
-                konular = ['Genel Tekrar']
+                st.info("Bu gün için program henüz hazırlanmamış.")
+    
+    # Haftalık hedefler
+    st.markdown("### 🎯 Bu Haftanın Derece Hedefleri")
+    
+    hedefler = [
+        f"🔴 Zayıf konulardan en az {min(3, len(zayıf_konular))} tanesini 'Orta Seviye'ye çıkar",
+        f"📝 {strateji['haftalık_dağılım'].get('Deneme', 1)} tam deneme çöz ve analiz et",
+        f"📚 Toplamda {bilgi['çalışma_saati'] * 6} saat aktif çalışma gerçekleştir",
+        f"🎯 {bilgi['hedef_bölüm']} için özel kaynak araştırması yap",
+        "💪 Fiziksel egzersiz ve zihinsel sağlığa önem ver"
+    ]
+    
+    for hedef in hedefler:
+        st.markdown(f"• {hedef}")
+    
+    # Motivasyonel mesaj ve ilerleme takibi
+    st.markdown("### 🚀 Haftalık Motivasyon Köşesi")
+    
+    motivasyon_mesajları = [
+        f"💫 {bilgi['isim']}, her geçen gün {bilgi['hedef_bölüm']} hayaline bir adım daha yaklaşıyorsun!",
+        f"🏆 Derece öğrencileri böyle disiplinli çalışır. Sen de onlardan birisin!",
+        f"🎯 {bilgi['hedef_sıralama']}. sıralama artık çok yakın. Bu hafta biraz daha zorlayalım!",
+        "⭐ Zayıf konularını güçlü yaptığında, rakiplerinden çok önde olacaksın!",
+        "🔥 Bu program sadece çalışmak değil, sistematik başarı stratejisidir!"
+    ]
+    
+    seçilen_mesaj = random.choice(motivasyon_mesajları)
+    st.markdown(f'''
+    <div class="success-card">
+        <h4>💝 Bu Haftanın Motivasyonu</h4>
+        <p style="font-size: 1.1rem; font-weight: bold;">{seçilen_mesaj}</p>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # İlerleme takibi ve kayıt
+    st.markdown("### 📈 Haftalık İlerleme Kaydı")
+    
+    bugünün_tarihi = str(datetime.now().date())
+    
+    with st.form("günlük_kayıt"):
+        st.markdown("**Bugünkü çalışmanı kaydet:**")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            çalışılan_saat = st.number_input("Kaç saat çalıştın?", min_value=0, max_value=16, value=0)
+            tamamlanan_konu = st.selectbox("Hangi konuyu tamamladın?", 
+                                         options=["Seçiniz..."] + [k.split('>')[-1] for k in zayıf_konular + orta_konular])
+        
+        with col2:
+            motivasyon_skoru = st.slider("Bugünkü motivasyon skorun (1-10)", 1, 10, 7)
+            notlar = st.text_area("Bugünle ilgili notların", placeholder="Zorlandığın konular, başarılar vb.")
+        
+        kaydet = st.form_submit_button("📝 Günlük Kaydı Ekle")
+        
+        if kaydet and çalışılan_saat > 0:
+            if 'günlük_çalışma_kayıtları' not in st.session_state:
+                st.session_state.günlük_çalışma_kayıtları = {}
             
-            for konu in konular:
-                if konu not in konu_dagilimi[ders]:
-                    konu_dagilimi[ders][konu] = 2
-        
-        return konu_dagilimi
+            st.session_state.günlük_çalışma_kayıtları[bugünün_tarihi] = {
+                'saat': çalışılan_saat,
+                'konu': tamamlanan_konu,
+                'motivasyon': motivasyon_skoru,
+                'notlar': notlar
+            }
+            
+            # Motivasyon puanını güncelle
+            st.session_state.motivasyon_puanı = min(100, st.session_state.motivasyon_puanı + motivasyon_skoru)
+            
+            st.success(f"✅ {bugünün_tarihi} tarihli çalışman kaydedildi! Motivasyon puanın: {st.session_state.motivasyon_puanı}")
+            
+            # Verileri kaydet
+            data_to_save = {
+                'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
+                'program_oluşturuldu': st.session_state.program_oluşturuldu,
+                'deneme_sonuçları': st.session_state.deneme_sonuçları,
+                'konu_durumu': st.session_state.konu_durumu,
+                'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
+                'motivasyon_puanı': st.session_state.motivasyon_puanı,
+                'hedef_sıralama': st.session_state.hedef_sıralama,
+            }
+            save_user_data(st.session_state.kullanıcı_adı, data_to_save)
     
-    def deneme_plani_olustur(self, strateji: Dict, kalan_hafta: int) -> Dict[str, int]:
-        """Deneme planı oluşturma"""
+    # Son 7 günün özeti
+    if 'günlük_çalışma_kayıtları' in st.session_state and st.session_state.günlük_çalışma_kayıtları:
+        st.markdown("### 📊 Son 7 Günlük Performans")
         
-        haftalik_deneme = max(1, int(strateji['deneme_oran'] / 5))
+        # Son 7 günün verilerini al
+        son_kayıtlar = list(st.session_state.günlük_çalışma_kayıtları.items())[-7:]
         
-        return {
-            'TYT_Denemesi': haftalik_deneme,
-            'AYT_Denemesi': haftalik_deneme if kalan_hafta > 4 else haftalik_deneme + 1,
-            'Konu_Tarama': 2,
-            'Hiz_Denemesi': 1 if kalan_hafta < 8 else 0
-        }
-    
-    def revizyon_konulari_belirle(self, ogrenci: OgrenciProfili) -> List[str]:
-        """Revizyon konuları"""
-        
-        revizyon_liste = []
-        
-        for ders, konular in ogrenci.zayif_konular.items():
-            revizyon_liste.extend([f"{ders} - {konu}" for konu in konular[:2]])
-        
-        return revizyon_liste
-    
-    def hedef_soru_sayilari_belirle(self, ogrenci: OgrenciProfili, seviye: str) -> Dict[str, int]:
-        """Günlük hedef soru sayıları"""
-        
-        base_sorular = {
-            'baslangic': {'Matematik': 15, 'Türkçe': 20, 'Sosyal': 15, 'Fen': 12},
-            'orta': {'Matematik': 25, 'Türkçe': 30, 'Sosyal': 25, 'Fen': 20},
-            'ileri': {'Matematik': 35, 'Türkçe': 40, 'Sosyal': 30, 'Fen': 25},
-            'sinava_yakin': {'Matematik': 45, 'Türkçe': 50, 'Sosyal': 40, 'Fen': 35}
-        }
-        
-        return base_sorular[seviye]
-    
-    def gunluk_hedefler_belirle(self, ders_saatleri: Dict[str, int], haftalik_strateji: HaftalikStrateji) -> List[str]:
-        """Günlük hedefleri belirleme"""
-        
-        hedefler = []
-        
-        for ders, saat in ders_saatleri.items():
-            if ders not in ['MOLA', 'Deneme Çözümü', 'Değerlendirme']:
-                hedef_soru = haftalik_strateji.hedef_soru_sayilari.get(ders, 20)
-                hedefler.append(f"{ders}: {hedef_soru} soru çözümü")
-        
-        hedefler.append("Günlük değerlendirme ve eksik analizi")
-        hedefler.append("Yarınki konuları gözden geçirme")
-        
-        return hedefler
-    
-    def performans_analizi(self, ogrenci: OgrenciProfili) -> Dict:
-        """Performans analizi"""
-        
-        analiz = {
-            'guclu_yonler': [],
-            'gelisim_alanlari': [],
-            'uyarilar': [],
-            'oneriler': []
-        }
-        
-        for ders, puan in ogrenci.mevcut_seviye.items():
-            if puan > 75:
-                analiz['guclu_yonler'].append(f"{ders} dersinde çok iyi durumdasınız ({puan}%)")
-            elif puan < 50:
-                analiz['gelisim_alanlari'].append(f"{ders} dersi acil müdahale gerektiriyor ({puan}%)")
-                analiz['uyarilar'].append(f"⚠️ {ders} dersine daha fazla zaman ayırın!")
-        
-        # Deneme performansı analizi
-        for ders, puanlar in ogrenci.son_deneme_puanlari.items():
-            if len(puanlar) > 1:
-                trend = puanlar[-1] - puanlar[-2]
-                if trend > 0:
-                    analiz['oneriler'].append(f"✅ {ders} dersinde yükseliştesiniz (+{trend})")
-                elif trend < -5:
-                    analiz['uyarilar'].append(f"📉 {ders} dersinde düşüş var ({trend})")
-        
-        return analiz
-    
-    def taktik_onerileri_olustur(self, ogrenci: OgrenciProfili, seviye: str) -> List[str]:
-        """Taktik önerileri"""
-        
-        taktikler = []
-        
-        # Seviyeye özel taktikler
-        seviye_taktikleri = {
-            'baslangic': [
-                "🎯 Temel konulara odaklanın, zor sorulara takılmayın",
-                "⏰ Zamanı iyi yönetin, kolay sorulardan başlayın",
-                "📚 Konu eksiklerinizi sistematik olarak kapatın"
-            ],
-            'orta': [
-                "🚀 Orta düzey sorulara ağırlık verin",
-                "🎪 Taktiksel çözüm yöntemlerini öğrenin", 
-                "📊 Deneme analizlerinizi detaylandırın"
-            ],
-            'ileri': [
-                "🏆 Zor sorularda hız kazanmaya odaklanın",
-                "🎯 Her dersten maksimum net hedefleyin",
-                "⚡ Hızlı çözüm tekniklerini geliştirin"
-            ],
-            'sinava_yakin': [
-                "🔥 Sürekli deneme ritmi tutun",
-                "🎭 Sınav stratejinizi netleştirin",
-                "💪 Mental hazırlığınızı güçlendirin"
-            ]
-        }
-        
-        taktikler.extend(seviye_taktikleri[seviye])
-        
-        # Kişisel taktikler
-        if ogrenci.hedef_puan > 450:
-            taktikler.append("🌟 Hedef puanınız yüksek, AYT'ye daha fazla ağırlık verin")
-        
-        ortalama_seviye = sum(ogrenci.mevcut_seviye.values()) / len(ogrenci.mevcut_seviye)
-        if ortalama_seviye < 60:
-            taktikler.append("📈 Temel seviyenizi yükseltmeye odaklanın")
-        
-        return taktikler
-    
-    def hedef_analizi(self, ogrenci: OgrenciProfili) -> Dict:
-        """Hedef analizi"""
-        
-        mevcut_ortalama = sum(ogrenci.mevcut_seviye.values()) / len(ogrenci.mevcut_seviye)
-        
-        # Tahmini puan hesaplama (basit model)
-        tahmini_tyt = mevcut_ortalama * 4  # TYT için yaklaşık hesaplama
-        tahmini_ayt = mevcut_ortalama * 3.5  # AYT için yaklaşık hesaplama
-        tahmini_toplam = tahmini_tyt + tahmini_ayt
-        
-        hedef_fark = ogrenci.hedef_puan - tahmini_toplam
-        
-        return {
-            'mevcut_tahmini_puan': round(tahmini_toplam),
-            'hedef_puan': ogrenci.hedef_puan,
-            'puan_farki': round(hedef_fark),
-            'ulasilabilirlik': 'Yüksek' if hedef_fark < 50 else 'Orta' if hedef_fark < 100 else 'Zor',
-            'gereken_gelisim': round(hedef_fark / len(ogrenci.mevcut_seviye)) if len(ogrenci.mevcut_seviye) > 0 else 0
-        }
+        if son_kayıtlar:
+            tarihler = [tarih for tarih, _ in son_kayıtlar]
+            saatler = [veri['saat'] for _, veri in son_kayıtlar]
+            motivasyon_skorları = [veri['motivasyon'] for _, veri in son_kayıtlar]
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                fig_saat = px.bar(x=tarihler, y=saatler, title="Günlük Çalışma Saatleri",
+                                labels={'x': 'Tarih', 'y': 'Saat'})
+                st.plotly_chart(fig_saat, use_container_width=True)
+            
+            with col2:
+                fig_motivasyon = px.line(x=tarihler, y=motivasyon_skorları, title="Motivasyon Trendi",
+                                       labels={'x': 'Tarih', 'y': 'Motivasyon Skoru'})
+                fig_motivasyon.update_traces(mode='markers+lines')
+                st.plotly_chart(fig_motivasyon, use_container_width=True)
+            
+            # Ortalama istatistikler
+            ortalama_saat = sum(saatler) / len(saatler)
+            ortalama_motivasyon = sum(motivasyon_skorları) / len(motivasyon_skorları)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("📚 Ortalama Günlük Çalışma", f"{ortalama_saat:.1f} saat")
+            with col2:
+                st.metric("💪 Ortalama Motivasyon", f"{ortalama_motivasyon:.1f}/10")
 
+# Deneme analizi fonksiyonu da ekleyelim
+def derece_deneme_analizi():
+    st.markdown('<div class="section-header">📈 Deneme Sonucu Analizi</div>', unsafe_allow_html=True)
+    
+    bilgi = st.session_state.öğrenci_bilgisi
+    tema = BÖLÜM_TEMALARI[bilgi['bölüm_kategori']]
+    
+    # Deneme sonucu girme formu
+    with st.form("deneme_form"):
+        st.markdown("### ✍️ Yeni Deneme Sonucu Ekle")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("**TYT Netleri**")
+            tyt_mat = st.number_input("Matematik", 0, 40, 0, key="tyt_mat")
+            tyt_tur = st.number_input("Türkçe", 0, 40, 0, key="tyt_tur")
+            tyt_sos = st.number_input("Sosyal", 0, 20, 0, key="tyt_sos")
+            tyt_fen = st.number_input("Fen", 0, 20, 0, key="tyt_fen")
+        
+        with col2:
+            st.markdown("**AYT Netleri**")
+            if bilgi['alan'] == "Sayısal":
+                ayt_mat = st.number_input("AYT Matematik", 0, 40, 0, key="ayt_mat")
+                ayt_fiz = st.number_input("Fizik", 0, 14, 0, key="ayt_fiz")
+                ayt_kim = st.number_input("Kimya", 0, 13, 0, key="ayt_kim")
+                ayt_bio = st.number_input("Biyoloji", 0, 13, 0, key="ayt_bio")
+                ayt_edeb = 0
+                ayt_tar = 0
+                ayt_cog = 0
+            elif bilgi['alan'] == "Sözel":
+                ayt_edeb = st.number_input("Edebiyat", 0, 24, 0, key="ayt_edeb")
+                ayt_tar = st.number_input("Tarih", 0, 10, 0, key="ayt_tar")
+                ayt_cog = st.number_input("Coğrafya", 0, 6, 0, key="ayt_cog")
+                ayt_mat = 0
+                ayt_fiz = 0
+                ayt_kim = 0
+                ayt_bio = 0
+            else:  # Eşit Ağırlık
+                ayt_mat = st.number_input("AYT Matematik", 0, 40, 0, key="ayt_mat")
+                ayt_edeb = st.number_input("Edebiyat", 0, 24, 0, key="ayt_edeb")
+                ayt_tar = st.number_input("Tarih", 0, 10, 0, key="ayt_tar")
+                ayt_cog = st.number_input("Coğrafya", 0, 6, 0, key="ayt_cog")
+                ayt_fiz = 0
+                ayt_kim = 0
+                ayt_bio = 0
+        
+        with col3:
+            st.markdown("**Ek Bilgiler**")
+            deneme_adı = st.text_input("Deneme Adı", "Genel Deneme")
+            deneme_tarihi = st.date_input("Deneme Tarihi", datetime.now().date())
+            çözüm_süresi = st.number_input("Çözüm Süresi (dk)", 60, 300, 180)
+            notlar = st.text_area("Notlar", placeholder="Zorlandığın sorular, gözlemler...")
+        
+        deneme_kaydet = st.form_submit_button("📊 Deneme Sonucunu Kaydet")
+        
+        if deneme_kaydet:
+            toplam_tyt = tyt_mat + tyt_tur + tyt_sos + tyt_fen
+            toplam_ayt = ayt_mat + ayt_fiz + ayt_kim + ayt_bio + ayt_edeb + ayt_tar + ayt_cog
+            
+            yeni_deneme = {
+                'tarih': str(deneme_tarihi),
+                'ad': deneme_adı,
+                'tyt_mat': tyt_mat,
+                'tyt_tur': tyt_tur,
+                'tyt_sos': tyt_sos,
+                'tyt_fen': tyt_fen,
+                'tyt_net': toplam_tyt,
+                'ayt_mat': ayt_mat,
+                'ayt_fiz': ayt_fiz,
+                'ayt_kim': ayt_kim,
+                'ayt_bio': ayt_bio,
+                'ayt_edeb': ayt_edeb,
+                'ayt_tar': ayt_tar,
+                'ayt_cog': ayt_cog,
+                'ayt_net': toplam_ayt,
+                'toplam_net': toplam_tyt + toplam_ayt,
+                'süre': çözüm_süresi,
+                'notlar': notlar,
+                'alan': bilgi['alan']
+            }
+            
+            if 'deneme_sonuçları' not in st.session_state:
+                st.session_state.deneme_sonuçları = []
+            
+            st.session_state.deneme_sonuçları.append(yeni_deneme)
+            
+            # Analiz yap
+            analiz = derece_performans_analizi(toplam_tyt, toplam_ayt, bilgi)
+            
+            st.success(f"✅ Deneme kaydedildi! Toplam Net: {toplam_tyt + toplam_ayt}")
+            
+            # Durum mesajı
+            if analiz['durum'] == 'Derece Adayı':
+                st.balloons()
+                st.markdown(f'''
+                <div class="success-card">
+                    <h3>🏆 TEBRİKLER! DERECE ADAYISIN!</h3>
+                    <p>Bu performansla {bilgi['hedef_bölüm']} çok yakın!</p>
+                </div>
+                ''', unsafe_allow_html=True)
+            elif analiz['durum'] == 'Hedefte':
+                st.markdown(f'''
+                <div class="info-card">
+                    <h3>🎯 HEDEFTESİN!</h3>
+                    <p>Çok iyi gidiyorsun, bu tempoyu korumaya odaklan!</p>
+                </div>
+                ''', unsafe_allow_html=True)
+            else:
+                st.markdown(f'''
+                <div class="warning-card">
+                    <h3>💪 DAHA FAZLA ÇALIŞMAN GEREKİYOR!</h3>
+                    <p>{analiz['eksik_net']:.1f} net daha artırman gerekiyor.</p>
+                </div>
+                ''', unsafe_allow_html=True)
+            
+            # Verileri kaydet
+            data_to_save = {
+                'öğrenci_bilgisi': st.session_state.öğrenci_bilgisi,
+                'program_oluşturuldu': st.session_state.program_oluşturuldu,
+                'deneme_sonuçları': st.session_state.deneme_sonuçları,
+                'konu_durumu': st.session_state.konu_durumu,
+                'günlük_çalışma_kayıtları': st.session_state.günlük_çalışma_kayıtları,
+                'motivasyon_puanı': st.session_state.motivasyon_puanı,
+                'hedef_sıralama': st.session_state.hedef_sıralama,
+            }
+            save_user_data(st.session_state.kullanıcı_adı, data_to_save)
+            
+            st.rerun()
+    
+    # Mevcut deneme sonuçlarını göster
+    if 'deneme_sonuçları' in st.session_state and st.session_state.deneme_sonuçları:
+        st.markdown("### 📊 Deneme Sonuçları Trendi")
+        
+        df = pd.DataFrame(st.session_state.deneme_sonuçları)
+        
+        # Grafik oluştur
+        fig = px.line(df, x='tarih', y=['tyt_net', 'ayt_net', 'toplam_net'], 
+                     title="Net Gelişim Trendi", 
+                     labels={'value': 'Net Sayısı', 'tarih': 'Tarih'})
+        
+        fig.update_traces(mode='markers+lines')
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Son deneme analizi
+        son_deneme = df.iloc[-1]
+        st.markdown("### 📋 Son Deneme Detaylı Analizi")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("TYT Net", f"{son_deneme['tyt_net']}", 
+                     delta=f"{son_deneme['tyt_net'] - df.iloc[-2]['tyt_net']:.1f}" if len(df) > 1 else None)
+        
+        with col2:
+            st.metric("AYT Net", f"{son_deneme['ayt_net']}", 
+                     delta=f"{son_deneme['ayt_net'] - df.iloc[-2]['ayt_net']:.1f}" if len(df) > 1 else None)
+        
+        with col3:
+            st.metric("Toplam Net", f"{son_deneme['toplam_net']}", 
+                     delta=f"{son_deneme['toplam_net'] - df.iloc[-2]['toplam_net']:.1f}" if len(df) > 1 else None)
+        
+        with col4:
+            hedef_net = hedef_net_hesapla(bilgi['hedef_sıralama'], bilgi['alan'])
+            fark = son_deneme['toplam_net'] - hedef_net
+            st.metric("Hedefe Uzaklık", f"{fark:+.1f}")
+        
+        # Ders bazında analiz
+        st.markdown("### 🎯 Ders Bazında Detay Analizi")
+        
+        if bilgi['alan'] == "Sayısal":
+            ders_netleri = {
+                'TYT Matematik': son_deneme['tyt_mat'],
+                'TYT Türkçe': son_deneme['tyt_tur'],
+                'TYT Fen': son_deneme['tyt_fen'],
+                'TYT Sosyal': son_deneme['tyt_sos'],
+                'AYT Matematik': son_deneme['ayt_mat'],
+                'Fizik': son_deneme['ayt_fiz'],
+                'Kimya': son_deneme['ayt_kim'],
+                'Biyoloji': son_deneme['ayt_bio']
+            }
+            maksimum_netler = {
+                'TYT Matematik': 40, 'TYT Türkçe': 40, 'TYT Fen': 20, 'TYT Sosyal': 20,
+                'AYT Matematik': 40, 'Fizik': 14, 'Kimya': 13, 'Biyoloji': 13
+            }
+        elif bilgi['alan'] == "Sözel":
+            ders_netleri = {
+                'TYT Matematik': son_deneme['tyt_mat'],
+                'TYT Türkçe': son_deneme['tyt_tur'],
+                'TYT Fen': son_deneme['tyt_fen'],
+                'TYT Sosyal': son_deneme['tyt_sos'],
+                'Edebiyat': son_deneme['ayt_edeb'],
+                'Tarih': son_deneme['ayt_tar'],
+                'Coğrafya': son_deneme['ayt_cog']
+            }
+            maksimum_netler = {
+                'TYT Matematik': 40, 'TYT Türkçe': 40, 'TYT Fen': 20, 'TYT Sosyal': 20,
+                'Edebiyat': 24, 'Tarih': 10, 'Coğrafya': 6
+            }
+        else:  # Eşit Ağırlık
+            ders_netleri = {
+                'TYT Matematik': son_deneme['tyt_mat'],
+                'TYT Türkçe': son_deneme['tyt_tur'],
+                'TYT Fen': son_deneme['tyt_fen'],
+                'TYT Sosyal': son_deneme['tyt_sos'],
+                'AYT Matematik': son_deneme['ayt_mat'],
+                'Edebiyat': son_deneme['ayt_edeb'],
+                'Tarih': son_deneme['ayt_tar'],
+                'Coğrafya': son_deneme['ayt_cog']
+            }
+            maksimum_netler = {
+                'TYT Matematik': 40, 'TYT Türkçe': 40, 'TYT Fen': 20, 'TYT Sosyal': 20,
+                'AYT Matematik': 40, 'Edebiyat': 24, 'Tarih': 10, 'Coğrafya': 6
+            }
+        
+        # Her ders için başarı yüzdesi hesapla
+        ders_analizi = []
+        for ders, net in ders_netleri.items():
+            maksimum = maksimum_netler[ders]
+            yüzde = (net / maksimum) * 100 if maksimum > 0 else 0
+            
+            if yüzde >= 80:
+                durum = "🟢 Mükemmel"
+                öneri = "Bu seviyeyi koru, hız çalış"
+            elif yüzde >= 60:
+                durum = "🟡 İyi"
+                öneri = "Daha zorlu sorulara geç"
+            elif yüzde >= 40:
+                durum = "🟠 Orta"
+                öneri = "Konu eksiklerini tamamla"
+            else:
+                durum = "🔴 Zayıf"
+                öneri = "Temel konuları güçlendir"
+            
+            ders_analizi.append({
+                'Ders': ders,
+                'Net': f"{net}/{maksimum}",
+                'Yüzde': f"{yüzde:.1f}%",
+                'Durum': durum,
+                'Öneri': öneri
+            })
+        
+        analiz_df = pd.DataFrame(ders_analizi)
+        st.dataframe(analiz_df, use_container_width=True)
+        
+        # Zayıf alanlar için özel öneriler
+        zayıf_dersler = [d for d in ders_analizi if "🔴" in d['Durum']]
+        orta_dersler = [d for d in ders_analizi if "🟠" in d['Durum']]
+        
+        if zayıf_dersler:
+            st.markdown("### 🔴 Acil Müdahale Gereken Dersler")
+            for ders in zayıf_dersler:
+                st.warning(f"**{ders['Ders']}**: {ders['Öneri']}")
+        
+        if orta_dersler:
+            st.markdown("### 🟠 İyileştirilebilir Dersler")
+            for ders in orta_dersler:
+                st.info(f"**{ders['Ders']}**: {ders['Öneri']}")
+        
+        # Hedef odaklı analiz
+        st.markdown("### 🎯 Hedefe Yönelik Strateji")
+        
+        analiz = derece_performans_analizi(son_deneme['tyt_net'], son_deneme['ayt_net'], bilgi)
+        
+        st.markdown(f"**Durum:** {analiz['durum']}")
+        
+        if analiz['eksik_net'] > 0:
+            st.markdown(f"**Kapatman gereken net:** {analiz['eksik_net']:.1f}")
+            
+            # Net dağılım önerisi
+            if bilgi['alan'] == "Sayısal":
+                öneri_dağılım = {
+                    "TYT Matematik": min(5, analiz['eksik_net'] * 0.3),
+                    "AYT Matematik": min(8, analiz['eksik_net'] * 0.4),
+                    "Fen Dersleri": min(6, analiz['eksik_net'] * 0.3)
+                }
+            elif bilgi['alan'] == "Sözel":
+                öneri_dağılım = {
+                    "TYT Türkçe": min(6, analiz['eksik_net'] * 0.3),
+                    "Edebiyat": min(8, analiz['eksik_net'] * 0.4),
+                    "Sosyal Dersler": min(4, analiz['eksik_net'] * 0.3)
+                }
+            else:  # Eşit Ağırlık
+                öneri_dağılım = {
+                    "TYT Matematik": min(4, analiz['eksik_net'] * 0.25),
+                    "TYT Türkçe": min(4, analiz['eksik_net'] * 0.25),
+                    "AYT Matematik": min(6, analiz['eksik_net'] * 0.3),
+                    "Edebiyat": min(4, analiz['eksik_net'] * 0.2)
+                }
+            
+            st.markdown("**Önerilen Net Artırım Dağılımı:**")
+            for ders, artış in öneri_dağılım.items():
+                if artış > 0:
+                    st.markdown(f"• {ders}: +{artış:.1f} net")
+        
+        # Zamana göre ilerleme analizi
+        if len(df) >= 3:
+            st.markdown("### 📈 İlerleme Hız Analizi")
+            
+            son_3_deneme = df.tail(3)
+            ilk_net = son_3_deneme.iloc[0]['toplam_net']
+            son_net = son_3_deneme.iloc[-1]['toplam_net']
+            
+            ilerleme_hızı = (son_net - ilk_net) / 2  # Son 3 deneme arası ortalama artış
+            
+            if ilerleme_hızı > 2:
+                st.success(f"🚀 Harika! Deneme başına ortalama {ilerleme_hızı:.1f} net artırıyorsun!")
+            elif ilerleme_hızı > 0:
+                st.info(f"📈 İyi gidiyorsun. Deneme başına {ilerleme_hızı:.1f} net artış var.")
+            else:
+                st.warning("⚠️ Son denemelerde net artışı yavaşladı. Strateji değişikliği gerekebilir.")
+            
+            # Hedefe ulaşma tahmini
+            if ilerleme_hızı > 0 and analiz['eksik_net'] > 0:
+                gereken_deneme = int(analiz['eksik_net'] / ilerleme_hızı) + 1
+                st.info(f"Bu hızla devam edersen, yaklaşık {gereken_deneme} deneme sonra hedefe ulaşabilirsin.")
+    
+    else:
+        st.info("Henüz deneme sonucu girmediniz. İlk denemenizi ekleyerek analizlere başlayın!")
 
-# Örnek kullanım fonksiyonu - kodunuzda def_gunluk_program() yerine bu fonksiyonu kullanın
-def def_gunluk_program():
-    """Sizin mevcut def_gunluk_program fonksiyonunuz yerine bu kodu kullanın"""
     
-    # Örnek öğrenci profili - gerçek verilerle değiştirin
-    ornek_ogrenci = OgrenciProfili(
-        isim="Ahmet Yılmaz",
-        hedef_puan=420,
-        mevcut_seviye={
-            'Matematik': 65,
-            'Türkçe': 70,
-            'Sosyal': 45,  # Zayıf - coğrafya örneği
-            'Fen': 55,
-            'AYT_Matematik': 40,  # Zayıf
-            'Fizik': 35,  # Çok zayıf
-            'Kimya': 50,
-            'Biyoloji': 60
-        },
-        zayif_konular={
-            'Sosyal': ['Tarih-Osmanlı', 'Coğrafya-İklim'],
-            'AYT_Matematik': ['Türev', 'İntegral'],
-            'Fizik': ['Elektrik', 'Manyetizma']
-        },
-        guclu_konular={
-            'Türkçe': ['Anlam Bilgisi', 'Paragraf'],
-            'Matematik': ['Fonksiyonlar', 'Denklemler']
-        },
-        gunluk_calisma_saati=8,
-        sinav_tarihi=datetime.date(2025, 6, 14),  # YKS tarihi
-        son_deneme_puanlari={
-            'TYT': [285, 295, 305],
-            'AYT': [180, 175, 190]
-        }
-    )
-    
-    # Sistemi başlat
-    sistem = UltraProfesyonelTYTAYTSistemi()
-    
-    # Günlük programı oluştur
-    program = sistem.gunluk_program_olustur(ornek_ogrenci)
-    
-    return program
-
-
-# Test etmek için
-if __name__ == "__main__":
-    program = def_gunluk_program()
-    print("Program başarıyla oluşturuldu!")
-    print(f"Seviye: {program['seviye']}")
-    print(f"Kalan gün: {program['kalan_gun']}")
+     
 def derece_konu_takibi():
     
     
