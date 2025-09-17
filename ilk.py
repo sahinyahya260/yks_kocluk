@@ -500,6 +500,7 @@ def öğrenci_bilgi_formu():
 
 def derece_günlük_program():
     
+    
 
 # Sayfa yapılandırması
     st.set_page_config(
@@ -565,6 +566,22 @@ st.markdown("""
 
 # Başlık
 st.markdown('<div class="main-header">🧠 Psikoloji Temelli Kişiselleştirilmiş YKS Programı</div>', unsafe_allow_html=True)
+
+# Basitleştirilmiş YKS konu yapısı
+yks_konulari = {
+    "TYT Türkçe": {
+        "Anlam Bilgisi": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf"],
+        "Dil Bilgisi": ["Ses Bilgisi", "Yazım Kuralları", "Noktalama İşaretleri", "Sözcükte Yapı"]
+    },
+    "TYT Matematik": {
+        "Temel Matematik": ["Temel Kavramlar", "Sayı Basamakları", "Bölme ve Bölünebilme", "EBOB-EKOK"],
+        "Problemler": ["Sayı Problemleri", "Kesir Problemleri", "Yaş Problemleri"]
+    },
+    "TYT Geometri": {
+        "Temel Geometri": ["Doğruda Açılar", "Üçgende Açılar", "Üçgende Alan"],
+        "Çokgenler": ["Dörtgenler", "Çember ve Daire"]
+    }
+}
 
 # Oturum durumu başlatma
 if 'konu_durumu' not in st.session_state:
@@ -639,42 +656,36 @@ with tab1:
     st.markdown('<div class="section-header">🎯 Konu Masterysi</div>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 1.1rem;">Eksik olduğun konuları en detaylı şekilde takip et.</p>', unsafe_allow_html=True)
     
-    # YKS konularını 4 seviyeli hiyerarşik olarak tanımla
-    # (Bu kısım çok uzun olduğu için burada tekrarlamıyorum, yukarıdaki konu yapısını kullanıyoruz)
-    
     mastery_seviyeleri = ["Hiç Bilmiyor", "Temel Bilgi", "Orta Seviye", "İyi Seviye", "Uzman (Derece) Seviye"]
     
     # Her ders için genişletilebilir bölümler
-    if  for ders, konu_alani in yks_konulari.items():
+    for ders, konu_alani in yks_konulari.items():
         with st.expander(f"📚 {ders}"):
-            for alan, alt_konular in konu_alani.items():
+            for alan, konular in konu_alani.items():
                 st.subheader(f"📖 {alan}")
                 
-                for alt_konu, detaylar in alt_konular.items():
-                    st.markdown(f"**{alt_konu}**")
+                for konu in konular:
+                    konu_key = f"{ders}>{alan}>{konu}"
                     
-                    for detay in detaylar:
-                        konu_key = f"{ders}>{alan}>{alt_konu}>{detay}"
-                        
-                        # Konu durumu kayıtlı değilse başlat
-                        if konu_key not in st.session_state.konu_durumu:
-                            st.session_state.konu_durumu[konu_key] = "Hiç Bilmiyor"
-                        
-                        # Mevcut seviyeyi al
-                        mevcut_seviye = st.session_state.konu_durumu[konu_key]
-                        
-                        # Seviye seçici
-                        yeni_seviye = st.selectbox(
-                            f"{detay} seviyeniz:",
-                            options=mastery_seviyeleri,
-                            index=mastery_seviyeleri.index(mevcut_seviye),
-                            key=konu_key
-                        )
-                        
-                        # Değişiklikleri kaydet
-                        if yeni_seviye != mevcut_seviye:
-                            st.session_state.konu_durumu[konu_key] = yeni_seviye
-                            st.success(f"{detay} seviyesi güncellendi: {yeni_seviye}")
+                    # Konu durumu kayıtlı değilse başlat
+                    if konu_key not in st.session_state.konu_durumu:
+                        st.session_state.konu_durumu[konu_key] = "Hiç Bilmiyor"
+                    
+                    # Mevcut seviyeyi al
+                    mevcut_seviye = st.session_state.konu_durumu[konu_key]
+                    
+                    # Seviye seçici
+                    yeni_seviye = st.selectbox(
+                        f"{konu} seviyeniz:",
+                        options=mastery_seviyeleri,
+                        index=mastery_seviyeleri.index(mevcut_seviye),
+                        key=konu_key
+                    )
+                    
+                    # Değişiklikleri kaydet
+                    if yeni_seviye != mevcut_seviye:
+                        st.session_state.konu_durumu[konu_key] = yeni_seviye
+                        st.success(f"{konu} seviyesi güncellendi: {yeni_seviye}")
 
 with tab2:
     st.markdown('<div class="section-header">📅 Kişiselleştirilmiş Program Oluşturucu</div>', unsafe_allow_html=True)
@@ -743,7 +754,7 @@ with tab3:
     toplam_konu = len(st.session_state.konu_durumu)
     if toplam_konu > 0:
         tamamlanan_konu = sum(1 for v in st.session_state.konu_durumu.values() if v in ["İyi Seviye", "Uzman (Derece) Seviye"])
-        ilerleme_yuzdesi = (tamamlanan_konu / toplam_konu) * 100
+        ilerleme_yuzdesi = (tamamlanan_konu / toplam_konu) * 100 if toplam_konu > 0 else 0
         
         st.metric("Toplam Konu", toplam_konu)
         st.metric("Tamamlanan Konu", f"{tamamlanan_konu} (%{ilerleme_yuzdesi:.1f})")
@@ -764,7 +775,9 @@ with tab3:
     # Psikolojik durum analizi
     st.subheader("Psikolojik Durum Analizi")
     
-    if ilerleme_yuzdesi > 70:
+    if toplam_konu == 0:
+        st.markdown('<div class="adaptive-card">📝 Henüz hiç konu eklemediniz. İlk adım olarak "Konu Analizi" sekmesinden konularınızı ekleyin ve seviyelerini belirleyin.</div>', unsafe_allow_html=True)
+    elif ilerleme_yuzdesi > 70:
         st.markdown('<div class="adaptive-card">🎉 Mükemmel ilerleme! Motivasyonunuz yüksek ve hedefinize doğru emin adımlarla ilerliyorsunuz. Zor konulara odaklanarak devam edin.</div>', unsafe_allow_html=True)
     elif ilerleme_yuzdesi > 40:
         st.markdown('<div class="adaptive-card">👍 Orta düzeyde ilerleme. Motivasyonunuzu korumak için küçük başarıları kutlayın ve molalarınızı iyi değerlendirin.</div>', unsafe_allow_html=True)
