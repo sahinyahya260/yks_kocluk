@@ -500,196 +500,839 @@ def öğrenci_bilgi_formu():
 
 def derece_günlük_program():
     
-    
     import streamlit as st
-    import pandas as pd
-    from datetime import datetime, timedelta, date
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import time
+import calendar
+from streamlit_option_menu import option_menu
 
-    # --- CSS Stilleri ve İkonlar ---
-    st.markdown("""
-        <style>
-            .main-header { font-size: 2.5rem; color: #3498db; text-align: center; margin-bottom: 1.5rem; font-weight: bold; }
-            .section-header { font-size: 1.8rem; color: #2c3e50; margin-top: 2rem; margin-bottom: 1rem; border-left: 5px solid #e74c3c; padding-left: 10px; }
-            .info-card { background-color: #ecf0f1; border-radius: 10px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-            .program-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-            .program-table th, .program-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-            .program-table th { background-color: #f39c12; color: white; }
-            .program-table tr:nth-child(even) { background-color: #f2f2f2; }
-            .tip-box { background-color: #e8f6f3; border-left: 5px solid #1abc9c; padding: 15px; margin-top: 15px; border-radius: 8px; }
-            .weekly-target { background-color: #fef9e7; border-left: 5px solid #f1c40f; padding: 15px; margin-top: 15px; border-radius: 8px; }
-            .pomodoro-info { background-color: #eaf2f8; border-left: 5px solid #3498db; padding: 15px; margin-top: 15px; border-radius: 8px; }
-            .psych-tactics { background-color: #f4ecf7; border-left: 5px solid #9b59b6; padding: 15px; margin-top: 15px; border-radius: 8px; }
-        </style>
-    """, unsafe_allow_html=True)
-    
-    # --- YKS Dersleri ve Konuları ---
-    yks_dersleri = {
-        'Sayısal': ['TYT Matematik', 'TYT Fen', 'AYT Matematik', 'AYT Fizik', 'AYT Kimya', 'AYT Biyoloji', 'Geometri', 'Paragraf', 'Problem', 'Türkçe'],
-        'Eşit Ağırlık': ['TYT Matematik', 'AYT Edebiyat', 'AYT Tarih', 'AYT Coğrafya', 'Geometri', 'Paragraf', 'Problem', 'Türkçe'],
-        'Sözel': ['AYT Edebiyat', 'AYT Tarih', 'AYT Coğrafya', 'AYT Felsefe', 'AYT Din', 'Paragraf', 'Problem', 'Türkçe']
+# Sayfa yapılandırması
+st.set_page_config(
+    page_title="Psikoloji Temelli YKS Programı",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# CSS stilleri
+st.markdown("""
+<style>
+    :root {
+        --primary: #1E88E5;
+        --primary-dark: #0D47A1;
+        --secondary: #64B5F6;
+        --accent: #4CAF50;
+        --warning: #FF9800;
+        --danger: #F44336;
+        --light: #E3F2FD;
+        --dark: #212121;
+        --gray: #F5F5F5;
     }
+    
+    .main-header {
+        font-size: 2.8rem;
+        color: var(--primary-dark);
+        text-align: center;
+        margin-bottom: 2rem;
+        font-weight: 700;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--light) 0%, #ffffff 100%);
+        border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border-left: 5px solid var(--primary);
+    }
+    
+    .section-header {
+        font-size: 1.8rem;
+        color: var(--primary-dark);
+        margin: 2rem 0 1rem 0;
+        padding-bottom: 0.8rem;
+        border-bottom: 3px solid var(--secondary);
+        font-weight: 600;
+    }
+    
+    .card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--primary);
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .psych-tip {
+        background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        margin: 1.2rem 0;
+        border-left: 4px solid var(--primary);
+    }
+    
+    .success-card {
+        background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+        border-left: 4px solid var(--accent);
+    }
+    
+    .warning-card {
+        background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+        border-left: 4px solid var(--warning);
+    }
+    
+    .danger-card {
+        background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+        border-left: 4px solid var(--danger);
+    }
+    
+    .metric-card {
+        text-align: center;
+        padding: 1.2rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin: 0.5rem;
+    }
+    
+    .metric-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin: 0.5rem 0;
+    }
+    
+    .metric-label {
+        font-size: 1rem;
+        color: #666;
+        font-weight: 500;
+    }
+    
+    .program-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 1.5rem 0;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .program-table th {
+        background: var(--primary);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    .program-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .program-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .program-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    
+    .program-table tr:hover {
+        background-color: #f1f8ff;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4);
+    }
+    
+    .progress-container {
+        width: 100%;
+        height: 1.5rem;
+        background-color: #e0e0e0;
+        border-radius: 1rem;
+        margin: 1rem 0;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        border-radius: 1rem;
+        text-align: center;
+        color: white;
+        line-height: 1.5rem;
+        font-weight: 600;
+        transition: width 0.5s ease;
+    }
+    
+    .technique-card {
+        background: white;
+        padding: 1.2rem;
+        border-radius: 1rem;
+        margin: 1rem 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-left: 4px solid var(--secondary);
+        transition: all 0.3s ease;
+    }
+    
+    .technique-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .sidebar .sidebar-content {
+        background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
+    }
+    
+    /* Responsive tasarım */
+    @media (max-width: 768px) {
+        .main-header {
+            font-size: 2rem;
+            padding: 1rem;
+        }
+        
+        .section-header {
+            font-size: 1.5rem;
+        }
+        
+        .metric-value {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
 
-    konu_seviyeleri = ['Zayıf', 'Temel', 'Orta', 'İyi', 'Uzman']
+# Başlık
+st.markdown('<div class="main-header">🧠 PSİKOLOJİ TEMELLİ YKS HAZIRLIK PROGRAMI</div>', unsafe_allow_html=True)
 
-    # --- Session State Başlatma ---
-    if 'program_form_tamamlandı' not in st.session_state:
-        st.session_state.program_form_tamamlandı = False
-        st.session_state.kullanici_bilgileri = {}
-        st.session_state.konu_durumu = {}
+# YKS konuları (daha detaylı ve yapılandırılmış)
+yks_konulari = {
+    "TYT Türkçe": {
+        "Anlam Bilgisi": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf"],
+        "Dil Bilgisi": ["Ses Bilgisi", "Yazım Kuralları", "Noktalama İşaretleri", "Sözcükte Yapı", "Sözcük Türleri"],
+        "Anlatım Bozukluğu": ["Anlatım Bozukluğu"],
+        "Edebi Türler": ["Sözlü Anlatım", "Yazılı Anlatım"]
+    },
+    "TYT Matematik": {
+        "Temel Kavramlar": ["Sayılar", "Sayı Basamakları", "Bölme-Bölünebilme", "EBOB-EKOK"],
+        "Problemler": ["Sayı Problemleri", "Kesir Problemleri", "Yaş Problemleri", "İşçi Problemleri", "Hareket Problemleri"],
+        "Cebir": ["Rasyonel Sayılar", "Basit Eşitsizlikler", "Mutlak Değer", "Üslü Sayılar", "Köklü Sayılar"],
+        "Geometri": ["Doğruda Açılar", "Üçgende Açılar", "Üçgende Alan", "Çokgenler", "Çember-Daire"]
+    },
+    # Diğer dersler için benzer yapı...
+}
 
-    # --- Program Oluşturma Formu ---
-    if not st.session_state.program_form_tamamlandı:
-        st.markdown('<div class="main-header">🧠 Psikoloji Temelli Programını Oluştur!</div>', unsafe_allow_html=True)
-        st.markdown('<p style="text-align:center; color:#7f8c8d;">Başarıya giden yol, kendini tanımakla başlar. Bu formla sana özel bir strateji belirleyelim.</p>', unsafe_allow_html=True)
+# Oturum durumu başlatma
+if 'konu_durumu' not in st.session_state:
+    st.session_state.konu_durumu = {}
+if 'ogrenme_stili' not in st.session_state:
+    st.session_state.ogrenme_stili = ""
+if 'verimli_saatler' not in st.session_state:
+    st.session_state.verimli_saatler = {"sabah": False, "ogle": False, "aksam": False, "gece": False}
+if 'program' not in st.session_state:
+    st.session_state.program = {}
+if 'motivasyon' not in st.session_state:
+    st.session_state.motivasyon = 70
+if 'kisisel_veri' not in st.session_state:
+    st.session_state.kisisel_veri = {}
+if 'hedefler' not in st.session_state:
+    st.session_state.hedefler = {}
+if 'ilerleme' not in st.session_state:
+    st.session_state.ilerleme = {}
 
-        with st.form("program_olusturma_formu"):
-            st.markdown('<div class="section-header">🔍 Durum Tespiti</div>', unsafe_allow_html=True)
+# Yan menü
+with st.sidebar:
+    st.markdown('<div style="text-align: center; margin-bottom: 2rem;">', unsafe_allow_html=True)
+    st.image("https://img.icons8.com/dusk/128/000000/mental-health.png", width=80)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    selected = option_menu(
+        menu_title="🎓 ÖĞRENCİ PROFİLİ",
+        options=["Kişisel Bilgiler", "Öğrenme Stili", "Hedefler", "İlerleme", "Ayarlar"],
+        icons=["person", "lightbulb", "flag", "graph-up", "gear"],
+        default_index=0,
+        styles={
+            "container": {"padding": "0!important", "background-color": "#f8f9fa"},
+            "icon": {"color": "#1E88E5", "font-size": "18px"}, 
+            "nav-link": {"font-size": "16px", "text-align": "left", "margin":"0px", "--hover-color": "#e9ecef"},
+            "nav-link-selected": {"background-color": "#1E88E5", "font-weight": "600"},
+        }
+    )
+    
+    if selected == "Kişisel Bilgiler":
+        st.subheader("👤 Kişisel Bilgiler")
+        isim = st.text_input("Adınız Soyadınız", "")
+        yas = st.number_input("Yaşınız", min_value=15, max_value=30, value=18)
+        hedef = st.text_input("Hedefiniz (Üniversite/Bölüm)", "Psikoloji Fakültesi")
+        
+        st.subheader("🛌 Uyku Düzeniniz")
+        uyku_baslangic = st.time_input("Uyku Saati", datetime.strptime("23:00", "%H:%M").time())
+        uyku_bitis = st.time_input("Uyanma Saati", datetime.strptime("06:00", "%H:%M").time())
+        
+    elif selected == "Öğrenme Stili":
+        st.subheader("🎯 Öğrenme Stiliniz")
+        ogrenme_stili = st.radio(
+            "En iyi nasıl öğreniyorsunuz?",
+            ["Görsel", "İşitsel", "Kinestetik", "Okuma/Yazma"],
+            horizontal=True
+        )
+        st.session_state.ogrenme_stili = ogrenme_stili
+        
+        st.subheader("⏰ Verimli Saatleriniz")
+        col1, col2 = st.columns(2)
+        with col1:
+            sabah = st.checkbox("Sabah (08:00-12:00)", True)
+            ogle = st.checkbox("Öğle (12:00-16:00)")
+        with col2:
+            aksam = st.checkbox("Akşam (16:00-20:00)")
+            gece = st.checkbox("Gece (20:00-24:00)")
+        
+        st.session_state.verimli_saatler = {
+            "sabah": sabah, "ogle": ogle, "aksam": aksam, "gece": gece
+        }
+        
+    elif selected == "Hedefler":
+        st.subheader("🎯 Aylık Hedefler")
+        hedef_aylik = st.slider("Bu Ay Tamamlanacak Konu Sayısı", 5, 50, 20)
+        st.session_state.hedefler['aylik_konu'] = hedef_aylik
+        
+    elif selected == "İlerleme":
+        st.subheader("📊 İlerleme Durumu")
+        toplam_konu = len(st.session_state.konu_durumu)
+        if toplam_konu > 0:
+            tamamlanan_konu = sum(1 for v in st.session_state.konu_durumu.values() if v in ["İyi Seviye", "Uzman Seviye"])
+            ilerleme_yuzdesi = (tamamlanan_konu / toplam_konu) * 100
             
-            alan = st.selectbox("📚 Hangi Alanda Hazırlanıyorsun?", list(yks_dersleri.keys()))
-            hedef_ders_sayisi = st.slider("✍️ Günde Kaç Farklı Ders Çalışmak İstersin?", 1, 3, 2, help="Paragraf/Problem/Geometri gibi rutinler bu sayıya dahil değildir.")
+            st.metric("Tamamlanan Konular", f"{tamamlanan_konu}/{toplam_konu}")
+            st.metric("İlerleme Oranı", f"%{ilerleme_yuzdesi:.1f}")
             
-            st.markdown("### Konu Hakimiyetini Belirle")
-            st.info("Her ders için seviyeni seç. Amacımız 'İyi' seviyesine ulaşmanı sağlamak.")
+            # İlerleme çubuğu
+            st.markdown('<div class="progress-container">', unsafe_allow_html=True)
+            st.markdown(f'<div class="progress-bar" style="width: {ilerleme_yuzdesi}%; background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);">{ilerleme_yuzdesi:.1f}%</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+    elif selected == "Ayarlar":
+        st.subheader("⚙️ Çalışma Ayarları")
+        pomodoro_sure = st.slider("Pomodoro Çalışma Süresi (dakika)", 25, 90, 45)
+        mola_sure = st.slider("Mola Süresi (dakika)", 5, 20, 10)
+        gunluk_ders_sayisi = st.slider("Günlük Ders Çeşidi", 1, 6, 3)
+        gunluk_calisma_saati = st.slider("Günlük Çalışma Saati", 1, 12, 7)
+        
+        st.session_state.kisisel_veri['calisma_ayarlari'] = {
+            'pomodoro': pomodoro_sure,
+            'mola': mola_sure,
+            'gunluk_ders': gunluk_ders_sayisi,
+            'gunluk_saat': gunluk_calisma_saati
+        }
 
-            konu_durumu_form = {}
-            for ders in yks_dersleri[alan]:
-                konu_durumu_form[ders] = st.selectbox(f"• {ders} seviyen:", konu_seviyeleri, help=f"Lütfen {ders} için şu anki seviyeni belirt.")
+# Ana içerik
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Dashboard", "📚 Konu Analizi", "📅 Program", "📊 İlerleme", "💡 Teknikler"])
 
-            kalkis_saati = st.time_input("⏰ Sabah Kaçta Kalkıyorsun?", value=datetime.strptime("07:00", "%H:%M").time())
-            uyku_saati = st.time_input("😴 Akşam Kaçta Yatıyorsun?", value=datetime.strptime("23:00", "%H:%M").time())
+with tab1:
+    st.markdown('<div class="section-header">📊 Kişisel Dashboard</div>', unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-icon">📚</div>', unsafe_allow_html=True)
+        toplam_konu = len(st.session_state.konu_durumu)
+        st.markdown(f'<div class="metric-value">{toplam_konu}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-label">Toplam Konu</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-icon">✅</div>', unsafe_allow_html=True)
+        tamamlanan_konu = sum(1 for v in st.session_state.konu_durumu.values() if v in ["İyi Seviye", "Uzman Seviye"])
+        st.markdown(f'<div class="metric-value">{tamamlanan_konu}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-label">Tamamlanan Konu</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-icon">📈</div>', unsafe_allow_html=True)
+        ilerleme_yuzdesi = (tamamlanan_konu / toplam_konu * 100) if toplam_konu > 0 else 0
+        st.markdown(f'<div class="metric-value">{ilerleme_yuzdesi:.1f}%</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-label">İlerleme Oranı</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Öneriler ve istatistikler
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown('### 🎯 Bugünün Hedefi')
+        
+        if st.session_state.program:
+            bugun = datetime.now().date()
+            if bugun in st.session_state.program:
+                st.info(f"**{st.session_state.program[bugun]['icerik']}**")
+                st.caption(f"⏰ {st.session_state.program[bugun]['sure']} saat | 🍅 {st.session_state.program[bugun]['pomodoro']}")
+            else:
+                st.warning("Bugün için programlanmış bir aktivite bulunamadı.")
+        else:
+            st.info("Henüz bir program oluşturulmamış. Program sekmesinden oluşturabilirsiniz.")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown('### 📊 Haftalık Performans')
+        
+        # Örnek haftalık veri
+        gunler = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
+        calisma_saatleri = [6, 7, 5, 8, 6, 4, 3]  # Örnek veri
+        
+        fig = go.Figure(data=[
+            go.Bar(x=gunler, y=calisma_saatleri, marker_color='#1E88E5')
+        ])
+        
+        fig.update_layout(
+            height=200,
+            margin=dict(l=20, r=20, t=30, b=20),
+            showlegend=False,
+            yaxis_title="Saat"
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Motivasyon ve öneriler
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('### 💪 Motivasyon ve Öneriler')
+    
+    if ilerleme_yuzdesi > 70:
+        st.markdown('<div class="success-card">', unsafe_allow_html=True)
+        st.success("**🎉 Mükemmel Gidiyorsunuz!** Hedefinize doğru emin adımlarla ilerliyorsunuz. Bu tempoyu koruyun.")
+        st.markdown('</div>', unsafe_allow_html=True)
+    elif ilerleme_yuzdesi > 40:
+        st.markdown('<div class="warning-card">', unsafe_allow_html=True)
+        st.warning("**👍 İyi Gidiyorsunuz!** Biraz daha çaba ile hedefinize ulaşabilirsiniz. Küçük molalar vererek verimliliğinizi artırabilirsiniz.")
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="danger-card">', unsafe_allow_html=True)
+        st.error("**💪 Başlangıç Seviyesi!** Hedeflerinize ulaşmak için düzenli çalışma programı oluşturmalısınız. Her gün küçük adımlarla başlayın.")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
-            submitted = st.form_submit_button("🚀 Programımı Hazırla!")
+with tab2:
+    st.markdown('<div class="section-header">📚 Konu Analizi ve Seviye Belirleme</div>', unsafe_allow_html=True)
+    
+    mastery_seviyeleri = ["Hiç Bilmiyorum", "Temel Seviye", "Orta Seviye", "İyi Seviye", "Uzman Seviye"]
+    
+    # Ders seçimi
+    col1, col2 = st.columns([1, 3])
+    
+    with col1:
+        secilen_ders = st.selectbox("Ders Seçin", list(yks_konulari.keys()))
+    
+    with col2:
+        if secilen_ders:
+            st.info(f"**{secilen_ders}** dersindeki konuları ve seviyelerinizi belirleyin.")
+    
+    if secilen_ders:
+        # Konu kategorileri
+        for kategori, konular in yks_konulari[secilen_ders].items():
+            st.markdown(f'### 📖 {kategori}')
+            
+            for konu in konular:
+                konu_key = f"{secilen_ders}>{kategori}>{konu}"
+                
+                if konu_key not in st.session_state.konu_durumu:
+                    st.session_state.konu_durumu[konu_key] = "Hiç Bilmiyorum"
+                
+                mevcut_seviye = st.session_state.konu_durumu[konu_key]
+                
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown(f"**{konu}**")
+                with col2:
+                    yeni_seviye = st.selectbox(
+                        f"{konu} seviyeniz:",
+                        options=mastery_seviyeleri,
+                        index=mastery_seviyeleri.index(mevcut_seviye),
+                        key=konu_key,
+                        label_visibility="collapsed"
+                    )
+                
+                if yeni_seviye != mevcut_seviye:
+                    st.session_state.konu_durumu[konu_key] = yeni_seviye
+                    st.success(f"{konu} seviyesi güncellendi: {yeni_seviye}")
 
-            if submitted:
-                if hedef_ders_sayisi < 1:
-                    st.error("⚠️ Lütfen en az bir ders seçin.")
-                else:
-                    st.session_state.kullanici_bilgileri = {
-                        'alan': alan,
-                        'hedef_ders_sayisi': hedef_ders_sayisi,
-                        'kalkis_saati': kalkis_saati,
-                        'uyku_saati': uyku_saati
+with tab3:
+    st.markdown('<div class="section-header">📅 Kişiselleştirilmiş Çalışma Programı</div>', unsafe_allow_html=True)
+    
+    # Program oluşturma
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        baslangic_tarihi = st.date_input("Başlangıç Tarihi", datetime.now())
+    
+    with col2:
+        program_suresi = st.slider("Program Süresi (gün)", 7, 90, 30)
+    
+    with col3:
+        zorluk_seviyesi = st.slider("Program Yoğunluğu", 1, 5, 3)
+        hedef_gun = baslangic_tarihi + timedelta(days=program_suresi)
+        st.caption(f"Hedef Tarih: {hedef_gun.strftime('%d/%m/%Y')}")
+    
+    # Program oluşturma butonu
+    if st.button("🔄 Programı Oluştur", type="primary", use_container_width=True):
+        with st.spinner("Psikolojik profilinize uygun program oluşturuluyor..."):
+            time.sleep(2)
+            
+            # Program oluşturma mantığı
+            program = {}
+            calisma_gunleri = [baslangic_tarihi + timedelta(days=i) for i in range(program_suresi)]
+            
+            # Basitleştirilmiş program oluşturma
+            for i, gun in enumerate(calisma_gunleri):
+                if i % 7 == 0:  # Pazartesi - Tekrar günü
+                    program[gun] = {
+                        "tip": "🔄 Tekrar",
+                        "icerik": "Geçmiş haftanın konularının tekrarı ve deneme çözümü",
+                        "sure": 6,
+                        "pomodoro": "45+15"
                     }
-                    st.session_state.konu_durumu = konu_durumu_form
-                    st.session_state.program_form_tamamlandı = True
-                    st.rerun()
-
-    # --- Programı Gösterme Bölümü ---
-    if st.session_state.program_form_tamamlandı:
-        bilgiler = st.session_state.kullanici_bilgileri
-        konular = st.session_state.konu_durumu
-
-        st.markdown('<div class="main-header">⭐ Kişiye Özel YKS Programın Hazır!</div>', unsafe_allow_html=True)
-        st.markdown(f'<p style="text-align:center; color:#7f8c8d;"><strong>Bugünün Tarihi:</strong> {datetime.now().strftime("%d %B %Y")}</p>', unsafe_allow_html=True)
-
-        # --- Psikolojik ve Beslenme İpuçları ---
-        st.markdown('<div class="section-header">🧠 Psikolojik ve Fizyolojik İpuçları</div>', unsafe_allow_html=True)
-        st.markdown(f"""
-            <div class="tip-box">
-                <p><strong>Uyku Düzeni:</strong> Beynin öğrendiklerini pekiştirmesi ve enerjini toplaman için uyku çok kritik. Sana özel önerilen uyku aralığı <strong>23:00 - 06:00</strong>. Bu aralıkta düzenli uyku, hafıza performansını maksimize edecektir.</p>
-                <p><strong>Beslenme:</strong> Özellikle öğle ve akşam öğünlerinde ağır, yağlı yemeklerden kaçın. Hafif ve dengeli bir beslenme, odaklanmanı artırır ve gün içindeki enerjini korur.</p>
-                <p><strong>Önemli Takip:</strong> Beyninin en dinç olduğu sabah saatlerinde, en çok zorlandığın dersle başla. Bu, günün geri kalanı için psikolojik olarak sana özgüven kazandırır.</p>
-            </div>
-        """, unsafe_allow_html=True)
+                elif i % 7 == 6:  # Pazar - Hafif program
+                    program[gun] = {
+                        "tip": "📖 Hafif Çalışma",
+                        "icerik": "Genel tekrar ve eksik konuların tamamlanması",
+                        "sure": 4,
+                        "pomodoro": "30+10"
+                    }
+                else:
+                    # Normal çalışma günleri
+                    program[gun] = {
+                        "tip": "📚 Yoğun Çalışma",
+                        "icerik": "Yeni konu öğrenme ve soru pratiği",
+                        "sure": 8,
+                        "pomodoro": "50+10"
+                    }
+            
+            st.session_state.program = program
+            st.success("✅ Program başarıyla oluşturuldu!")
+    
+    # Programı göster
+    if st.session_state.program:
+        st.markdown("### 📅 Haftalık Program")
         
-        # --- Haftalık ve Aylık Hedefler ---
-        st.markdown('<div class="section-header">🎯 Haftalık ve Aylık Hedeflerin</div>', unsafe_allow_html=True)
-        start_date = date.today() - timedelta(days=date.today().weekday())
-        end_date = start_date + timedelta(days=6)
-        st.markdown(f"""
-            <div class="weekly-target">
-                <p><strong>📅 Haftalık Hedef (17 Eylül - 24 Eylül):</strong> Bu hafta, belirlenen derslerin konularını tamamla ve her konudan en az 100 soru çöz. Hafta sonu deneme analizi yapmayı unutma.</p>
-                <p><strong>📈 Aylık Hedef:</strong> Bu ayki planının <strong>%80'ini</strong> tamamlayarak, {list(konular.keys())[0]} ve {list(konular.keys())[1]} derslerindeki seviyeni en az **"İyi"** seviyesine çıkaracaksın. Başardığın her adım, hedefine daha da yaklaşmanı sağlayacak!</p>
-            </div>
-        """, unsafe_allow_html=True)
+        # Mevcut haftayı göster
+        bugun = datetime.now().date()
+        baslangic = bugun - timedelta(days=bugun.weekday())  # Haftanın başlangıcı (Pazartesi)
+        haftalik_program = {}
         
-        # --- Günlük Program Tablosu ---
-        st.markdown('<div class="section-header">📅 Günlük Programın</div>', unsafe_allow_html=True)
-
-        # Program içeriği oluşturma
-        program_verisi = []
-        kalkis = datetime.combine(date.today(), bilgiler['kalkis_saati'])
+        for i in range(7):
+            gun = baslangic + timedelta(days=i)
+            if gun in st.session_state.program:
+                haftalik_program[gun] = st.session_state.program[gun]
         
-        # En zor dersi bulma
-        en_zor_ders = min(konular, key=lambda x: konu_seviyeleri.index(konular[x]))
-
-        # Zaman blokları ve aktiviteler
-        program_verisi.append({'Zaman Aralığı': f"{kalkis.strftime('%H:%M')} - {(kalkis + timedelta(minutes=45)).strftime('%H:%M')}", 'Aktivite': "Sabah Rutini: Paragraf + Problem + Geometri", 'İpucu': "Zorlandığın konularla güne başlayarak en yüksek verimi al."})
-        kalkis += timedelta(minutes=60)
+        # Program tablosu
+        program_data = []
+        for gun, detay in haftalik_program.items():
+            program_data.append({
+                "Tarih": gun.strftime('%d/%m (%A)'),
+                "Tip": detay["tip"],
+                "İçerik": detay["icerik"],
+                "Süre": f"{detay['sure']} saat",
+                "Pomodoro": detay["pomodoro"]
+            })
         
-        # Ana dersler
-        ana_dersler = []
-        # En zor dersi ilk sıraya ekle
-        if en_zor_ders not in ana_dersler:
-            ana_dersler.append(en_zor_ders)
-
-        # Kullanıcının seçtiği diğer dersleri ekle
-        secilen_dersler = list(konular.keys())
-        secilen_dersler.remove(en_zor_ders)
-        ana_dersler.extend(secilen_dersler)
+        program_df = pd.DataFrame(program_data)
+        st.dataframe(program_df, use_container_width=True, hide_index=True)
         
-        for i in range(bilgiler['hedef_ders_sayisi']):
-            if i < len(ana_dersler):
-                ders = ana_dersler[i]
-                seviye = konular[ders]
-                
-                aktivite_tipi = "Konu Çalışması ve Soru Çözümü"
-                if seviye in ['Zayıf', 'Temel']:
-                    aktivite_tipi = "Konu Anlatımı + Temel Soru Çözümü"
-                elif seviye == 'Orta':
-                    aktivite_tipi = "Konu Tekrarı + Orta Seviye Soru Çözümü"
-                elif seviye == 'İyi':
-                    aktivite_tipi = "Soru Bankası ve Deneme Soruları"
-
-                program_verisi.append({'Zaman Aralığı': f"{kalkis.strftime('%H:%M')} - {(kalkis + timedelta(minutes=90)).strftime('%H:%M')}", 'Aktivite': f"{ders}: {aktivite_tipi}", 'İpucu': ""})
-                kalkis += timedelta(minutes=90)
-                
-                # Molayı ekle
-                program_verisi.append({'Zaman Aralığı': f"{kalkis.strftime('%H:%M')} - {(kalkis + timedelta(minutes=15)).strftime('%H:%M')}", 'Aktivite': "Kısa Mola", 'İpucu': "Kısa molalarda ekranlardan uzak dur."})
-                kalkis += timedelta(minutes=15)
-                
-        program_verisi.append({'Zaman Aralığı': f"{kalkis.strftime('%H:%M')} - {(kalkis + timedelta(minutes=60)).strftime('%H:%M')}", 'Aktivite': "Öğle Yemeği ve Uzun Mola", 'İpucu': "Hafif ve besleyici bir öğün tercih et."})
-        kalkis += timedelta(minutes=60)
+        # Günlük program detayı
+        st.markdown("### 📋 Günlük Program Detayı")
+        secilen_gun = st.selectbox("Gün Seçin", list(haftalik_program.keys()), format_func=lambda x: x.strftime('%d/%m/%Y - %A'))
         
-        program_verisi.append({'Zaman Aralığı': f"{kalkis.strftime('%H:%M')} - {(kalkis + timedelta(minutes=120)).strftime('%H:%M')}", 'Aktivite': "Tekrar & Yanlış Analizi", 'İpucu': "Gün içinde öğrendiklerini pekiştir."})
-        kalkis += timedelta(minutes=120)
+        if secilen_gun:
+            gun_detay = haftalik_program[secilen_gun]
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-value">{gun_detay["sure"]}</div>', unsafe_allow_html=True)
+                st.markdown('<div class="metric-label">Saat</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                pomodoro = gun_detay["pomodoro"].split('+')
+                st.markdown(f'<div class="metric-value">{pomodoro[0]}</div>', unsafe_allow_html=True)
+                st.markdown('<div class="metric-label">Dakika Çalışma</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            with col3:
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-value">{pomodoro[1]}</div>', unsafe_allow_html=True)
+                st.markdown('<div class="metric-label">Dakika Mola</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            st.markdown(f"**Açıklama:** {gun_detay['icerik']}")
 
-        # Tabloyu oluştur
-        df_program = pd.DataFrame(program_verisi)
-        st.table(df_program)
+with tab4:
+    st.markdown('<div class="section-header">📊 Detaylı İlerleme Analizi</div>', unsafe_allow_html=True)
+    
+    if not st.session_state.konu_durumu:
+        st.info("Henüz konu eklemediniz. Lütfen önce 'Konu Analizi' sekmesinden konularınızı ekleyin.")
+    else:
+        # İlerleme istatistikleri
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            toplam_konu = len(st.session_state.konu_durumu)
+            st.markdown(f'<div class="metric-value">{toplam_konu}</div>', unsafe_allow_html=True)
+            st.markdown('<div class="metric-label">Toplam Konu</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            tamamlanan_konu = sum(1 for v in st.session_state.konu_durumu.values() if v in ["İyi Seviye", "Uzman Seviye"])
+            st.markdown(f'<div class="metric-value">{tamamlanan_konu}</div>', unsafe_allow_html=True)
+            st.markdown('<div class="metric-label">Tamamlanan</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            devam_eden_konu = sum(1 for v in st.session_state.konu_durumu.values() if v == "Orta Seviye")
+            st.markdown(f'<div class="metric-value">{devam_eden_konu}</div>', unsafe_allow_html=True)
+            st.markdown('<div class="metric-label">Devam Eden</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            baslanacak_konu = sum(1 for v in st.session_state.konu_durumu.values() if v in ["Hiç Bilmiyorum", "Temel Seviye"])
+            st.markdown(f'<div class="metric-value">{baslanacak_konu}</div>', unsafe_allow_html=True)
+            st.markdown('<div class="metric-label">Başlanacak</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        # İlerleme grafiği
+        st.markdown("### 📈 İlerleme Grafiği")
+        
+        # Derslere göre ilerleme
+        ders_ilerleme = {}
+        for konu_key, seviye in st.session_state.konu_durumu.items():
+            ders = konu_key.split('>')[0]
+            if ders not in ders_ilerleme:
+                ders_ilerleme[ders] = {'toplam': 0, 'tamamlanan': 0}
+            
+            ders_ilerleme[ders]['toplam'] += 1
+            if seviye in ["İyi Seviye", "Uzman Seviye"]:
+                ders_ilerleme[ders]['tamamlanan'] += 1
+        
+        # Grafik için veri hazırlama
+        dersler = list(ders_ilerleme.keys())
+        tamamlanan_oranlar = [(ders_ilerleme[d]['tamamlanan'] / ders_ilerleme[d]['toplam'] * 100) for d in dersler]
+        
+        fig = go.Figure(data=[
+            go.Bar(x=dersler, y=tamamlanan_oranlar, marker_color='#1E88E5')
+        ])
+        
+        fig.update_layout(
+            title="Derslere Göre Tamamlanma Oranları",
+            yaxis_title="Tamamlanma Oranı (%)",
+            showlegend=False,
+            height=400
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Aylık hedef takibi
+        st.markdown("### 🎯 Aylık Hedef Takibi")
+        
+        hedef_aylik = st.slider("Bu Ay Tamamlamayı Hedeflediğiniz Konu Sayısı", 5, 50, 20)
+        tahmini_tamamlanma = hedef_aylik * (tamamlanan_konu / toplam_konu) if toplam_konu > 0 else 0
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-value">{tahmini_tamamlanma:.1f}</div>', unsafe_allow_html=True)
+            st.markdown('<div class="metric-label">Tahmini Tamamlanma</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-value">{hedef_aylik}</div>', unsafe_allow_html=True)
+            st.markdown('<div class="metric-label">Hedef</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        # İlerleme durumu
+        if tahmini_tamamlanma >= hedef_aylik * 0.8:
+            st.markdown('<div class="success-card">', unsafe_allow_html=True)
+            st.success("**🎉 Mükemmel!** Bu hızla hedefinize ulaşacaksınız. Motivasyonunuzu koruyun.")
+            st.markdown('</div>', unsafe_allow_html=True)
+        elif tahmini_tamamlanma >= hedef_aylik * 0.5:
+            st.markdown('<div class="warning-card">', unsafe_allow_html=True)
+            st.warning("**👍 İyi Gidiyorsunuz!** Biraz daha çaba ile hedefinize ulaşabilirsiniz. Planınızı gözden geçirin.")
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="danger-card">', unsafe_allow_html=True)
+            st.error("**💪 Daha Fazla Çaba Gerek!** Hedefinize ulaşmak için çalışma tempounuzu artırmanız gerekebilir.")
+            st.markdown('</div>', unsafe_allow_html=True)
 
-        # --- Pomodoro ve Diğer Öğrenme Teknikleri ---
-        st.markdown('<div class="section-header">💡 Öğrenme ve Odaklanma Tekniklerin</div>', unsafe_allow_html=True)
+with tab5:
+    st.markdown('<div class="section-header">💡 Kanıtlanmış Öğrenme Teknikleri</div>', unsafe_allow_html=True)
+    
+    # Öğrenme teknikleri
+    teknikler = [
+        {
+            "isim": "Feynman Tekniği",
+            "aciklama": "Konuyu 5 yaşındaki bir çocuğa anlatabilecek kadar basitleştir. Bu, konuyu ne kadar iyi anladığını test eder.",
+            "emoji": "🎯",
+            "detay": "1. Konuyu öğren\n2. Basitçe açıkla\n3. Eksikleri tespit et\n4. Basitleştir ve analojiler kullan"
+        },
+        {
+            "isim": "Aktif Hatırlama (Active Recall)",
+            "aciklama": "Kitaba veya deftere bakmadan konuyu hatırlamaya çalış. Beynini zorlayarak bilgiyi daha derinlemesine işlersin.",
+            "emoji": "🔄",
+            "detay": "1. Konuyu oku\n2. Kitabı kapat\n3. Hatırlamaya çalış\n4. Kontrol et ve tekrarla"
+        },
+        {
+            "isim": "Interleaving (Karışık Çalışma)",
+            "aciklama": "Farklı konuları veya dersleri art arda çalış. Bu yöntem, beynin bilgiyi ayırt etme ve bağlantı kurma yeteneğini güçlendirir.",
+            "emoji": "🎨",
+            "detay": "1. Farklı konuları karıştır\n2. Benzer konuları ardışık çalışma\n3. Beynin bağlantı kurmasını sağla"
+        },
+        {
+            "isim": "Mind Mapping (Zihin Haritası)",
+            "aciklama": "Konuları anahtar kelimeler ve görsellerle bir ağaç gibi organize et. Beyin, bu görsel bağlantıları daha kolay hatırlar.",
+            "emoji": "📝",
+            "detay": "1. Ana konuyu merkeze yaz\n2. Alt başlıkları dallandır\n3. Görseller ve renkler kullan\n4. İlişkileri göster"
+        },
+        {
+            "isim": "Pomodoro Tekniği",
+            "aciklama": "25 dakika çalışma, 5 dakika mola şeklinde çalış. Odaklanmayı artırır ve mental yorgunluğu azaltır.",
+            "emoji": "⏰",
+            "detay": "1. 25 dakika odaklan\n2. 5 dakika mola\n3. 4 pomodoroda 15-30 dakika mola\n4. Tekrarla"
+        },
+        {
+            "isim": "Blitz Tekrar",
+            "aciklama": "Öğrendiğin bir konuyu kısa süre sonra (örneğin 24 saat içinde) hızlıca tekrar et. Bu, bilginin uzun süreli hafızaya geçişini sağlar.",
+            "emoji": "🚀",
+            "detay": "1. Öğren\n2. 24 saat içinde tekrarla\n3. 1 hafta sonra tekrar tekrarla\n4. 1 ay sonra son tekrar"
+        }
+    ]
+    
+    for teknik in teknikler:
+        with st.expander(f"{teknik['emoji']} {teknik['isim']}", expanded=False):
+            st.markdown(f"**{teknik['aciklama']}**")
+            st.markdown(f"*{teknik['detay']}*")
+    
+    # Öğrenme stiline göre öneriler
+    st.markdown("### 👤 Öğrenme Stilinize Özel İpuçları")
+    
+    if st.session_state.ogrenme_stili == "Görsel":
         st.markdown("""
-            <div class="pomodoro-info">
-                <h3>⏰ Pomodoro Tekniği</h3>
-                <p>Başlangıç seviyesinde <strong>25 dakika çalışma + 5 dakika mola</strong> ile başla. Odaklanma becerin geliştikçe bu süreyi <strong>90 dakika çalışma + 15 dakika mola</strong> olacak şekilde kademeli olarak artır. Bu, beynini daha uzun süre odaklanmaya programlayacaktır.</p>
-            </div>
-            <div class="psych-tactics">
-                <h3>🧠 Psikoloji Temelli Çalışma Taktikleri</h3>
-                <ul>
-                    <li><strong>Feynman Tekniği:</strong> Öğrendiğin konuyu 5 yaşındaki bir çocuğa anlatmaya çalış. Anlatamadığın yerler, konuyu tam olarak anlamadığın noktaları gösterir.</li>
-                    <li><strong>Aktif Hatırlama (Active Recall):</strong> Notlarına bakmadan konuyu kafandan anlatmaya çalış. Bu, pasif okumadan çok daha etkilidir.</li>
-                    <li><strong>Interleaving (Karışık Çalışma):</strong> Arka arkaya farklı derslerden soru çözümü yaparak beynini esnek tut ve konular arası bağlantı kurma becerini geliştir.</li>
-                    <li><strong>Zihin Haritası (Mind Mapping):</strong> Konuları anahtar kelimeler ve görsellerle bir ağaç gibi organize et.</li>
-                    <li><strong>Cornell Not Alma Tekniği:</strong> Notlarını üç bölüme ayırarak (ana notlar, anahtar kelimeler ve özet) daha sonraki tekrarlarını kolaylaştır.</li>
-                    <li><strong>Blitz Tekrar:</strong> Öğrendiğin bir konuyu 24 saat içinde hızlıca tekrar et. Bu, bilginin uzun süreli hafızaya geçişini sağlar.</li>
-                </ul>
-            </div>
+        <div class="psych-tip">
+        <h4>👁️ Görsel Öğrenenler İçin:</h4>
+        <ul>
+        <li><strong>Renk kodlaması kullanın:</strong> Farklı konular için farklı renklerde kalemler/markerlar kullanın</li>
+        <li><strong>Mind map oluşturun:</strong> Konuları görsel haritalarla ilişkilendirin</li>
+        <li><strong>Grafik ve diyagramlar çizin:</strong> Soyut kavramları görselleştirin</li>
+        <li><strong>Video içerikleri izleyin:</strong> Görsel anlatımları tercih edin</li>
+        <li><strong>Flashcard'ları renkli yapın:</strong> Görsel hafızanızı güçlendirin</li>
+        </ul>
+        </div>
         """, unsafe_allow_html=True)
-
-        # Okuma kitabı önerisi
-        st.markdown('<div class="section-header">📚 Kişisel Gelişim ve Okuma</div>', unsafe_allow_html=True)
+    
+    elif st.session_state.ogrenme_stili == "İşitsel":
         st.markdown("""
-            <div class="info-card">
-                <p><strong>Önerilen Kitap:</strong> <i>"Derin Çalışma" (Deep Work) - Cal Newport.</i></p>
-                <p>Bu kitap, dikkat dağınıklığı çağında nasıl derinlemesine odaklanacağını ve üretkenliğini nasıl artıracağını anlatıyor. Senin gibi bir derece öğrencisi için vazgeçilmez bir rehber olacaktır.</p>
-            </div>
+        <div class="psych-tip">
+        <h4>👂 İşitsel Öğrenenler İçin:</h4>
+        <ul>
+        <li><strong>Sesli kayıtlar yapın:</strong> Kendi sesinizle konu anlatımlarını kaydedin</li>
+        <li><strong>Grupla çalışın:</strong> Konuları başkalarına anlatın veya tartışın</li>
+        <li><strong>Ritmik tekrarlar yapın:</strong> Önemli bilgileri ritmik şekilde tekrarlayın</li>
+        <li><strong>Arka plan müziği kullanın:</strong> Çalışırken klasik müzik veya doğa sesleri dinleyin</li>
+        <li><strong>Konu anlatım videoları izleyin:</strong> Sesli anlatımları tercih edin</li>
+        </ul>
+        </div>
         """, unsafe_allow_html=True)
+    
+    elif st.session_state.ogrenme_stili == "Kinestetik":
+        st.markdown("""
+        <div class="psych-tip">
+        <h4>🔧 Kinestetik Öğrenenler İçin:</h4>
+        <ul>
+        <li><strong>Hareket ederek çalışın:</strong> Ayakta durarak veya yürüyerek çalışın</li>
+        <li><strong>Modeller oluşturun:</strong> Fiziksel modeller veya el işleriyle öğrenin</li>
+        <li><strong>Role-play yapın:</strong> Tarihi olayları veya bilimsel süreçleri canlandırın</li>
+        <li><strong>Sık molalar verin:</strong> Uzun süre hareketsiz kalmayın</li>
+        <li><strong>Deneyler yapın:</strong> Mümkünse konuları pratik olarak deneyimleyin</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    else:
+        st.markdown("""
+        <div class="psych-tip">
+        <h4>📖 Okuyarak/Yazarak Öğrenenler İçin:</h4>
+        <ul>
+        <li><strong>Detaylı notlar çıkarın:</strong> Okuduklarınızı kendi kelimelerinizle yazın</li>
+        <li><strong>Özetler hazırlayın:</strong> Konuları özet kartlarına yazın</li>
+        <li><strong>Essay'ler yazın:</strong> Konular hakkında kısa yazılar yazın</li>
+        <li><strong>Listeler oluşturun:</strong> Bilgileri maddeler halinde düzenleyin</li>
+        <li><strong>Kendi sorularınızı yazın:</strong> Konularla ilgili sorular oluşturun ve cevaplayın</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Motivasyon artırıcı teknikler
+    st.markdown("### 💪 Motivasyon Artırıcı Teknikler")
+    
+    st.markdown("""
+    <div class="card">
+    <ul>
+    <li><strong>Küçük hedefler belirleyin:</strong> Büyük hedefleri küçük parçalara bölün</li>
+    <li><strong>Kendini ödüllendirin:</strong> Başarılarınızı küçük ödüllerle kutlayın</li>
+    <li><strong>Olumlu iç konuşma:</strong> Kendinize motive edici cümleler söyleyin</li>
+    <li><strong>Görselleştirme:</strong> Başarılı olduğunuz anları zihninizde canlandırın</li>
+    <li><strong>Sosyal destek:</strong> Aileniz ve arkadaşlarınızdan destek isteyin</li>
+    <li><strong>İlerlemeyi takip edin:</strong> Günlük ve haftalık ilerlemenizi kaydedin</li>
+    <li><strong>Esneklik:</strong> Programınızda esnek olun, kendinize zaman tanıyın</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
-        if st.button("Programı Sıfırla ve Yeniden Başla", key="program_reset"):
-            st.session_state.program_form_tamamlandı = False
-            st.rerun()
+# Footer
+st.markdown("---")
+st.markdown("""
+<div style="text-align: center; color: #666; margin-top: 3rem;">
+<p><strong>🧠 Bu program psikoloji prensipleri temel alınarak kişiselleştirilmiş öğrenme deneyimi sunar.</strong></p>
+<p>Düzenli geri bildirim ve ayarlamalarla maksimum verimlilik hedeflenir. Unutmayın, her öğrenci farklıdır ve kendi hızında ilerler.</p>
+<p>Kendinizi başkalarıyla kıyaslamak yerine, kendi ilerlemenize odaklanın.</p>
+</div>
+""", unsafe_allow_html=True)
 def derece_deneme_analizi():
     st.markdown('<div class="section-header">📈 Deneme Sonucu Analizi</div>', unsafe_allow_html=True)
     
