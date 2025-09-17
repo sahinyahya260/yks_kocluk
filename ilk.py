@@ -645,7 +645,7 @@ with tab1:
     mastery_seviyeleri = ["Hiç Bilmiyor", "Temel Bilgi", "Orta Seviye", "İyi Seviye", "Uzman (Derece) Seviye"]
     
     # Her ders için genişletilebilir bölümler
-         for ders, konu_alani in yks_konulari.items():
+    if  for ders, konu_alani in yks_konulari.items():
         with st.expander(f"📚 {ders}"):
             for alan, alt_konular in konu_alani.items():
                 st.subheader(f"📖 {alan}")
