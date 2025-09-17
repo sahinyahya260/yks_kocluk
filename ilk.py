@@ -509,7 +509,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import time
 import calendar
-
+from streamlit_option_menu import option_menu
 
 # Sayfa yapılandırması
 st.set_page_config(
