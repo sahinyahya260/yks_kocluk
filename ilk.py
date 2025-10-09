@@ -25,7 +25,16 @@ try:
     # Firebase'in zaten başlatılıp başlatılmadığını kontrol et
     if not firebase_admin._apps:
         # Firebase Admin SDK'yı başlat
-        cred = credentials.Certificate("firebase_key.json")
+        # GitHub/Streamlit Cloud deployment için environment variable kontrolü
+        if 'FIREBASE_KEY' in os.environ:
+            # Production: Environment variable'dan JSON key'i al
+            firebase_json = os.environ["FIREBASE_KEY"]
+            firebase_config = json.loads(firebase_json)
+            cred = credentials.Certificate(firebase_config)
+        else:
+            # Local development: JSON dosyasından al
+            cred = credentials.Certificate("firebase_key.json")
+        
         firebase_admin.initialize_app(cred, {
             'databaseURL':'https://yks-takip-c26d5-default-rtdb.firebaseio.com/'  # ✅ DOĞRU/'
         })
@@ -8574,7 +8583,9 @@ def main():
                         'genel_deneme': 0,
                         'brans_deneme': 0
                     },
-                    'paragraf_questions': 0
+                    'paragraf_questions': 0,
+                    'photo_data': None,
+                    'photo_caption': ''
                 })
                 
                 # Eski format veri uyumluluğu - mevcut eski verileri yeni formata geçir
@@ -8650,6 +8661,88 @@ def main():
                             help="Bugünkü düşüncelerinizi, hislerinizi veya yaşadıklarınızı kısaca yazın",
                             placeholder="Örnek: Bugün matematik dersinde çok iyi gitti, kendimi motive hissediyorum. Yarın fizik çalışacağım."
                         )
+                    
+                    # 📸 GÜNLÜK FOTOĞRAF ÖZELLİĞİ
+                    st.markdown("---")
+                    st.markdown("**📸 Günlük Fotoğrafın:**")
+                    
+                    col_photo_upload, col_photo_display = st.columns([1, 1])
+                    
+                    with col_photo_upload:
+                        st.markdown("📷 **Bugünkü anını paylaş**")
+                        uploaded_file = st.file_uploader(
+                            "Fotoğraf seç", 
+                            type=['png', 'jpg', 'jpeg'],
+                            key=f"photo_upload_{today_str}",
+                            help="Çalışma masanız, notlarınız veya bugünkü halinizi fotoğraflayın"
+                        )
+                        
+                        # Fotoğraf açıklaması
+                        photo_caption = st.text_input(
+                            "Fotoğraf açıklaması (isteğe bağlı)",
+                            value=today_motivation.get('photo_caption', ''),
+                            key=f"photo_caption_{today_str}",
+                            placeholder="Bu fotoğraf hakkında bir şeyler yaz..."
+                        )
+                    
+                    with col_photo_display:
+                        st.markdown("🖼️ **Bugünkü fotoğrafın**")
+                        # Bugünkü fotoğrafı göster
+                        today_photo = today_motivation.get('photo_data', None)
+                        
+                        if uploaded_file is not None:
+                            # Yeni yüklenen fotoğrafı göster
+                            st.image(uploaded_file, caption=f"📸 Bugün yüklenen: {uploaded_file.name}", use_column_width=True)
+                            # Session state'e geçici olarak kaydet
+                            import base64
+                            photo_bytes = uploaded_file.read()
+                            photo_b64 = base64.b64encode(photo_bytes).decode()
+                            st.session_state[f'temp_photo_{today_str}'] = {
+                                'data': photo_b64,
+                                'filename': uploaded_file.name,
+                                'type': uploaded_file.type
+                            }
+                        elif today_photo:
+                            # Daha önce kaydedilmiş fotoğrafı göster
+                            try:
+                                import base64
+                                photo_bytes = base64.b64decode(today_photo['data'])
+                                st.image(photo_bytes, caption=f"📸 Bugünkü fotoğraf: {today_photo.get('filename', 'Fotoğraf')}", use_column_width=True)
+                            except:
+                                st.info("📷 Fotoğraf yüklenemedi")
+                        else:
+                            st.info("📷 Henüz bugün için fotoğraf yüklenmedi")
+                            st.markdown("*Bugünü fotoğrafla ve anı kaydet!*")
+                    
+                    # Son 3 günün fotoğraf galerisi
+                    st.markdown("---")
+                    st.markdown("**🖼️ Son Fotoğraflarım:**")
+                    
+                    # Son 3 günü döngüyle göster
+                    photo_cols = st.columns(3)
+                    for i, col in enumerate(photo_cols):
+                        day_ago = week_info["today"] - timedelta(days=i+1)
+                        day_str = day_ago.strftime("%Y-%m-%d")
+                        day_name = day_ago.strftime("%d/%m")
+                        
+                        with col:
+                            day_data = daily_motivation.get(day_str, {})
+                            day_photo = day_data.get('photo_data', None)
+                            
+                            if day_photo:
+                                try:
+                                    import base64
+                                    photo_bytes = base64.b64decode(day_photo['data'])
+                                    st.image(photo_bytes, caption=f"📅 {day_name}", use_column_width=True)
+                                    
+                                    # Fotoğraf açıklaması varsa göster
+                                    caption = day_data.get('photo_caption', '')
+                                    if caption:
+                                        st.caption(f"💬 {caption}")
+                                except:
+                                    st.info(f"📷 {day_name}\nFotoğraf yok")
+                            else:
+                                st.info(f"📷 {day_name}\nFotoğraf yok")
                 
                 with tab_study:
                     st.markdown("**📊 Bugün çözdüğün soruları kaydet:**")
@@ -8788,6 +8881,13 @@ def main():
                 
                 # Tek kaydet butonu - tüm verileri toplar
                 if st.button("💾 Bugünkü Tüm Verilerimi Kaydet", key=f"save_all_data_{today_str}", type="primary"):
+                    # Fotoğraf verilerini al
+                    photo_data = None
+                    if f'temp_photo_{today_str}' in st.session_state:
+                        photo_data = st.session_state[f'temp_photo_{today_str}']
+                    elif today_motivation.get('photo_data'):
+                        photo_data = today_motivation.get('photo_data')
+                    
                     daily_motivation[today_str] = {
                         'score': motivation_score,
                         'note': daily_note,
@@ -8797,11 +8897,21 @@ def main():
                             'brans_deneme': brans_deneme
                         },
                         'paragraf_questions': paragraf_questions,
+                        'photo_data': photo_data,
+                        'photo_caption': photo_caption,
                         'timestamp': datetime.now().isoformat()
                     }
+                    
+                    # Geçici session state'i temizle
+                    if f'temp_photo_{today_str}' in st.session_state:
+                        del st.session_state[f'temp_photo_{today_str}']
+                    
                     update_user_in_firebase(st.session_state.current_user, {'daily_motivation': json.dumps(daily_motivation)})
                     st.session_state.users_db = load_users_from_firebase()
-                    st.success(f"✅ {today_str} tarihli tüm verileriniz kaydedildi! Motivasyon: {motivation_score}/10, Toplam Soru: {total_questions}, Denemeler: {total_tests}")
+                    
+                    # Başarı mesajına fotoğraf bilgisini de ekle
+                    photo_info = "📸 Fotoğraf da kaydedildi!" if photo_data else ""
+                    st.success(f"✅ {today_str} tarihli tüm verileriniz kaydedildi! Motivasyon: {motivation_score}/10, Toplam Soru: {total_questions}, Denemeler: {total_tests} {photo_info}")
                 
                 # Son 7 günün performans trendi ve geçmiş verileri
                 if len(daily_motivation) > 0:
